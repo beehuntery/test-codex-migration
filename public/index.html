@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Task Manager</h1>
+        <p class="tagline">Keep track of what needs doing.</p>
+      </header>
+
+      <section class="card">
+        <h2>Add Task</h2>
+        <form id="task-form">
+          <label class="field">
+            <span>Title</span>
+            <input type="text" id="title" name="title" required placeholder="What needs to be done?" />
+          </label>
+          <label class="field date-field">
+            <span>Due date</span>
+            <div class="date-input-wrapper">
+              <input type="date" id="dueDate" name="dueDate" class="date-input" />
+            </div>
+          </label>
+          <div class="field tag-field">
+            <span id="form-tag-label" role="button" tabindex="0" aria-controls="form-tag-input form-tag-dropdown">Tags</span>
+            <div class="tag-select">
+              <div
+                class="tag-input-wrapper"
+                id="form-tag-input"
+                tabindex="0"
+                role="button"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                aria-controls="form-tag-options"
+                aria-labelledby="form-tag-label"
+              >
+                <div class="tag-chip-list" id="form-tag-selected"></div>
+              </div>
+              <div class="tag-dropdown" id="form-tag-dropdown" hidden>
+                <div class="tag-dropdown-search">
+                  <input
+                    type="search"
+                    id="form-tag-search"
+                    class="tag-search-input"
+                    placeholder="タグを検索"
+                    autocomplete="off"
+                    role="combobox"
+                    aria-expanded="false"
+                    aria-autocomplete="list"
+                    aria-haspopup="listbox"
+                    aria-controls="form-tag-options"
+                    aria-labelledby="form-tag-label"
+                  />
+                </div>
+                <div class="tag-dropdown-options" id="form-tag-options" role="listbox"></div>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="primary">Add task</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="list-header">
+          <h2>Tasks</h2>
+          <div class="list-actions">
+            <label class="search-field">
+              <span class="visually-hidden">Search tasks</span>
+              <input
+                id="search"
+                name="search"
+                type="search"
+                placeholder="Search tasks"
+                autocomplete="off"
+              />
+            </label>
+            <button id="refresh" class="secondary" type="button">Refresh</button>
+          </div>
+        </div>
+        <div class="filters" aria-label="Task filters">
+          <label class="filter">
+            <span>Title</span>
+            <input type="search" id="filter-title" placeholder="Contains" autocomplete="off" />
+          </label>
+          <label class="filter">
+            <span>Status</span>
+            <div class="status-filter" data-filter-status>
+              <button
+                type="button"
+                class="status-filter__toggle"
+                data-filter-status-toggle
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="filter-status-dropdown"
+              >
+                すべてのステータス
+              </button>
+              <div class="status-filter__dropdown" id="filter-status-dropdown" data-filter-status-panel hidden>
+                <div class="status-filter__options" data-filter-status-list role="group" aria-label="ステータスフィルター"></div>
+                <div class="status-filter__footer">
+                  <button type="button" class="status-filter__clear" data-filter-status-clear>選択をクリア</button>
+                </div>
+              </div>
+            </div>
+          </label>
+          <label class="filter">
+            <span>Tags</span>
+            <div class="tag-filter" data-filter-tags>
+              <button
+                type="button"
+                class="tag-filter__toggle"
+                data-filter-tags-toggle
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="filter-tag-dropdown"
+              >
+                すべてのタグ
+              </button>
+              <div class="tag-filter__dropdown" id="filter-tag-dropdown" data-filter-tags-panel hidden>
+                <div class="tag-filter__scroll" data-filter-tags-list role="group" aria-label="タグフィルター"></div>
+                <div class="tag-filter__footer">
+                  <button type="button" class="tag-filter__clear" data-filter-tags-clear>選択をクリア</button>
+                </div>
+              </div>
+            </div>
+          </label>
+          <label class="filter">
+            <span>Due between</span>
+            <div class="date-range">
+              <div class="date-input-wrapper">
+                <input type="date" id="filter-due-from" aria-label="Due date from" />
+              </div>
+              <span class="date-range__separator">–</span>
+              <div class="date-input-wrapper">
+                <input type="date" id="filter-due-to" aria-label="Due date to" />
+              </div>
+            </div>
+          </label>
+          <label class="filter">
+            <span>Created between</span>
+            <div class="date-range">
+              <div class="date-input-wrapper">
+                <input type="date" id="filter-created-from" aria-label="Created date from" />
+              </div>
+              <span class="date-range__separator">–</span>
+              <div class="date-input-wrapper">
+                <input type="date" id="filter-created-to" aria-label="Created date to" />
+              </div>
+            </div>
+          </label>
+          <label class="filter">
+            <span>Updated between</span>
+            <div class="date-range">
+              <div class="date-input-wrapper">
+                <input type="date" id="filter-updated-from" aria-label="Updated date from" />
+              </div>
+              <span class="date-range__separator">–</span>
+              <div class="date-input-wrapper">
+                <input type="date" id="filter-updated-to" aria-label="Updated date to" />
+              </div>
+            </div>
+          </label>
+        </div>
+        <ul id="task-list" class="tasks"></ul>
+        <p id="empty-state" class="empty">No tasks yet. Add your first task above.</p>
+      </section>
+    </main>
+    <template id="task-template">
+      <li class="task">
+        <div class="task-header">
+          <span class="title editable" data-edit-field="title" contenteditable="true"></span>
+          <div class="task-controls">
+            <label class="status-field">
+              <span class="visually-hidden">Status</span>
+              <select class="status">
+                <option value="todo">未着手</option>
+                <option value="in_progress">進行中</option>
+                <option value="done">完了</option>
+              </select>
+            </label>
+            <label class="due-field">
+              <span class="visually-hidden">期限</span>
+              <div class="date-input-wrapper">
+                <input type="date" class="due-date" />
+              </div>
+            </label>
+          </div>
+        </div>
+        <div class="tag-chip-row">
+          <div class="tag-chip-selector" data-role="tag-selector"></div>
+        </div>
+        <div class="timestamps-row">
+          <div class="timestamps">
+            <time class="created" datetime=""></time>
+            <time class="updated" datetime=""></time>
+          </div>
+          <button class="delete secondary" type="button">Delete</button>
+        </div>
+      </li>
+    </template>
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
