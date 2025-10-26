@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | フロントエンド | HTML5 / CSS3 / Vanilla JavaScript | シングルページ風 UI の描画と REST API の呼び出し |
 | バックエンド | Node.js / Express 5 / TypeScript | API エンドポイントの提供と静的ファイル配信 |
-| データストア | JSON ファイル (`data/tasks.json`, `data/tags.json`) / SQLite (`dev.db`) | 既定では JSON 永続化。Prisma + SQLite への切替と移行ユーティリティを追加済み |
+| データストア | JSON ファイル (`data/tasks.json`, `data/tags.json`) / SQLite (`dev.db`) | 既定では JSON 永続化。`DATA_STORE=prisma` で Prisma + SQLite にスイッチ可能、移行ユーティリティを同梱 |
 | 開発ツール | Nodemon / ts-node / TypeScript Compiler | `npm run dev` / `npm run build` 実行時のホットリロードとトランスパイル |
 
 ## 開発環境での起動手順
@@ -50,6 +50,15 @@
    npm run migrate:json
    ```
 5. 実験的に Prisma ベースのデータストアを試す場合は `DATA_STORE=prisma npm start` でサーバーを起動します（Prisma Client の生成が必須）。
+   - Prisma モードではタスク CRUD・並び替え・タグ操作がトランザクション内で差分更新されます。
+
+## テスト
+
+ユニットテストは Vitest を利用しています。
+
+```bash
+npm run test
+```
 
 > Render 等にデプロイする際は、Persistent Disk かクラウド DB を利用し、`DATABASE_URL` を適宜上書きしてください。
 

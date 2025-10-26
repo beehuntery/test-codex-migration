@@ -1,3 +1,5 @@
+import { animateReorder } from './drag-utils.mjs';
+
 const listEl = document.querySelector('#task-list');
 const template = document.querySelector('#task-template');
 const emptyState = document.querySelector('#empty-state');
@@ -756,6 +758,7 @@ listEl.addEventListener('dragstart', (event) => {
   }
   dragState.draggingId = taskItem.dataset.taskId;
   taskItem.classList.add('dragging');
+  listEl.classList.add('is-reordering');
   event.dataTransfer.effectAllowed = 'move';
   event.dataTransfer.setData('text/plain', dragState.draggingId);
 });
@@ -765,27 +768,64 @@ listEl.addEventListener('dragover', (event) => {
     return;
   }
   event.preventDefault();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move';
+  }
+
   const draggingElement = listEl.querySelector('.task.dragging');
   if (!draggingElement) {
     return;
   }
-  listEl.classList.remove('dragging-end');
 
-  const siblings = [...listEl.querySelectorAll('.task:not(.dragging)')];
-  const previousRects = new Map();
-  siblings.forEach((sibling) => {
-    previousRects.set(sibling, sibling.getBoundingClientRect());
-  });
-
-  const afterElement = getDragAfterElement(event.clientY);
-  if (!afterElement) {
-    listEl.appendChild(draggingElement);
-    listEl.classList.add('dragging-end');
-  } else if (afterElement !== draggingElement) {
-    listEl.insertBefore(draggingElement, afterElement);
+  const allTasks = Array.from(listEl.querySelectorAll('.task'));
+  if (allTasks.length <= 1) {
+    return;
   }
 
-  animateReorder(previousRects, siblings);
+  const siblings = allTasks.filter((task) => task !== draggingElement);
+  if (!siblings.length) {
+    return;
+  }
+
+  const pointerY = event.clientY;
+  let referenceNode = null;
+  const targetTask = event.target.closest('.task');
+
+  if (targetTask && targetTask !== draggingElement) {
+    const rect = targetTask.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    referenceNode = pointerY < midpoint ? targetTask : targetTask.nextElementSibling;
+  } else {
+    const firstSibling = siblings[0];
+    const lastSibling = siblings[siblings.length - 1];
+    const beforeFirst = firstSibling && pointerY < firstSibling.getBoundingClientRect().top;
+    const afterLast = lastSibling && pointerY > lastSibling.getBoundingClientRect().bottom;
+
+    if (beforeFirst) {
+      referenceNode = firstSibling;
+    } else if (afterLast) {
+      referenceNode = null;
+    } else {
+      return;
+    }
+  }
+
+  const currentNext = draggingElement.nextElementSibling;
+  if (referenceNode === draggingElement || referenceNode === currentNext) {
+    return;
+  }
+
+  const previousRects = captureTaskRects(listEl);
+  const otherTasks = Array.from(previousRects.keys()).filter((task) => task !== draggingElement);
+
+  listEl.insertBefore(draggingElement, referenceNode || null);
+  listEl.classList.toggle('dragging-end', !draggingElement.nextElementSibling);
+
+  if (previousRects.size > 0 && otherTasks.length > 0) {
+    requestAnimationFrame(() => {
+      animateReorder(previousRects, otherTasks);
+    });
+  }
 });
 
 listEl.addEventListener('drop', (event) => {
@@ -812,8 +852,13 @@ listEl.addEventListener('dragend', async (event) => {
   dragState.draggingId = null;
 
   try {
-    await persistOrder(orderedIds);
-    await loadTasks();
+    const updatedTasks = await persistOrder(orderedIds);
+    if (Array.isArray(updatedTasks)) {
+      state.tasks = updatedTasks;
+      renderTasks();
+    } else {
+      await loadTasks();
+    }
   } catch (err) {
     console.error(err);
     alert(err.message);
@@ -851,8 +896,8 @@ async function loadTags() {
 }
 
 function renderTasks() {
+  const previousRects = captureTaskRects(listEl);
   clearTaskTagSelectors();
-  listEl.innerHTML = '';
 
   const query = state.searchQuery.trim().toLowerCase();
   const preparedFilters = {
@@ -887,72 +932,134 @@ function renderTasks() {
   if (!filteredTasks.length) {
     emptyState.hidden = false;
     emptyState.textContent = hasAnyTasks && hasActiveFilters ? EMPTY_MESSAGES.search : EMPTY_MESSAGES.default;
+    listEl.innerHTML = '';
     return;
   }
 
   emptyState.hidden = true;
   emptyState.textContent = EMPTY_MESSAGES.default;
 
+  const existingNodes = new Map();
+  listEl.querySelectorAll('.task').forEach((node) => {
+    const id = node.dataset.taskId;
+    if (id) {
+      existingNodes.set(id, node);
+    }
+  });
+
   const fragment = document.createDocumentFragment();
+  const renderedNodes = [];
+
   filteredTasks.forEach((task) => {
-    const node = template.content.firstElementChild.cloneNode(true);
-    node.dataset.taskId = task.id;
-    node.dataset.order = Number.isFinite(task.order) ? task.order : 0;
-    node.draggable = true;
-    node.classList.add('draggable');
-
-    const status = task.status || 'todo';
-
-    const titleEl = node.querySelector('.title');
-    titleEl.textContent = task.title;
-
-    const statusSelect = node.querySelector('.status');
-    if (statusSelect) {
-      statusSelect.value = status;
-      statusSelect.dataset.prevStatus = status;
-      const statusLabel = STATUS_LABELS[status] ?? status;
-      statusSelect.title = `ステータス: ${statusLabel}`;
+    let node = existingNodes.get(task.id);
+    if (!node) {
+      node = template.content.firstElementChild.cloneNode(true);
     }
-
-    node.classList.toggle('completed', status === 'done');
-
-    const dueInput = node.querySelector('.due-date');
-    if (dueInput) {
-      const due = task.dueDate || '';
-      dueInput.value = due;
-      dueInput.dataset.prevDueDate = due;
-      dueInput.title = due ? formatDateDisplay(due) : '期限なし';
-    }
-
-    const tagSelector = node.querySelector('[data-role="tag-selector"]');
-    if (tagSelector) {
-      renderTaskTagSelector(tagSelector, task);
-    }
-
-    const createdEl = node.querySelector('.created');
-    if (createdEl) {
-      createdEl.dateTime = task.createdAt;
-      createdEl.textContent = `作成: ${formatDateTime(task.createdAt)}`;
-      createdEl.title = `${formatRelativeTime(task.createdAt)}に作成`;
-    }
-
-    const updatedEl = node.querySelector('.updated');
-    if (updatedEl) {
-      if (task.updatedAt) {
-        updatedEl.dateTime = task.updatedAt;
-        updatedEl.textContent = `更新: ${formatDateTime(task.updatedAt)}`;
-        updatedEl.title = `${formatRelativeTime(task.updatedAt)}に更新`;
-      } else {
-        updatedEl.removeAttribute('dateTime');
-        updatedEl.textContent = '更新: －';
-        updatedEl.title = 'まだ更新されていません';
-      }
-    }
-
+    existingNodes.delete(task.id);
+    populateTaskNode(node, task);
     fragment.appendChild(node);
+    renderedNodes.push(node);
   });
 
   listEl.appendChild(fragment);
+  existingNodes.forEach((node) => node.remove());
+
+  if (previousRects.size > 0 && renderedNodes.length > 0) {
+    requestAnimationFrame(() => {
+      animateReorder(previousRects, renderedNodes);
+    });
+  }
+}
+
+function captureTaskRects(container) {
+  const rects = new Map();
+  if (!container) {
+    return rects;
+  }
+
+  container.querySelectorAll('.task').forEach((task) => {
+    rects.set(task, task.getBoundingClientRect());
+  });
+
+  return rects;
+}
+
+function populateTaskNode(node, task) {
+  if (!node || !task) {
+    return;
+  }
+
+  node.dataset.taskId = task.id;
+  node.dataset.order = Number.isFinite(task.order) ? task.order : 0;
+  node.draggable = true;
+  node.classList.add('draggable');
+  node.classList.remove('dragging');
+  node.style.transform = '';
+  node.style.transition = '';
+  node.style.willChange = '';
+
+  const status = task.status || 'todo';
+
+  const titleEl = node.querySelector('.title');
+  if (titleEl) {
+    const titleText = task.title ?? '';
+    if (titleEl.textContent !== titleText) {
+      titleEl.textContent = titleText;
+    }
+  }
+
+  const statusSelect = node.querySelector('.status');
+  if (statusSelect) {
+    if (statusSelect.value !== status) {
+      statusSelect.value = status;
+    }
+    statusSelect.dataset.prevStatus = status;
+    const statusLabel = STATUS_LABELS[status] ?? status;
+    statusSelect.title = `ステータス: ${statusLabel}`;
+  }
+
+  node.classList.toggle('completed', status === 'done');
+
+  const dueInput = node.querySelector('.due-date');
+  if (dueInput) {
+    const due = task.dueDate || '';
+    if (dueInput.value !== due) {
+      dueInput.value = due;
+    }
+    dueInput.dataset.prevDueDate = due;
+    dueInput.title = due ? formatDateDisplay(due) : '期限なし';
+  }
+
+  const tagSelector = node.querySelector('[data-role="tag-selector"]');
+  if (tagSelector) {
+    renderTaskTagSelector(tagSelector, task);
+  }
+
+  const createdEl = node.querySelector('.created');
+  if (createdEl) {
+    if (task.createdAt) {
+      createdEl.dateTime = task.createdAt;
+      createdEl.textContent = `作成: ${formatDateTime(task.createdAt)}`;
+      createdEl.title = `${formatRelativeTime(task.createdAt)}に作成`;
+    } else {
+      createdEl.removeAttribute('dateTime');
+      createdEl.textContent = '作成: －';
+      createdEl.title = '作成日時が設定されていません';
+    }
+  }
+
+  const updatedEl = node.querySelector('.updated');
+  if (updatedEl) {
+    if (task.updatedAt) {
+      updatedEl.dateTime = task.updatedAt;
+      updatedEl.textContent = `更新: ${formatDateTime(task.updatedAt)}`;
+      updatedEl.title = `${formatRelativeTime(task.updatedAt)}に更新`;
+    } else {
+      updatedEl.removeAttribute('dateTime');
+      updatedEl.textContent = '更新: －';
+      updatedEl.title = 'まだ更新されていません';
+    }
+  }
 }
 
 function matchesSearch(task, query) {
@@ -1029,51 +1136,60 @@ function getDatePortion(value) {
   }
 }
 
-function getDragAfterElement(mouseY) {
-  const draggableElements = [...listEl.querySelectorAll('.task:not(.dragging)')];
-  return draggableElements.reduce(
-    (closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = mouseY - box.top - box.height / 2;
-      if (offset < 0 && offset > closest.offset) {
-        return { offset, element: child };
-      }
-      return closest;
-    },
-    { offset: Number.NEGATIVE_INFINITY, element: null }
-  ).element;
-}
-
-function animateReorder(previousRects, elements) {
-  elements.forEach((el) => {
-    const prevRect = previousRects.get(el);
-    if (!prevRect) {
+function sanitizeOrderIds(values) {
+  const seen = new Set();
+  const normalized = [];
+  values.forEach((value) => {
+    const id = typeof value === 'string' ? value.trim() : String(value ?? '').trim();
+    if (!id || seen.has(id)) {
       return;
     }
-    const newRect = el.getBoundingClientRect();
-    const deltaY = prevRect.top - newRect.top;
-    if (!deltaY) {
-      return;
-    }
-
-    el.style.transition = 'none';
-    el.style.transform = `translateY(${deltaY}px)`;
-
-    requestAnimationFrame(() => {
-      el.style.transition = '';
-      el.style.transform = '';
-    });
+    seen.add(id);
+    normalized.push(id);
   });
+  return normalized;
 }
 
-async function persistOrder(orderedIds) {
-  for (let index = 0; index < orderedIds.length; index += 1) {
-    const id = orderedIds[index];
+async function reorderViaEndpoint(order) {
+  try {
+    const res = await fetch('/api/tasks/reorder', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ order })
+    });
+
+    const payload = await parseResponseJson(res);
+
+    if (!res.ok) {
+      const isFallback = res.status === 404 || res.status === 405 || res.status === 501;
+      const error = new Error((payload && payload.error) || 'Failed to reorder tasks.');
+      return { success: false, fallback: isFallback, error };
+    }
+
+    if (Array.isArray(payload)) {
+      return { success: true, tasks: payload };
+    }
+
+    return { success: true, tasks: null };
+  } catch (err) {
+    return {
+      success: false,
+      fallback: false,
+      error: err instanceof Error ? err : new Error(String(err))
+    };
+  }
+}
+
+async function reorderIndividually(order) {
+  for (let index = 0; index < order.length; index += 1) {
+    const id = order[index];
     if (!id) {
       continue;
     }
 
-    const res = await fetch(`/api/tasks/${id}`, {
+    const res = await fetch(`/api/tasks/${encodeURIComponent(id)}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'
@@ -1093,10 +1209,32 @@ async function persistOrder(orderedIds) {
   }
 }
 
+async function persistOrder(orderedIds) {
+  const normalizedOrder = sanitizeOrderIds(orderedIds);
+  if (!normalizedOrder.length) {
+    return null;
+  }
+
+  const batchResult = await reorderViaEndpoint(normalizedOrder);
+  if (batchResult.success) {
+    return batchResult.tasks ?? null;
+  }
+
+  if (!batchResult.fallback) {
+    throw batchResult.error;
+  }
+
+  await reorderIndividually(normalizedOrder);
+  return null;
+}
+
 function clearDragIndicators() {
   listEl.classList.remove('dragging-end');
+  listEl.classList.remove('is-reordering');
   listEl.querySelectorAll('.task').forEach((task) => {
     task.style.transform = '';
+    task.style.transition = '';
+    task.style.willChange = '';
   });
 }
 
@@ -1642,6 +1780,7 @@ class TaskTagSelector {
     this.task = task;
     this.taskId = task.id;
     this.container = container;
+    this.hostTask = container ? container.closest('.task') : null;
     this.selectedTags = sortTags(dedupeTags(Array.isArray(task.tags) ? task.tags.filter(Boolean) : []));
     this.state = {
       open: false,
@@ -1779,6 +1918,8 @@ class TaskTagSelector {
     }
     this.destroyed = true;
     this.detachEventListeners();
+    this.resetHostTaskElevation();
+    this.hostTask = null;
     if (this.container) {
       this.container.innerHTML = '';
     }
@@ -1798,6 +1939,7 @@ class TaskTagSelector {
       this.inputWrapper.classList.add('open');
       this.inputWrapper.setAttribute('aria-expanded', 'true');
       this.searchInput.setAttribute('aria-expanded', 'true');
+      this.elevateHostTask();
     }
     this.renderOptions();
   }
@@ -1812,6 +1954,7 @@ class TaskTagSelector {
     this.inputWrapper.setAttribute('aria-expanded', 'false');
     this.searchInput.setAttribute('aria-expanded', 'false');
     this.searchInput.removeAttribute('aria-activedescendant');
+    this.resetHostTaskElevation();
   }
 
   focusSearchInput(options = { preventScroll: true }) {
@@ -2167,6 +2310,31 @@ class TaskTagSelector {
       return;
     }
     this.closeDropdown();
+  }
+
+  resolveHostTask() {
+    if (!this.container) {
+      return null;
+    }
+    const nextHost = this.container.closest('.task');
+    if (nextHost !== this.hostTask) {
+      this.resetHostTaskElevation();
+      this.hostTask = nextHost;
+    }
+    return this.hostTask;
+  }
+
+  elevateHostTask() {
+    const host = this.resolveHostTask();
+    if (host) {
+      host.classList.add('task--tag-open');
+    }
+  }
+
+  resetHostTaskElevation() {
+    if (this.hostTask) {
+      this.hostTask.classList.remove('task--tag-open');
+    }
   }
 
   handleWrapperMouseDown(event) {
@@ -2707,3 +2875,13 @@ function formatRelativeTime(isoString) {
   await loadTags();
   await loadTasks();
 })();
+
+if (typeof window !== 'undefined') {
+  window.__testHelpers = {
+    reorderTasks: async (orderedIds) => {
+      await persistOrder(orderedIds);
+      await loadTasks();
+    },
+    taskTitles: () => Array.from(listEl.querySelectorAll('.task .title')).map((el) => el.textContent?.trim() ?? '')
+  };
+}

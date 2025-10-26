@@ -1024,7 +1024,23 @@ button:active {
   background: var(--color-surface-alt);
   cursor: grab;
   box-shadow: 0 10px 24px rgba(107, 102, 95, 0.12);
-  transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  transition: transform 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28),
+    box-shadow 0.24s ease,
+    border-color 0.24s ease,
+    background 0.24s ease;
+  will-change: transform, box-shadow;
+}
+
+.task--tag-open {
+  position: relative;
+  z-index: 80;
+}
+
+.tasks.is-reordering .task:not(.dragging) {
+  transition: transform 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28),
+    box-shadow 0.24s ease,
+    border-color 0.24s ease,
+    background 0.24s ease;
 }
 
 .task.completed {

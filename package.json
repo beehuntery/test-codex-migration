@@ -4,30 +4,42 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "prepare": "npm run prisma:generate",
     "start": "node server.js",
     "prestart": "npm run build",
     "dev": "npm run dev:ts",
+    "predev:ts": "npm run prisma:generate",
+    "prebuild": "npm run prisma:generate",
     "build": "tsc --project tsconfig.json",
     "dev:ts": "nodemon --watch src --exec ts-node src/server/index.ts",
     "start:ts": "node dist/server/index.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma db push --force-reset",
-    "migrate:json": "ts-node src/scripts/jsonToSqlite.ts"
+    "migrate:json": "ts-node src/scripts/jsonToSqlite.ts",
+    "pretest": "npm run prisma:generate",
+    "test": "vitest run --reporter verbose",
+    "test:e2e": "npm run build && playwright test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.20.0",
-    "express": "^5.1.0"
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10",
-    "prisma": "^5.20.0",
+    "@playwright/test": "^1.56.1",
     "@types/express": "^4.17.21",
     "@types/node": "^22.10.1",
+    "@types/supertest": "^6.0.3",
+    "nodemon": "^3.1.10",
+    "prisma": "^5.20.0",
+    "supertest": "^7.1.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^4.0.2"
   },
   "config": "{}"
 }
