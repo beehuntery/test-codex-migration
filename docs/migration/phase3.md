@@ -1,0 +1,52 @@
+# フェーズ3: フロントエンド再構築
+
+- ステータス: 🚧 着手 (2025-10-26)
+- 目的: Next.js 15 App Router + Tailwind CSS 4 を採用したモダンな UI レイヤーを構築し、既存 API との互換性を保ちつつ段階的な移行基盤を整える。
+
+## スコープ
+- Next.js アプリケーションの骨格構築（App Router、ESM、TypeScript 設定、環境変数定義）。
+- Tailwind 4 とデザイントークンの接続（`docs/DESIGN_GUIDELINE.md` との同期）。
+- 既存 REST API へのフェッチ層実装と型共有（Zod スキーマからの型生成を活用）。
+- 既存の公共アセット（ドラッグ＆ドロップやタグ操作）の段階的移植方針策定。
+- Storybook 導入計画とアクセシビリティ検証プロセスの明文化。
+
+## 成果物
+- `apps/web` ディレクトリ配下に Next.js 15 App Router ベースのアプリ。
+- Tailwind 4 設定ファイルとデザイントークン読み込みモジュール。
+- API クライアントユーティリティ（REST → 後続で Prisma 直結に移行しやすい構造）。
+- 主要ページ: タスク一覧（サーバーコンポーネント）とタスク詳細/作成モーダル（クライアントコンポーネント）への道筋。
+- Storybook/Playwright の Next.js 対応下準備（CI 導入はフェーズ4で実施）。
+
+## スケジュール目安
+1. **Week 1**: Next.js スケルトン導入、Tailwind/Token 設定、Lint/tsconfig 整合。
+2. **Week 2**: API フェッチ層 + タスク一覧ページのサーバーコンポーネント原型。
+3. **Week 3**: クライアント側インタラクション（タグ選択、ドラッグ操作の React 化）と Storybook 雛形。
+4. **Week 4**: モジュール分割・テスト整備・移行リハーサル（Express サーバーへのプロキシ併用）。
+
+## マイルストーン
+- **M1: Skeleton Ready** – Next.js アプリ起動、Tailwind 設定、基本ページが表示できる。
+- **M2: Data Connected** – `/api/tasks` を SSR 取得し、リストを Next.js 側で表示。
+- **M3: Interactive Draft** – タスク操作（作成/更新/タグ付け）の UI を React 化、Playwright スモークを追加。
+- **M4: Cutover Plan** – Express + Next.js の並行稼働シナリオとデプロイ手順を文書化。
+
+## バックログ
+- [ ] Next.js 用の `package.json` ワークスペース設定（ルートから管理）。
+- [ ] `apps/web/next.config.mjs` / `apps/web/tsconfig.json` 生成。
+- [ ] Tailwind 4 インストール、`apps/web/tailwind.config.ts` にトークンをマッピング。
+- [ ] `src/shared/api.ts` からの Zod スキーマを利用した API クライアント作成。
+- [ ] タスク一覧ページ (`app/tasks/page.tsx`) の SSR 実装。
+- [ ] タグ/ステータスフィルターコンポーネントの React 化。
+- [ ] Storybook 設定ファイルの雛形作成。
+- [ ] 既存 Vanilla JS 資産の段階的移植計画（モジュール単位の洗い出し）。
+
+## リスクと対応
+- **Tailwind 4 の仕様変化**: 公式リリースノートの追跡とプレリリース版利用時のピン止めを実施。
+- **Next.js 15 の App Router 互換性**: 既存 API との同居期間は `rewrites` で Express にプロキシ。移行完了後に Route Handler へ統合。
+- **ドラッグ＆ドロップの React 化コスト**: 段階的に `@dnd-kit` 等の採用を比較検討し、先にクリティカルなタグ選択 UI を React 化する。
+- **ビルド時間増加**: Turbopack/webpack の評価と CI のキャッシュ戦略をフェーズ4で検討。
+
+## 関連ドキュメント
+- [デザインガイドライン](../DESIGN_GUIDELINE.md)
+- [フェーズ2: バックエンド刷新](./phase2.md)
+- [テスト戦略ガイド](../testing/README.md)
+

@@ -18,7 +18,10 @@
     "migrate:json": "ts-node src/scripts/jsonToSqlite.ts",
     "pretest": "npm run prisma:generate",
     "test": "vitest run --reporter verbose",
-    "test:e2e": "npm run build && playwright test"
+    "test:e2e": "npm run build && playwright test",
+    "web:dev": "npm run dev --prefix apps/web",
+    "web:build": "npm run build --prefix apps/web",
+    "web:start": "npm run start --prefix apps/web"
   },
   "keywords": [],
   "author": "",
