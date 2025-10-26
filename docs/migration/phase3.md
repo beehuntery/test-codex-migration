@@ -39,6 +39,12 @@
 - [ ] Storybook 設定ファイルの雛形作成。
 - [ ] 既存 Vanilla JS 資産の段階的移植計画（モジュール単位の洗い出し）。
 
+## テスト戦略
+- SSR ページ: Jest/Testing Library ではなく Playwright の `app-router` モードでレンダリング検証を行い、`tasks` ページのフィルタリングを自動化。
+- UI コンポーネント: Storybook Interaction Testing + Vitest を併用し、デザイントークン適用可否やアクセシビリティ属性をスナップショット化。
+- API 層: 既存の `src/server/index.test.ts` に加え、Next.js Route Handler へ移行した際は Contract Test を `src/shared/api.ts` の Zod スキーマで再利用。
+- E2E: 既存 Playwright スイートを Next.js アプリ用に分岐し、`npm run web:build` 後の `next start` を対象にスモークテストを実施。
+
 ## リスクと対応
 - **Tailwind 4 の仕様変化**: 公式リリースノートの追跡とプレリリース版利用時のピン止めを実施。
 - **Next.js 15 の App Router 互換性**: 既存 API との同居期間は `rewrites` で Express にプロキシ。移行完了後に Route Handler へ統合。
@@ -49,4 +55,3 @@
 - [デザインガイドライン](../DESIGN_GUIDELINE.md)
 - [フェーズ2: バックエンド刷新](./phase2.md)
 - [テスト戦略ガイド](../testing/README.md)
-
