@@ -1,0 +1,60 @@
+@theme {
+  --color-base: #e5ded3;
+  --color-surface: #f8f5f0;
+  --color-surface-alt: #ffffff;
+  --color-primary: #6bb892;
+  --color-secondary: #efdcc5;
+  --color-accent: #82c7c9;
+  --color-text: #3e3a36;
+  --color-text-muted: #6b665f;
+  --color-disabled: #b8b3ab;
+  --color-success: #4e8f6f;
+  --color-warning: #d6a75b;
+  --color-error: #c97171;
+
+  --shadow-elevation-1: 0 8px 24px rgba(107, 102, 95, 0.12);
+  --shadow-elevation-2: 0 16px 32px rgba(62, 58, 54, 0.16);
+  --shadow-focus: 0 0 0 4px rgba(130, 199, 201, 0.28);
+
+  --radius-card: 20px;
+  --radius-button-lg: 16px;
+  --radius-button: 12px;
+
+  --font-sans: "SF Pro Text", "SF Pro JP", "Noto Sans JP", system-ui, sans-serif;
+}
+
+@utility shadow-elevated {
+  box-shadow: var(--shadow-elevation-1);
+}
+
+@utility shadow-elevated-2 {
+  box-shadow: var(--shadow-elevation-2);
+}
+
+@utility btn-primary {
+  background-color: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-button-lg);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 0.75rem 1.5rem;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+@utility btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-elevation-1);
+}
+
+@utility btn-secondary {
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: var(--radius-button);
+  background-color: transparent;
+  padding: 0.7rem 1.4rem;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+@utility btn-secondary:hover {
+  background-color: rgba(239, 220, 197, 0.4);
+}

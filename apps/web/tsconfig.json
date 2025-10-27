@@ -16,7 +16,11 @@
     "types": [
       "@types/node"
     ],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@shared": ["../../src/shared/index"],
+      "@shared/*": ["../../src/shared/*"]
+    }
   },
   "include": [
     "next-env.d.ts",

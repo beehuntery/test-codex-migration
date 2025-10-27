@@ -55,3 +55,6 @@
 - [デザインガイドライン](../DESIGN_GUIDELINE.md)
 - [フェーズ2: バックエンド刷新](./phase2.md)
 - [テスト戦略ガイド](../testing/README.md)
+
+## 進捗ログ
+- **2025-10-27**: Next.js スケルトン（`apps/web`）を追加し、Tailwind CSS v4 とデザイントークンを統合。`/tasks` ページで既存 API からサーバーサイドレンダリングする下地を構築。
