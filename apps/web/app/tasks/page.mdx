@@ -1,0 +1,27 @@
+import { Meta, Canvas, Story, ArgsTable } from '@storybook/blocks';
+import * as TaskCardStories from './_components/task-card.stories';
+
+<Meta title="Tasks/Documentation" />
+
+# Tasks UI 概要
+
+このページは Next.js フェーズ3で構築中のタスク管理 UI コンポーネントを Storybook 上で解説するための MDX ドキュメントです。
+
+## TaskCard コンポーネント
+
+タスクのタイトル、説明、期限、タグ、ステータスを表示するカードです。Next.js ではサーバーコンポーネントから呼び出され、ステータス更新フォーム（Server Action）を組み合わせることで操作が可能になります。
+
+<Canvas>
+  <Story of={TaskCardStories.Default} name="Default" />
+</Canvas>
+
+## プロパティ
+
+<ArgsTable of={TaskCardStories.Default} />
+
+## 確認ポイント
+
+- Tailwind トークンによるスタイリングとデザイントークンの適用状況
+- タグがない場合のプレースホルダーテキスト
+- Server Action を利用できない環境でもレンダリングが崩れないか
+

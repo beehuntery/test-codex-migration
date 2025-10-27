@@ -1,3 +1,4 @@
+import React from 'react';
 import { type Task } from '@shared/api';
 import { StatusBadge } from './status-badge';
 

@@ -38,6 +38,7 @@
 - [ ] タグ/ステータスフィルターコンポーネントの React 化。
 - [x] Storybook 設定ファイルの雛形作成。
 - [ ] 既存 Vanilla JS 資産の段階的移植計画（モジュール単位の洗い出し）。
+- [x] TaskCard ストーリーのコントロール拡充と MDX ドキュメント化。
 
 ## テスト戦略
 - SSR ページ: Jest/Testing Library ではなく Playwright の `app-router` モードでレンダリング検証を行い、`tasks` ページのフィルタリングを自動化。
@@ -59,3 +60,4 @@
 ## 進捗ログ
 - **2025-10-27**: Next.js スケルトン（`apps/web`）を追加し、Tailwind CSS v4 とデザイントークンを統合。`/tasks` ページで既存 API からサーバーサイドレンダリングする下地を構築。`TaskCard` や `StatusBadge` などの再利用可能な UI コンポーネントを作成し、タスク一覧を Next.js 上で読み取り専用表示できるようにした。
 - **2025-10-28**: Server Actions を介したステータス更新フォームを Next.js 側に追加し、Storybook (Vite Builder) を導入。`TaskCard` のストーリーを作成して UI ドキュメント化を開始。
+- **2025-10-29**: Storybook を v9 系へ更新（`storybook` / `@storybook/*` パッケージを ^9.0.0 へ揃え）し、アップグレード時の Alias/スタブ設定を確認。

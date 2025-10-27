@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { TaskCard } from './task-card';
 import type { Task } from '@shared/api';
+import { within } from '@storybook/test';
+import type { StoryContext } from '@storybook/react';
 
 const baseTask: Task = {
   id: 'task-1',
@@ -30,6 +32,10 @@ export const Default: Story = {
   args: {
     task: baseTask,
     statusControls: undefined
+  },
+  play: async ({ canvasElement }: StoryContext<typeof TaskCard>) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText('ストーリーブック対応の整備');
   }
 };
 
