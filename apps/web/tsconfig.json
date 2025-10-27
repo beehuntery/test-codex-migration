@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -18,17 +22,29 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@shared": ["../../src/shared/index"],
-      "@shared/*": ["../../src/shared/*"]
-    }
+      "@shared": [
+        "../../src/shared/index"
+      ],
+      "@shared/*": [
+        "../../src/shared/*"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
-    "next-env.d.ts",
-    "next.config.mjs",
     "app/**/*",
     "lib/**/*",
+    "next-env.d.ts",
+    "next.config.mjs",
     "styles/**/*",
-    "types/**/*"
+    "types/**/*",
+    ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

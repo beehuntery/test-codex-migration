@@ -41,11 +41,6 @@
   transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
-@utility btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-elevation-1);
-}
-
 @utility btn-secondary {
   border: 1px solid var(--color-primary);
   color: var(--color-primary);
@@ -53,8 +48,4 @@
   background-color: transparent;
   padding: 0.7rem 1.4rem;
   transition: background-color 150ms ease, box-shadow 150ms ease;
-}
-
-@utility btn-secondary:hover {
-  background-color: rgba(239, 220, 197, 0.4);
 }

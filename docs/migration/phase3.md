@@ -36,7 +36,7 @@
 - [ ] `src/shared/api.ts` からの Zod スキーマを利用した API クライアント作成。
 - [ ] タスク一覧ページ (`app/tasks/page.tsx`) の SSR 実装。
 - [ ] タグ/ステータスフィルターコンポーネントの React 化。
-- [ ] Storybook 設定ファイルの雛形作成。
+- [x] Storybook 設定ファイルの雛形作成。
 - [ ] 既存 Vanilla JS 資産の段階的移植計画（モジュール単位の洗い出し）。
 
 ## テスト戦略
@@ -57,4 +57,5 @@
 - [テスト戦略ガイド](../testing/README.md)
 
 ## 進捗ログ
-- **2025-10-27**: Next.js スケルトン（`apps/web`）を追加し、Tailwind CSS v4 とデザイントークンを統合。`/tasks` ページで既存 API からサーバーサイドレンダリングする下地を構築。
+- **2025-10-27**: Next.js スケルトン（`apps/web`）を追加し、Tailwind CSS v4 とデザイントークンを統合。`/tasks` ページで既存 API からサーバーサイドレンダリングする下地を構築。`TaskCard` や `StatusBadge` などの再利用可能な UI コンポーネントを作成し、タスク一覧を Next.js 上で読み取り専用表示できるようにした。
+- **2025-10-28**: Server Actions を介したステータス更新フォームを Next.js 側に追加し、Storybook (Vite Builder) を導入。`TaskCard` のストーリーを作成して UI ドキュメント化を開始。

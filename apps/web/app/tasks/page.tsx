@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { getTasks } from '../../lib/api';
+import { TaskCard } from './_components/task-card';
 
 export const metadata = {
   title: 'Tasks (Next.js)',
@@ -20,46 +21,22 @@ export default async function TasksPage() {
       </header>
       <div className="card-surface space-y-6 p-8 text-[color:var(--color-text-muted)]">
         <div>
-          <p className="mb-2 text-lg font-semibold text-[color:var(--color-text)]">最新タスク</p>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-lg font-semibold text-[color:var(--color-text)]">タスク一覧（{tasks.length} 件）</p>
+            <span className="text-xs uppercase tracking-[0.24em] text-[color:var(--color-text-muted)]">
+              データソース: Express REST API
+            </span>
+          </div>
           {tasks.length === 0 ? (
-            <p className="text-sm">表示できるタスクがまだありません。既存 UI から作成したデータがここに表示されます。</p>
+            <p className="rounded-xl border border-dashed border-[rgba(107,102,95,0.25)] bg-white/70 px-4 py-6 text-center text-sm">
+              表示できるタスクがまだありません。既存 UI から作成したデータがここに表示されます。
+            </p>
           ) : (
-            <ul className="flex flex-col gap-3">
-              {tasks.slice(0, 5).map((task) => (
-                <li
-                  key={task.id}
-                  className="rounded-xl border border-[rgba(107,102,95,0.18)] bg-white/85 px-4 py-3 shadow-sm transition hover:-translate-y-[1px] hover:shadow-elevated"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-base font-medium text-[color:var(--color-text)]">{task.title}</span>
-                      <span className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-text-muted)]">
-                        {task.status}
-                      </span>
-                    </div>
-                    {task.dueDate ? (
-                      <span className="text-sm text-[color:var(--color-warning)]">
-                        期限: {new Date(task.dueDate).toLocaleDateString('ja-JP')}
-                      </span>
-                    ) : (
-                      <span className="text-sm text-[color:var(--color-disabled)]">期限なし</span>
-                    )}
-                  </div>
-                  {task.tags.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {task.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full bg-[color:var(--color-secondary)]/60 px-3 py-1 text-xs font-medium text-[color:var(--color-text)]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </li>
+            <div className="flex flex-col gap-4">
+              {tasks.map((task) => (
+                <TaskCard key={task.id} task={task} />
               ))}
-            </ul>
+            </div>
           )}
         </div>
         <div>

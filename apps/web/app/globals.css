@@ -37,6 +37,15 @@ button {
   font-family: inherit;
 }
 
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-elevation-1);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(239, 220, 197, 0.4);
+}
+
 @layer utilities {
   .card-surface {
     background-color: rgba(248, 245, 240, 0.9);

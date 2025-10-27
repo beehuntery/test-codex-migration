@@ -1,10 +1,10 @@
 import 'server-only';
 
-import { TaskListSchema, type Task } from '@shared/api';
+import { TaskListSchema, TaskSchema, TaskStatusSchema, type Task, type TaskStatus } from '@shared/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
-async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
+export async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
   const url = new URL(path, API_BASE_URL);
   const res = await fetch(url.toString(), {
     cache: 'no-store',
@@ -31,4 +31,17 @@ export async function getTasks(): Promise<Task[]> {
     throw new Error('Failed to parse tasks response');
   }
   return parsed.data;
+}
+
+export async function updateTaskStatusRequest(taskId: string, status: TaskStatus): Promise<Task> {
+  const parsedStatus = TaskStatusSchema.parse(status);
+  const data = await fetchFromApi<unknown>(`/api/tasks/${taskId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status: parsedStatus })
+  });
+  const parsedTask = TaskSchema.safeParse(data);
+  if (!parsedTask.success) {
+    throw new Error('Failed to parse updated task response');
+  }
+  return parsedTask.data;
 }
