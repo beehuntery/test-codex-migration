@@ -17,9 +17,6 @@ const baseTask: Task = {
 const meta = {
   title: 'Tasks/TaskCard',
   component: TaskCard,
-  args: {
-    enableStatusForm: false
-  },
   parameters: {
     layout: 'centered'
   }
@@ -31,7 +28,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    task: baseTask
+    task: baseTask,
+    statusControls: undefined
   }
 };
 
@@ -44,7 +42,8 @@ export const Completed: Story = {
       status: 'done',
       tags: ['backend'],
       updatedAt: '2025-10-25T09:30:00.000Z'
-    }
+    },
+    statusControls: undefined
   }
 };
 
@@ -56,6 +55,7 @@ export const NoTags: Story = {
       title: 'タグ未設定のタスク例',
       tags: [],
       description: ''
-    }
+    },
+    statusControls: undefined
   }
 };

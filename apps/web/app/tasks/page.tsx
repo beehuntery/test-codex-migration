@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { getTasks } from '../../lib/api';
 import { TaskCard } from './_components/task-card';
+import { TaskStatusForm } from './_components/task-status-form';
 
 export const metadata = {
   title: 'Tasks (Next.js)',
@@ -34,7 +35,11 @@ export default async function TasksPage() {
           ) : (
             <div className="flex flex-col gap-4">
               {tasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  statusControls={<TaskStatusForm taskId={task.id} currentStatus={task.status} />}
+                />
               ))}
             </div>
           )}

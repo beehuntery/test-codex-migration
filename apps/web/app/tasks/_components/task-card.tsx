@@ -1,6 +1,5 @@
 import { type Task } from '@shared/api';
 import { StatusBadge } from './status-badge';
-import { TaskStatusForm } from './task-status-form';
 
 function formatDate(value: string | null | undefined) {
   if (!value) {
@@ -27,7 +26,13 @@ function formatTimestamp(value: string | null | undefined) {
   }
 }
 
-export function TaskCard({ task, enableStatusForm = true }: { task: Task; enableStatusForm?: boolean }) {
+export function TaskCard({
+  task,
+  statusControls
+}: {
+  task: Task;
+  statusControls?: React.ReactNode;
+}) {
   const dueDate = formatDate(task.dueDate);
   const updatedAt = formatTimestamp(task.updatedAt);
 
@@ -73,9 +78,7 @@ export function TaskCard({ task, enableStatusForm = true }: { task: Task; enable
             <span className="text-xs text-[color:var(--color-disabled)]">タグは未設定です</span>
           )}
         </div>
-        {enableStatusForm ? (
-          <TaskStatusForm taskId={task.id} currentStatus={task.status} />
-        ) : (
+        {statusControls ?? (
           <div className="rounded-lg border border-dashed border-[rgba(107,102,95,0.25)] px-3 py-2 text-xs text-[color:var(--color-disabled)]">
             ステータス更新フォームは Storybook では無効化されています。
           </div>
