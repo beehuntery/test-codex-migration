@@ -16,6 +16,19 @@ const baseTask: Task = {
   tags: ['frontend', 'storybook']
 };
 
+const TagPreview = ({ tags }: { tags: string[] }) => (
+  <div className="flex flex-wrap gap-2">
+    {tags.map((tag) => (
+      <span
+        key={tag}
+        className="inline-flex items-center rounded-full bg-[color:var(--color-accent)]/30 px-3 py-1 text-xs font-medium text-[color:var(--color-text)]"
+      >
+        {tag}
+      </span>
+    ))}
+  </div>
+);
+
 const meta = {
   title: 'Tasks/TaskCard',
   component: TaskCard,
@@ -31,7 +44,8 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     task: baseTask,
-    statusControls: undefined
+    statusControls: undefined,
+    tagContent: <TagPreview tags={baseTask.tags} />
   },
   play: async ({ canvasElement }: StoryContext<typeof TaskCard>) => {
     const canvas = within(canvasElement);
@@ -49,7 +63,8 @@ export const Completed: Story = {
       tags: ['backend'],
       updatedAt: '2025-10-25T09:30:00.000Z'
     },
-    statusControls: undefined
+    statusControls: undefined,
+    tagContent: <TagPreview tags={['backend']} />
   }
 };
 
@@ -62,6 +77,7 @@ export const NoTags: Story = {
       tags: [],
       description: ''
     },
-    statusControls: undefined
+    statusControls: undefined,
+    tagContent: <TagPreview tags={[]} />
   }
 };

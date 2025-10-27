@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getTasks } from '../../lib/api';
 import { TaskCard } from './_components/task-card';
 import { TaskStatusForm } from './_components/task-status-form';
+import { TaskTagEditor } from './_components/task-tag-editor';
 
 export const metadata = {
   title: 'Tasks (Next.js)',
@@ -39,6 +40,7 @@ export default async function TasksPage() {
                   key={task.id}
                   task={task}
                   statusControls={<TaskStatusForm taskId={task.id} currentStatus={task.status} />}
+                  tagContent={<TaskTagEditor taskId={task.id} initialTags={task.tags} />}
                 />
               ))}
             </div>

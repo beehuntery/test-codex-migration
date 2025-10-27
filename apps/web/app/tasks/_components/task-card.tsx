@@ -29,10 +29,12 @@ function formatTimestamp(value: string | null | undefined) {
 
 export function TaskCard({
   task,
-  statusControls
+  statusControls,
+  tagContent
 }: {
   task: Task;
   statusControls?: React.ReactNode;
+  tagContent?: React.ReactNode;
 }) {
   const dueDate = formatDate(task.dueDate);
   const updatedAt = formatTimestamp(task.updatedAt);
@@ -65,20 +67,22 @@ export function TaskCard({
       </dl>
 
       <footer className="flex flex-col gap-3">
-        <div className="flex flex-wrap gap-2">
-          {task.tags.length ? (
-            task.tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center rounded-full bg-[color:var(--color-accent)]/30 px-3 py-1 text-xs font-medium text-[color:var(--color-text)]"
-              >
-                {tag}
-              </span>
-            ))
-          ) : (
-            <span className="text-xs text-[color:var(--color-disabled)]">タグは未設定です</span>
-          )}
-        </div>
+        {tagContent ?? (
+          <div className="flex flex-wrap gap-2">
+            {task.tags.length ? (
+              task.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center rounded-full bg-[color:var(--color-accent)]/30 px-3 py-1 text-xs font-medium text-[color:var(--color-text)]"
+                >
+                  {tag}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-[color:var(--color-disabled)]">タグは未設定です</span>
+            )}
+          </div>
+        )}
         {statusControls ?? (
           <div className="rounded-lg border border-dashed border-[rgba(107,102,95,0.25)] px-3 py-2 text-xs text-[color:var(--color-disabled)]">
             ステータス更新フォームは Storybook では無効化されています。
