@@ -34,19 +34,24 @@ export function TaskCard({
   titleContent,
   descriptionContent,
   statusControls,
+  statusActions,
   tagContent
 }: {
   task: Task;
   titleContent?: React.ReactNode;
   descriptionContent?: React.ReactNode;
   statusControls?: React.ReactNode;
+  statusActions?: React.ReactNode;
   tagContent?: React.ReactNode;
 }) {
   const dueDate = formatDate(task.dueDate);
   const updatedAt = formatTimestamp(task.updatedAt);
 
   return (
-    <article className="flex flex-col gap-4 rounded-2xl border border-[rgba(107,102,95,0.16)] bg-white/90 p-6 shadow-sm">
+    <article
+      className="flex flex-col gap-4 rounded-2xl border border-[rgba(107,102,95,0.16)] bg-white/90 p-6 shadow-sm"
+      data-task-id={task.id}
+    >
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
           {titleContent ?? <TaskInlineEditor taskId={task.id} title={task.title} />}
@@ -97,6 +102,7 @@ export function TaskCard({
             ステータス更新フォームは Storybook では無効化されています。
           </div>
         )}
+        {statusActions ?? null}
       </footer>
     </article>
   );

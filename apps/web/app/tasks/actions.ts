@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { TaskStatusSchema } from '@shared/api';
+import { TaskStatusSchema, type TaskStatus } from '@shared/api';
 import {
   updateTaskStatusRequest,
   updateTaskTagsRequest,
@@ -78,5 +78,17 @@ export async function updateTaskDescriptionAction(taskId: string, description: s
     throw new Error(error instanceof Error ? error.message : '説明の更新に失敗しました。');
   }
 
+  revalidatePath('/tasks');
+}
+
+export async function setTaskStatusAction(taskId: string, status: TaskStatus) {
+  'use server';
+
+  const parsedStatus = TaskStatusSchema.parse(status);
+  try {
+    await updateTaskStatusRequest(taskId, parsedStatus);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'ステータスの更新に失敗しました。');
+  }
   revalidatePath('/tasks');
 }

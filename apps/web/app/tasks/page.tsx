@@ -6,6 +6,7 @@ import { TaskStatusForm } from './_components/task-status-form';
 import { TaskTagEditor } from './_components/task-tag-editor';
 import { TaskInlineEditor } from './_components/task-inline-editor';
 import { TaskDescriptionEditor } from './_components/task-description-editor';
+import { TaskStatusToggle } from './_components/task-status-toggle';
 
 export const metadata = {
   title: 'Tasks (Next.js)',
@@ -44,6 +45,7 @@ export default async function TasksPage() {
                   titleContent={<TaskInlineEditor taskId={task.id} title={task.title} />}
                   descriptionContent={<TaskDescriptionEditor taskId={task.id} description={task.description} />}
                   statusControls={<TaskStatusForm taskId={task.id} currentStatus={task.status} />}
+                  statusActions={<TaskStatusToggle taskId={task.id} status={task.status} />}
                   tagContent={<TaskTagEditor taskId={task.id} initialTags={task.tags} />}
                 />
               ))}

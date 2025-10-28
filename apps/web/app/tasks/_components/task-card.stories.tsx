@@ -50,6 +50,11 @@ export const Default: Story = {
       <p className="max-w-2xl text-sm leading-relaxed text-[color:var(--color-text-muted)]">{baseTask.description}</p>
     ),
     statusControls: undefined,
+    statusActions: (
+      <button type="button" className="btn-secondary text-xs" disabled>
+        ステータス変更ボタン（Storybookでは無効）
+      </button>
+    ),
     tagContent: <TagPreview tags={baseTask.tags} />
   },
   play: async ({ canvasElement }: StoryContext<typeof TaskCard>) => {
@@ -77,6 +82,11 @@ export const Completed: Story = {
       </p>
     ),
     statusControls: undefined,
+    statusActions: (
+      <button type="button" className="btn-secondary text-xs" disabled>
+        ステータス変更ボタン（Storybookでは無効）
+      </button>
+    ),
     tagContent: <TagPreview tags={['backend']} />
   }
 };
@@ -97,6 +107,11 @@ export const NoTags: Story = {
       <p className="text-sm text-[color:var(--color-disabled)]">説明はまだありません</p>
     ),
     statusControls: undefined,
+    statusActions: (
+      <button type="button" className="btn-secondary text-xs" disabled>
+        ステータス変更ボタン（Storybookでは無効）
+      </button>
+    ),
     tagContent: <TagPreview tags={[]} />
   }
 };
