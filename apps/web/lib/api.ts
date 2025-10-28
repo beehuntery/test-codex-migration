@@ -65,3 +65,16 @@ export async function updateTaskTagsRequest(taskId: string, tags: string[]): Pro
   }
   return parsedTask.data;
 }
+
+export async function updateTaskTitleRequest(taskId: string, title: string): Promise<Task> {
+  const payload = TaskUpdateInputSchema.pick({ title: true }).parse({ title });
+  const data = await fetchFromApi<unknown>(`/api/tasks/${taskId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  });
+  const parsedTask = TaskSchema.safeParse(data);
+  if (!parsedTask.success) {
+    throw new Error('Failed to parse title update response');
+  }
+  return parsedTask.data;
+}

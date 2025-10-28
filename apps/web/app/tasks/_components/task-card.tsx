@@ -1,6 +1,7 @@
 import React from 'react';
 import { type Task } from '@shared/api';
 import { StatusBadge } from './status-badge';
+import { TaskInlineEditor } from './task-inline-editor';
 
 function formatDate(value: string | null | undefined) {
   if (!value) {
@@ -43,7 +44,7 @@ export function TaskCard({
     <article className="flex flex-col gap-4 rounded-2xl border border-[rgba(107,102,95,0.16)] bg-white/90 p-6 shadow-sm">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <h3 className="text-xl font-semibold text-[color:var(--color-text)]">{task.title}</h3>
+          <TaskInlineEditor taskId={task.id} title={task.title} />
           {task.description ? (
             <p className="max-w-2xl text-sm leading-relaxed text-[color:var(--color-text-muted)]">{task.description}</p>
           ) : null}

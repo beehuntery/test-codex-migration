@@ -4,6 +4,7 @@ import { getTasks } from '../../lib/api';
 import { TaskCard } from './_components/task-card';
 import { TaskStatusForm } from './_components/task-status-form';
 import { TaskTagEditor } from './_components/task-tag-editor';
+import { TaskInlineEditor } from './_components/task-inline-editor';
 
 export const metadata = {
   title: 'Tasks (Next.js)',
