@@ -12,20 +12,29 @@ export function TaskTagEditor({ taskId, initialTags }: TaskTagEditorProps) {
   const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [optimisticTags, setOptimisticTags] = useOptimistic(initialTags, (_, next: string[]) => next);
+  const [stableTags, setStableTags] = useState(initialTags);
+  const [optimisticTags, updateOptimisticTags] = useOptimistic(stableTags, (_, next: string[]) => next);
 
   const resetInput = () => setInputValue('');
 
+  const syncOptimistic = (nextTags: string[]) => {
+    startTransition(() => {
+      updateOptimisticTags(nextTags);
+    });
+  };
+
   const commitTags = (nextTags: string[]) => {
-    setOptimisticTags(nextTags);
-    startTransition(async () => {
+    syncOptimistic(nextTags);
+    void (async () => {
       try {
         await updateTaskTagsAction(taskId, nextTags);
+        setStableTags(nextTags);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'タグの更新に失敗しました。');
+        syncOptimistic(stableTags);
       }
-    });
+    })();
   };
 
   const handleAddTag = (event: FormEvent<HTMLFormElement>) => {
@@ -34,7 +43,9 @@ export function TaskTagEditor({ taskId, initialTags }: TaskTagEditorProps) {
     if (!value) {
       return;
     }
-    if (optimisticTags.includes(value)) {
+    const exists = new Set(stableTags);
+    optimisticTags.forEach((tag) => exists.add(tag));
+    if (exists.has(value)) {
       setError('同じタグが既に存在します。');
       return;
     }

@@ -20,7 +20,8 @@ const config: StorybookConfig = {
           '@shared/*': path.resolve(__dirname, '../../../src/shared/*'),
           '@app': path.resolve(__dirname, '../app'),
           '@styles': path.resolve(__dirname, '../styles'),
-          'server-only': path.resolve(__dirname, './mocks/server-only.ts')
+          'server-only': path.resolve(__dirname, './mocks/server-only.ts'),
+          'next/cache': path.resolve(__dirname, './mocks/next-cache.ts')
         }
       }
     });
