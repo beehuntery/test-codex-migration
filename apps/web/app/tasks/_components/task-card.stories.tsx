@@ -55,6 +55,7 @@ export const Default: Story = {
         ステータス変更ボタン（Storybookでは無効）
       </button>
     ),
+    dueDateContent: <dd>2025/11/10</dd>,
     tagContent: <TagPreview tags={baseTask.tags} />
   },
   play: async ({ canvasElement }: StoryContext<typeof TaskCard>) => {
@@ -87,6 +88,7 @@ export const Completed: Story = {
         ステータス変更ボタン（Storybookでは無効）
       </button>
     ),
+    dueDateContent: <dd>2025/10/25</dd>,
     tagContent: <TagPreview tags={['backend']} />
   }
 };
@@ -112,6 +114,7 @@ export const NoTags: Story = {
         ステータス変更ボタン（Storybookでは無効）
       </button>
     ),
+    dueDateContent: <dd>期限なし</dd>,
     tagContent: <TagPreview tags={[]} />
   }
 };

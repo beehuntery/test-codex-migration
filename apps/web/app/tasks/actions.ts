@@ -6,7 +6,8 @@ import {
   updateTaskStatusRequest,
   updateTaskTagsRequest,
   updateTaskTitleRequest,
-  updateTaskDescriptionRequest
+  updateTaskDescriptionRequest,
+  updateTaskDueDateRequest
 } from '../../lib/api';
 
 export async function updateTaskStatusAction(formData: FormData) {
@@ -90,5 +91,20 @@ export async function setTaskStatusAction(taskId: string, status: TaskStatus) {
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'ステータスの更新に失敗しました。');
   }
+  revalidatePath('/tasks');
+}
+
+export async function updateTaskDueDateAction(taskId: string, dueDate: string | null) {
+  'use server';
+
+  const normalized = dueDate ? dueDate.trim() : null;
+  const parsed = normalized && normalized.length > 0 ? normalized : null;
+
+  try {
+    await updateTaskDueDateRequest(taskId, parsed);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : '期限の更新に失敗しました。');
+  }
+
   revalidatePath('/tasks');
 }

@@ -91,3 +91,16 @@ export async function updateTaskDescriptionRequest(taskId: string, description: 
   }
   return parsedTask.data;
 }
+
+export async function updateTaskDueDateRequest(taskId: string, dueDate: string | null): Promise<Task> {
+  const payload = TaskUpdateInputSchema.pick({ dueDate: true }).parse({ dueDate });
+  const data = await fetchFromApi<unknown>(`/api/tasks/${taskId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  });
+  const parsedTask = TaskSchema.safeParse(data);
+  if (!parsedTask.success) {
+    throw new Error('Failed to parse due date update response');
+  }
+  return parsedTask.data;
+}

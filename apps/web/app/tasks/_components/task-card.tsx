@@ -35,6 +35,7 @@ export function TaskCard({
   descriptionContent,
   statusControls,
   statusActions,
+  dueDateContent,
   tagContent
 }: {
   task: Task;
@@ -42,6 +43,7 @@ export function TaskCard({
   descriptionContent?: React.ReactNode;
   statusControls?: React.ReactNode;
   statusActions?: React.ReactNode;
+  dueDateContent?: React.ReactNode;
   tagContent?: React.ReactNode;
 }) {
   const dueDate = formatDate(task.dueDate);
@@ -68,7 +70,7 @@ export function TaskCard({
       <dl className="grid gap-3 text-sm text-[color:var(--color-text-muted)] md:grid-cols-3">
         <div>
           <dt className="font-semibold text-[color:var(--color-text)]">期限</dt>
-          <dd>{dueDate ?? '期限なし'}</dd>
+          {dueDateContent ?? <dd>{dueDate ?? '期限なし'}</dd>}
         </div>
         <div>
           <dt className="font-semibold text-[color:var(--color-text)]">作成日</dt>
