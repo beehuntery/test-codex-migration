@@ -1,3 +1,4 @@
+import React from 'react';
 import { type TaskStatus } from '@shared/api';
 
 export const STATUS_LABELS: Record<TaskStatus, string> = {

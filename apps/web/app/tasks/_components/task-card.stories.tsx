@@ -1,8 +1,9 @@
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { TaskCard } from './task-card';
-import type { Task } from '@shared/api';
-import { within } from '@storybook/test';
 import type { StoryContext } from '@storybook/react';
+import { within } from '@storybook/test';
+import type { Task } from '@shared/api';
+import { TaskCard } from './task-card';
 
 const baseTask: Task = {
   id: 'task-1',
