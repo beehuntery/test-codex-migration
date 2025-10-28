@@ -61,4 +61,4 @@
 - **2025-10-27**: Next.js スケルトン（`apps/web`）を追加し、Tailwind CSS v4 とデザイントークンを統合。`/tasks` ページで既存 API からサーバーサイドレンダリングする下地を構築。`TaskCard` や `StatusBadge` などの再利用可能な UI コンポーネントを作成し、タスク一覧を Next.js 上で読み取り専用表示できるようにした。
 - **2025-10-28**: Server Actions を介したステータス更新フォームを Next.js 側に追加し、Storybook (Vite Builder) を導入。`TaskCard` のストーリーを作成して UI ドキュメント化を開始。
 - **2025-10-29**: Storybook を v9 系へ更新（`storybook` / `@storybook/*` パッケージを ^9.0.0 へ揃え）し、アップグレード時の Alias/スタブ設定を確認。
-- **2025-10-30**: タグ更新・タイトル編集の Server Action と楽観的 UI を追加。Storybook に TaskCard の MDX ドキュメントページを作成し、コンポーネント単位のドキュメント性を向上。
+- **2025-10-30**: タグ更新・タイトル/説明編集の Server Action と楽観的 UI を追加。Storybook に TaskCard の MDX ドキュメントページを作成し、コンポーネント単位のドキュメント性を向上。

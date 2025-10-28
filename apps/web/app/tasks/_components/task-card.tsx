@@ -2,6 +2,7 @@ import React from 'react';
 import { type Task } from '@shared/api';
 import { StatusBadge } from './status-badge';
 import { TaskInlineEditor } from './task-inline-editor';
+import { TaskDescriptionEditor } from './task-description-editor';
 
 function formatDate(value: string | null | undefined) {
   if (!value) {
@@ -30,10 +31,14 @@ function formatTimestamp(value: string | null | undefined) {
 
 export function TaskCard({
   task,
+  titleContent,
+  descriptionContent,
   statusControls,
   tagContent
 }: {
   task: Task;
+  titleContent?: React.ReactNode;
+  descriptionContent?: React.ReactNode;
   statusControls?: React.ReactNode;
   tagContent?: React.ReactNode;
 }) {
@@ -44,10 +49,13 @@ export function TaskCard({
     <article className="flex flex-col gap-4 rounded-2xl border border-[rgba(107,102,95,0.16)] bg-white/90 p-6 shadow-sm">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <TaskInlineEditor taskId={task.id} title={task.title} />
-          {task.description ? (
-            <p className="max-w-2xl text-sm leading-relaxed text-[color:var(--color-text-muted)]">{task.description}</p>
-          ) : null}
+          {titleContent ?? <TaskInlineEditor taskId={task.id} title={task.title} />}
+          {descriptionContent ??
+            (task.description ? (
+              <p className="max-w-2xl text-sm leading-relaxed text-[color:var(--color-text-muted)]">{task.description}</p>
+            ) : (
+              <p className="text-sm text-[color:var(--color-disabled)]">説明はまだありません</p>
+            ))}
         </div>
         <StatusBadge status={task.status} />
       </header>

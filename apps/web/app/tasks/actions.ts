@@ -2,7 +2,12 @@
 
 import { revalidatePath } from 'next/cache';
 import { TaskStatusSchema } from '@shared/api';
-import { updateTaskStatusRequest, updateTaskTagsRequest, updateTaskTitleRequest } from '../../lib/api';
+import {
+  updateTaskStatusRequest,
+  updateTaskTagsRequest,
+  updateTaskTitleRequest,
+  updateTaskDescriptionRequest
+} from '../../lib/api';
 
 export async function updateTaskStatusAction(formData: FormData) {
   const idValue = formData.get('taskId');
@@ -57,6 +62,20 @@ export async function updateTaskTitleAction(taskId: string, title: string) {
     await updateTaskTitleRequest(taskId, trimmed);
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'タイトルの更新に失敗しました。');
+  }
+
+  revalidatePath('/tasks');
+}
+
+export async function updateTaskDescriptionAction(taskId: string, description: string) {
+  'use server';
+
+  const normalized = description.trim();
+
+  try {
+    await updateTaskDescriptionRequest(taskId, normalized);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : '説明の更新に失敗しました。');
   }
 
   revalidatePath('/tasks');

@@ -45,6 +45,10 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     task: baseTask,
+    titleContent: <h3 className="text-xl font-semibold text-[color:var(--color-text)]">{baseTask.title}</h3>,
+    descriptionContent: (
+      <p className="max-w-2xl text-sm leading-relaxed text-[color:var(--color-text-muted)]">{baseTask.description}</p>
+    ),
     statusControls: undefined,
     tagContent: <TagPreview tags={baseTask.tags} />
   },
@@ -64,6 +68,14 @@ export const Completed: Story = {
       tags: ['backend'],
       updatedAt: '2025-10-25T09:30:00.000Z'
     },
+    titleContent: (
+      <h3 className="text-xl font-semibold text-[color:var(--color-text)]">バックエンド移行の完了</h3>
+    ),
+    descriptionContent: (
+      <p className="max-w-2xl text-sm leading-relaxed text-[color:var(--color-text-muted)]">
+        完了したタスクのフォローアップ内容を示す説明文です。
+      </p>
+    ),
     statusControls: undefined,
     tagContent: <TagPreview tags={['backend']} />
   }
@@ -78,6 +90,12 @@ export const NoTags: Story = {
       tags: [],
       description: ''
     },
+    titleContent: (
+      <h3 className="text-xl font-semibold text-[color:var(--color-text)]">タグ未設定のタスク例</h3>
+    ),
+    descriptionContent: (
+      <p className="text-sm text-[color:var(--color-disabled)]">説明はまだありません</p>
+    ),
     statusControls: undefined,
     tagContent: <TagPreview tags={[]} />
   }

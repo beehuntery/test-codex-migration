@@ -78,3 +78,16 @@ export async function updateTaskTitleRequest(taskId: string, title: string): Pro
   }
   return parsedTask.data;
 }
+
+export async function updateTaskDescriptionRequest(taskId: string, description: string): Promise<Task> {
+  const payload = TaskUpdateInputSchema.pick({ description: true }).parse({ description });
+  const data = await fetchFromApi<unknown>(`/api/tasks/${taskId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  });
+  const parsedTask = TaskSchema.safeParse(data);
+  if (!parsedTask.success) {
+    throw new Error('Failed to parse description update response');
+  }
+  return parsedTask.data;
+}
