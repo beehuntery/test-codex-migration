@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { type Task } from '@shared/api';
 import { StatusBadge } from './status-badge';
@@ -36,7 +38,8 @@ export function TaskCard({
   statusControls,
   statusActions,
   dueDateContent,
-  tagContent
+  tagContent,
+  deleteAction
 }: {
   task: Task;
   titleContent?: React.ReactNode;
@@ -45,15 +48,13 @@ export function TaskCard({
   statusActions?: React.ReactNode;
   dueDateContent?: React.ReactNode;
   tagContent?: React.ReactNode;
+  deleteAction?: React.ReactNode;
 }) {
   const dueDate = formatDate(task.dueDate);
   const updatedAt = formatTimestamp(task.updatedAt);
 
   return (
-    <article
-      className="flex flex-col gap-4 rounded-2xl border border-[rgba(107,102,95,0.16)] bg-white/90 p-6 shadow-sm"
-      data-task-id={task.id}
-    >
+    <article className="flex flex-col gap-4 rounded-2xl border border-[rgba(107,102,95,0.16)] bg-white/90 p-6 shadow-sm">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
           {titleContent ?? <TaskInlineEditor taskId={task.id} title={task.title} />}
@@ -105,6 +106,7 @@ export function TaskCard({
           </div>
         )}
         {statusActions ?? null}
+        {deleteAction ? <div className="flex justify-end">{deleteAction}</div> : null}
       </footer>
     </article>
   );

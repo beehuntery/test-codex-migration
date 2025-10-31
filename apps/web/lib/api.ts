@@ -4,9 +4,12 @@ import {
   TaskListSchema,
   TaskSchema,
   TaskStatusSchema,
+  TaskCreateInputSchema,
   TaskUpdateInputSchema,
   type Task,
-  type TaskStatus
+  type TaskStatus,
+  type TaskCreateInput,
+  TagListSchema
 } from '@shared/api';
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
@@ -38,6 +41,28 @@ export async function getTasks(): Promise<Task[]> {
     throw new Error('Failed to parse tasks response');
   }
   return parsed.data;
+}
+
+export async function getTags(): Promise<string[]> {
+  const data = await fetchFromApi<unknown>('/api/tags');
+  const parsed = TagListSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error('Failed to parse tags response');
+  }
+  return parsed.data;
+}
+
+export async function createTaskRequest(input: TaskCreateInput): Promise<Task> {
+  const payload = TaskCreateInputSchema.parse(input);
+  const data = await fetchFromApi<unknown>('/api/tasks', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  const parsedTask = TaskSchema.safeParse(data);
+  if (!parsedTask.success) {
+    throw new Error('Failed to parse create task response');
+  }
+  return parsedTask.data;
 }
 
 export async function updateTaskStatusRequest(taskId: string, status: TaskStatus): Promise<Task> {
@@ -102,5 +127,36 @@ export async function updateTaskDueDateRequest(taskId: string, dueDate: string |
   if (!parsedTask.success) {
     throw new Error('Failed to parse due date update response');
   }
+  return parsedTask.data;
+}
+
+export async function reorderTasksRequest(order: string[]): Promise<Task[]> {
+  if (!Array.isArray(order) || order.length === 0) {
+    return getTasks();
+  }
+
+  const data = await fetchFromApi<unknown>('/api/tasks/reorder', {
+    method: 'PATCH',
+    body: JSON.stringify({ order })
+  });
+
+  const parsed = TaskListSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error('Failed to parse task reorder response');
+  }
+
+  return parsed.data;
+}
+
+export async function deleteTaskRequest(taskId: string): Promise<Task> {
+  const data = await fetchFromApi<unknown>(`/api/tasks/${taskId}`, {
+    method: 'DELETE'
+  });
+
+  const parsedTask = TaskSchema.safeParse(data);
+  if (!parsedTask.success) {
+    throw new Error('Failed to parse delete task response');
+  }
+
   return parsedTask.data;
 }

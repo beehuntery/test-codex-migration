@@ -5,30 +5,37 @@ const BASE_URL = `http://localhost:${NEXT_PORT}`;
 
 import type { Page } from '@playwright/test';
 
-async function seedTask(page: Page) {
-  const response = await page.request.post('http://localhost:3000/api/tasks', {
-    data: {
-      title: 'Playwright Due Date Task',
-      description: 'Due date editing via UI test',
-      tags: ['playwright-test']
-    }
-  });
-  const payload = await response.json();
-  if (!response.ok()) {
-    throw new Error(`Failed to seed task: ${payload.error ?? response.status()}`);
-  }
-  return payload.id as string;
+async function createTaskViaUI(
+  page: Page,
+  { title, description, tags }: { title: string; description?: string; tags?: string }
+) {
+  const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'タスクを追加' }) }).first();
+  await form.getByLabel('タイトル').fill(title);
+  await form.getByLabel('説明').fill(description ?? '');
+  const dueInput = form.getByLabel('期限');
+  await dueInput.fill('');
+  await form.getByPlaceholder('カンマ区切りで入力').fill(tags ?? '');
+  await form.getByRole('button', { name: 'タスクを追加' }).click();
+  const card = page
+    .getByRole('listitem')
+    .filter({ has: page.getByText(title, { exact: true }) })
+    .first();
+  await expect(card).toBeVisible();
+  return card;
 }
 
 test.describe('Task due date editor', () => {
   test('updates due date from empty to a specific date', async ({ page }) => {
-    const taskId = await seedTask(page);
+    const taskTitle = `Playwright Due Date Task ${Date.now()}`;
 
     await page.goto(`${BASE_URL}/tasks`);
-    const card = page.locator(`[data-task-id="${taskId}"]`);
-    await expect(card).toBeVisible();
-
-    const dateInput = card.locator('input[type="date"]');
+    await page.waitForLoadState('networkidle');
+    const card = await createTaskViaUI(page, {
+      title: taskTitle,
+      description: 'Due date editing via UI test',
+      tags: 'playwright-test'
+    });
+    const dateInput = card.locator('input[type="date"]').first();
     await dateInput.fill('2026-01-15');
     await dateInput.blur();
 

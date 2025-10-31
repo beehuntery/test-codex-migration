@@ -1,5 +1,6 @@
 import { Meta, Canvas, Story, Controls } from '@storybook/blocks';
 import * as TaskCardStories from './_components/task-card.stories';
+import * as TaskDeleteButtonStories from './_components/task-delete-button.stories';
 
 <Meta of={TaskCardStories} title="Tasks/Documentation" />
 
@@ -24,3 +25,17 @@ import * as TaskCardStories from './_components/task-card.stories';
 - Tailwind トークンによるスタイリングとデザイントークンの適用状況
 - タグがない場合のプレースホルダーテキスト
 - Server Action を利用できない環境でもレンダリングが崩れないか
+
+## TaskDeleteButton コンポーネント
+
+タスク削除操作を行うためのクライアントコンポーネントです。確認ダイアログを内包しており、Server Action を通じて削除リクエストを発行します。
+
+<Canvas>
+  <Story of={TaskDeleteButtonStories.Default} name="Default" />
+</Canvas>
+
+「削除」ボタンを押せば、確認ダイアログを表示してフローを理解できます。
+
+<Canvas>
+  <Story of={TaskDeleteButtonStories.WithConfirmation} name="Confirm Flow" />
+</Canvas>

@@ -1,19 +1,19 @@
-import type { Metadata } from 'next';
 import './globals.css';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Task Manager Next',
-  description: 'Next.js migration of the task manager application.'
+  title: 'Task Migration Sandbox',
+  description: 'React + Next.js migration playground'
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="ja">
-      <body className="bg-surface text-body">
-        <main className="min-h-screen">
-          {children}
-        </main>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

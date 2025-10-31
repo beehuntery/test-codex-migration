@@ -1,6 +1,6 @@
 'use client';
 
-import React, { FormEvent, useState, useTransition, useOptimistic } from 'react';
+import React, { FormEvent, startTransition as startOptimisticTransition, useEffect, useOptimistic, useState } from 'react';
 import { updateTaskTagsAction } from '../actions';
 
 interface TaskTagEditorProps {
@@ -11,30 +11,41 @@ interface TaskTagEditorProps {
 export function TaskTagEditor({ taskId, initialTags }: TaskTagEditorProps) {
   const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
   const [stableTags, setStableTags] = useState(initialTags);
-  const [optimisticTags, updateOptimisticTags] = useOptimistic(stableTags, (_, next: string[]) => next);
+  const [optimisticTags, dispatchOptimisticTags] = useOptimistic(
+    stableTags,
+    (_, action: { type: 'replace'; tags: string[] }) => action.tags
+  );
 
   const resetInput = () => setInputValue('');
 
+  useEffect(() => {
+    setStableTags(initialTags);
+    startOptimisticTransition(() => {
+      dispatchOptimisticTags({ type: 'replace', tags: initialTags });
+    });
+  }, [initialTags, dispatchOptimisticTags]);
+
   const syncOptimistic = (nextTags: string[]) => {
-    startTransition(() => {
-      updateOptimisticTags(nextTags);
+    startOptimisticTransition(() => {
+      dispatchOptimisticTags({ type: 'replace', tags: nextTags });
     });
   };
 
-  const commitTags = (nextTags: string[]) => {
+  const commitTags = async (nextTags: string[]) => {
     syncOptimistic(nextTags);
-    void (async () => {
-      try {
-        await updateTaskTagsAction(taskId, nextTags);
-        setStableTags(nextTags);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'タグの更新に失敗しました。');
-        syncOptimistic(stableTags);
-      }
-    })();
+    setIsPending(true);
+    try {
+      await updateTaskTagsAction(taskId, nextTags);
+      setStableTags(nextTags);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'タグの更新に失敗しました。');
+      syncOptimistic(stableTags);
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const handleAddTag = (event: FormEvent<HTMLFormElement>) => {
@@ -50,13 +61,13 @@ export function TaskTagEditor({ taskId, initialTags }: TaskTagEditorProps) {
       return;
     }
     setError(null);
-    commitTags([...optimisticTags, value]);
+    void commitTags([...optimisticTags, value]);
     resetInput();
   };
 
   const handleRemoveTag = (tag: string) => {
     setError(null);
-    commitTags(optimisticTags.filter((item) => item !== tag));
+    void commitTags(optimisticTags.filter((item) => item !== tag));
   };
 
   return (

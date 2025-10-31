@@ -3,11 +3,14 @@
 import { revalidatePath } from 'next/cache';
 import { TaskStatusSchema, type TaskStatus } from '@shared/api';
 import {
+  createTaskRequest,
   updateTaskStatusRequest,
   updateTaskTagsRequest,
   updateTaskTitleRequest,
   updateTaskDescriptionRequest,
-  updateTaskDueDateRequest
+  updateTaskDueDateRequest,
+  reorderTasksRequest,
+  deleteTaskRequest
 } from '../../lib/api';
 
 export async function updateTaskStatusAction(formData: FormData) {
@@ -107,4 +110,75 @@ export async function updateTaskDueDateAction(taskId: string, dueDate: string | 
   }
 
   revalidatePath('/tasks');
+}
+
+export async function createTaskAction(formData: FormData) {
+  const title = (formData.get('title') ?? '').toString().trim();
+  const description = (formData.get('description') ?? '').toString().trim();
+  const dueDateRaw = (formData.get('dueDate') ?? '').toString().trim();
+  const tagsRaw = (formData.get('tags') ?? '').toString().trim();
+
+  if (!title) {
+    return { error: 'タイトルは必須です。' };
+  }
+
+  const tags = tagsRaw
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter((tag, index, array) => tag.length > 0 && array.indexOf(tag) === index);
+
+  try {
+    await createTaskRequest({
+      title,
+      description,
+      status: 'todo',
+      dueDate: dueDateRaw ? dueDateRaw : null,
+      tags
+    });
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'タスクの作成に失敗しました。'
+    };
+  }
+
+  revalidatePath('/tasks');
+  return { success: true };
+}
+
+export async function reorderTasksAction(order: string[]) {
+  'use server';
+
+  if (!Array.isArray(order) || order.length === 0) {
+    return { error: 'タスクの順序が空です。' };
+  }
+
+  try {
+    await reorderTasksRequest(order);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'タスクの並び替えに失敗しました。'
+    };
+  }
+
+  revalidatePath('/tasks');
+  return { success: true };
+}
+
+export async function deleteTaskAction(taskId: string) {
+  'use server';
+
+  if (typeof taskId !== 'string' || !taskId.trim()) {
+    return { error: 'タスク ID が無効です。' };
+  }
+
+  try {
+    await deleteTaskRequest(taskId);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'タスクの削除に失敗しました。'
+    };
+  }
+
+  revalidatePath('/tasks');
+  return { success: true };
 }

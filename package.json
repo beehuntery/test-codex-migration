@@ -2,6 +2,10 @@
   "name": "test-codex",
   "version": "1.0.0",
   "description": "",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
   "main": "server.js",
   "scripts": {
     "prepare": "npm run prisma:generate",
@@ -19,9 +23,11 @@
     "pretest": "npm run prisma:generate",
     "test": "vitest run --reporter verbose",
     "test:e2e": "npm run build && playwright test",
-    "web:dev": "npm run dev --prefix apps/web",
-    "web:build": "npm run build --prefix apps/web",
-    "web:start": "npm run start --prefix apps/web"
+    "playwright:e2e": "playwright test tests/e2e --workers=1",
+    "web:dev": "npm --workspace @test-codex/web run dev",
+    "web:build": "npm --workspace @test-codex/web run build",
+    "web:start": "npm --workspace @test-codex/web run start",
+    "web:storybook": "npm --workspace @test-codex/web run storybook"
   },
   "keywords": [],
   "author": "",

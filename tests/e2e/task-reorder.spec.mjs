@@ -156,11 +156,11 @@ test.describe('タスクボードのドラッグ＆ドロップ', () => {
     await expect(taskTitles.nth(0)).toHaveText('Alpha');
     await expect(taskTitles.nth(1)).toHaveText('Bravo');
 
-    const taskCards = page.locator('.task');
-    await taskCards.nth(1).dragTo(taskCards.nth(0), {
-      sourcePosition: { x: 10, y: 10 },
-      targetPosition: { x: 10, y: 10 }
+    await page.dragAndDrop('.task:nth-of-type(2)', '.task:nth-of-type(1)', {
+      sourcePosition: { x: 20, y: 20 },
+      targetPosition: { x: 20, y: 20 }
     });
+    await page.waitForTimeout(300);
 
     await expect(taskTitles.nth(0)).toHaveText('Bravo');
     await expect(taskTitles.nth(1)).toHaveText('Alpha');

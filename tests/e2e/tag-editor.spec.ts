@@ -1,10 +1,11 @@
+import type { Page } from '@playwright/test';
 import { test, expect } from '@playwright/test';
 
 const NEXT_PORT = process.env.NEXT_PORT || '3001';
 const BASE_URL = `http://localhost:${NEXT_PORT}`;
 
 async function createTaskViaUI(
-  page,
+  page: Page,
   { title, description, tags }: { title: string; description?: string; tags?: string }
 ) {
   const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'タスクを追加' }) }).first();
@@ -22,23 +23,30 @@ async function createTaskViaUI(
   return card;
 }
 
-test.describe('Task status toggle', () => {
-  test('updates status through toggle button', async ({ page }) => {
-    await page.goto(`${BASE_URL}/tasks`);
-    await page.waitForLoadState('networkidle');
-    const taskTitle = `Playwright Toggle Task ${Date.now()}`;
-    const card = await createTaskViaUI(page, {
-      title: taskTitle,
-      description: 'Status toggle via UI test',
-      tags: 'playwright-test'
+test.describe('Task tag editor', () => {
+  test('removes a tag without throwing console errors', async ({ page }) => {
+    const consoleErrors: string[] = [];
+
+    page.on('console', (message) => {
+      if (message.type() === 'error') {
+        consoleErrors.push(message.text());
+      }
     });
 
-    const toggleButton = card.getByRole('button', { name: /次の状態へ/i }).first();
-    await expect(toggleButton).toBeVisible();
-    await toggleButton.click();
-    await expect(toggleButton).toHaveText(/進行中/);
+    await page.goto(`${BASE_URL}/tasks`);
+    await page.waitForLoadState('networkidle');
+    const title = `Playwright Tag Editor Task ${Date.now()}`;
+    const card = await createTaskViaUI(page, {
+      title,
+      description: 'Exercise tag editor optimistic updates',
+      tags: 'frontend,optimistic'
+    });
 
-    await toggleButton.click();
-    await expect(toggleButton).toHaveText(/完了/);
+    const removeButton = card.getByRole('button', { name: 'frontend を削除' });
+    await removeButton.click();
+
+    await expect(card.getByText('frontend')).toHaveCount(0);
+
+    expect(consoleErrors).toEqual([]);
   });
 });

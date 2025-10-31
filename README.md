@@ -13,7 +13,7 @@
 | データストア | JSON ファイル (`data/tasks.json`, `data/tags.json`) / SQLite (`dev.db`) | 既定では JSON 永続化。`DATA_STORE=prisma` で Prisma + SQLite にスイッチ可能、移行ユーティリティを同梱 |
 | 開発ツール | Nodemon / ts-node / TypeScript Compiler | `npm run dev` / `npm run build` 実行時のホットリロードとトランスパイル |
 
-## 開発環境での起動手順
+## 開発環境での起動手順（Express + Vanilla UI）
 
 1. 依存関係をインストールします。
  ```bash
@@ -31,6 +31,41 @@
 4. ブラウザで `http://localhost:3000` を開き、アプリにアクセスします。
 
 > メモ: JSON ファイルにデータが保存されます。リポジトリにコミットしたくない場合は `.gitignore` で除外してください。
+
+## フェーズ3: Next.js プレビュー UI を試す
+
+Next.js 版のフロントエンド（フェーズ3）は既存 Express API と並行で動作します。以下の 2 プロセスを起動してください。
+
+```bash
+npm run start                       # Express API (http://localhost:3000)
+NEXT_PORT=3001 npm run web:dev      # Next.js App Router (http://localhost:3001)
+```
+
+ブラウザで `http://localhost:3001/tasks` を開くと、新しい UI を確認できます。タグ／ステータスのフィルター、Alt + ↑/↓ での並び替え、削除ボタンなどフェーズ3で移植した機能が含まれています。
+
+### Storybook でコンポーネントを確認
+
+```bash
+npm run web:storybook
+```
+
+Storybook では `Tasks/TaskCard` や `Tasks/TaskDeleteButton` のドキュメントを参照できます。削除ボタンのストーリーでは確認ダイアログまでの流れを再現しています。
+
+## Playwright E2E テスト
+
+フェーズ3で追加した Next.js UI を自動テストする Playwright スイートがあります。実行前に上記 2 プロセスを起動したうえで、以下のように実行してください。
+
+```bash
+npm run playwright:e2e
+# 例: 削除シナリオのみ実行
+npx playwright test tests/e2e/delete-task.spec.ts
+```
+
+`--workers=1` を付けるとテストが直列実行され、デバッグが容易です。失敗時のスクリーンショットやログは `test-results/` に出力されます。
+
+### GitHub Actions での自動実行
+
+`.github/workflows/playwright.yml` では、`main` ブランチへの push / PR 時に Playwright E2E を自動実行します。ローカルで追加した `playwright.config.ts` の `webServer` 設定により、Express と Next.js の両方が起動した状態でテストが走ります。
 
 ## Prisma / SQLite ワークフロー（任意）
 
