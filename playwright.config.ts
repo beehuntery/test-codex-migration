@@ -20,10 +20,10 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'npx ts-node --transpile-only src/server/index.ts',
+      command: 'npm run dev:ts',
       port: 3000,
       reuseExistingServer: reuseServer,
-      timeout: 60_000
+      timeout: 120_000
     },
     {
       command: 'PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run dev --prefix apps/web',

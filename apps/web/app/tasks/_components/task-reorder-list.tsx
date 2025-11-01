@@ -11,6 +11,7 @@ import { TaskStatusToggle } from './task-status-toggle';
 import { TaskDueDateEditor } from './task-due-date-editor';
 import { TaskTagEditor } from './task-tag-editor';
 import { TaskDeleteButton } from './task-delete-button';
+import { subscribeTaskCompleted } from '../_lib/task-events';
 
 interface TaskReorderListProps {
   tasks: Task[];
@@ -59,6 +60,8 @@ export function TaskReorderList({ tasks }: TaskReorderListProps) {
   const [isPending, startTransition] = useTransition();
   const [focusAfterOrder, setFocusAfterOrder] = useState<string | null>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const celebrationTimersRef = useRef<Map<string, number>>(new Map());
+  const [celebratingIds, setCelebratingIds] = useState<Set<string>>(new Set());
   const focusedTask = useMemo(() => orderedTasks.find((task) => task.id === focusedTaskId) ?? null, [focusedTaskId, orderedTasks]);
 
   const signature = useMemo(() => tasks.map((task) => `${task.id}:${task.updatedAt ?? ''}`).join('|'), [tasks]);
@@ -84,6 +87,37 @@ export function TaskReorderList({ tasks }: TaskReorderListProps) {
     }
     setFocusAfterOrder(null);
   }, [focusAfterOrder]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeTaskCompleted((taskId) => {
+      setCelebratingIds((current) => {
+        const next = new Set(current);
+        next.add(taskId);
+        return next;
+      });
+      const existingTimer = celebrationTimersRef.current.get(taskId);
+      if (existingTimer) {
+        window.clearTimeout(existingTimer);
+      }
+      const timer = window.setTimeout(() => {
+        setCelebratingIds((current) => {
+          if (!current.has(taskId)) {
+            return current;
+          }
+          const next = new Set(current);
+          next.delete(taskId);
+          return next;
+        });
+        celebrationTimersRef.current.delete(taskId);
+      }, 1600);
+      celebrationTimersRef.current.set(taskId, timer);
+    });
+    return () => {
+      unsubscribe();
+      celebrationTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+      celebrationTimersRef.current.clear();
+    };
+  }, []);
 
   const applyOrder = (nextOrder: Task[], persist: boolean) => {
     setOrderedTasks(nextOrder);
@@ -167,6 +201,7 @@ export function TaskReorderList({ tasks }: TaskReorderListProps) {
         {orderedTasks.map((task) => {
         const isDragging = draggingId === task.id;
         const isFocused = focusedTaskId === task.id;
+        const isCelebrating = celebratingIds.has(task.id);
         return (
           <div
             key={task.id}
@@ -198,7 +233,7 @@ export function TaskReorderList({ tasks }: TaskReorderListProps) {
               isDragging ? 'cursor-grabbing opacity-80 ring-2 ring-[color:var(--color-primary)]' : ''
             } ${isFocused ? 'ring-2 ring-[color:var(--color-accent)] shadow-lg outline-none' : ''} ${
               isPending ? 'opacity-80' : ''
-            } focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)]/80`}
+            } ${isCelebrating ? 'animate-pulse ring-4 ring-[color:var(--color-success)]/70 bg-[color:var(--color-success)]/10' : ''} focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)]/80`}
             aria-grabbed={isDragging}
             role="listitem"
             tabIndex={0}

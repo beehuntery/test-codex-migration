@@ -2,6 +2,7 @@
 
 import React, { useOptimistic, useState, useTransition } from 'react';
 import { updateTaskTitleAction } from '../actions';
+import { useTaskNotifications } from './task-notification-provider';
 
 interface TaskInlineEditorProps {
   taskId: string;
@@ -14,6 +15,7 @@ export function TaskInlineEditor({ taskId, title, disabled = false }: TaskInline
   const [error, setError] = useState<string | null>(null);
   const [optimisticTitle, setOptimisticTitle] = useOptimistic(title, (_, next: string) => next);
   const [inputValue, setInputValue] = useState(title);
+  const { notify } = useTaskNotifications();
 
   const commitTitle = (nextTitle: string) => {
     setOptimisticTitle(nextTitle);
@@ -21,11 +23,22 @@ export function TaskInlineEditor({ taskId, title, disabled = false }: TaskInline
       try {
         await updateTaskTitleAction(taskId, nextTitle);
         setError(null);
+        const preview = nextTitle.length > 40 ? `${nextTitle.slice(0, 37)}…` : nextTitle;
+        notify({
+          type: 'success',
+          title: 'タイトルを更新しました',
+          description: preview
+        });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'タイトルの更新に失敗しました。';
         setError(message);
         setOptimisticTitle(title);
         setInputValue(title);
+        notify({
+          type: 'error',
+          title: 'タイトルの更新に失敗しました',
+          description: message
+        });
       }
     });
   };

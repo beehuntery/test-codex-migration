@@ -1,7 +1,14 @@
 'use client';
 
-import React, { FormEvent, startTransition as startOptimisticTransition, useEffect, useOptimistic, useState } from 'react';
+import React, {
+  FormEvent,
+  startTransition as startOptimisticTransition,
+  useEffect,
+  useOptimistic,
+  useState
+} from 'react';
 import { updateTaskTagsAction } from '../actions';
+import { useTaskNotifications } from './task-notification-provider';
 
 interface TaskTagEditorProps {
   taskId: string;
@@ -17,6 +24,7 @@ export function TaskTagEditor({ taskId, initialTags }: TaskTagEditorProps) {
     stableTags,
     (_, action: { type: 'replace'; tags: string[] }) => action.tags
   );
+  const { notify } = useTaskNotifications();
 
   const resetInput = () => setInputValue('');
 
@@ -40,9 +48,19 @@ export function TaskTagEditor({ taskId, initialTags }: TaskTagEditorProps) {
       await updateTaskTagsAction(taskId, nextTags);
       setStableTags(nextTags);
       setError(null);
+      notify({
+        type: 'success',
+        title: 'タグを更新しました',
+        description: nextTags.length ? nextTags.join(', ') : 'タグなし'
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'タグの更新に失敗しました。');
       syncOptimistic(stableTags);
+      notify({
+        type: 'error',
+        title: 'タグの更新に失敗しました',
+        description: err instanceof Error ? err.message : undefined
+      });
     } finally {
       setIsPending(false);
     }
@@ -58,6 +76,11 @@ export function TaskTagEditor({ taskId, initialTags }: TaskTagEditorProps) {
     optimisticTags.forEach((tag) => exists.add(tag));
     if (exists.has(value)) {
       setError('同じタグが既に存在します。');
+      notify({
+        type: 'info',
+        title: 'タグが既に存在します',
+        description: `${value} は重複しています。`
+      });
       return;
     }
     setError(null);

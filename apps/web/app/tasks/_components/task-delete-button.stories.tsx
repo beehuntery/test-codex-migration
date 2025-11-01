@@ -2,6 +2,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
 import { TaskDeleteButton } from './task-delete-button';
+import { TaskNotificationProvider } from './task-notification-provider';
 
 const meta = {
   title: 'Tasks/TaskDeleteButton',
@@ -9,6 +10,13 @@ const meta = {
   parameters: {
     layout: 'centered'
   },
+  decorators: [
+    (Story) => (
+      <TaskNotificationProvider>
+        <Story />
+      </TaskNotificationProvider>
+    )
+  ],
   args: {
     taskId: 'storybook-task-id',
     taskTitle: 'Storybook タスク'

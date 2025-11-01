@@ -3,6 +3,7 @@
 import React, { useOptimistic, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createTaskAction } from '../actions';
+import { useTaskNotifications } from './task-notification-provider';
 
 interface TaskCreateFormProps {
   onCreated?: () => void;
@@ -25,6 +26,7 @@ export function TaskCreateForm({ onCreated }: TaskCreateFormProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { notify } = useTaskNotifications();
 
   const [optimisticTasks, dispatchOptimisticTask] = useOptimistic<OptimisticTask[], OptimisticTaskAction>(
     [],
@@ -52,6 +54,11 @@ export function TaskCreateForm({ onCreated }: TaskCreateFormProps) {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setError('タイトルは必須です。');
+      notify({
+        type: 'error',
+        title: 'タスクを作成できませんでした',
+        description: 'タイトルを入力してください。'
+      });
       return;
     }
 
@@ -83,6 +90,11 @@ export function TaskCreateForm({ onCreated }: TaskCreateFormProps) {
       if (result?.error) {
         setError(result.error);
         dispatchOptimisticTask({ type: 'settle', id: optimisticId });
+        notify({
+          type: 'error',
+          title: 'タスクの作成に失敗しました',
+          description: result.error
+        });
       } else {
         setError(null);
         setTitle('');
@@ -92,6 +104,11 @@ export function TaskCreateForm({ onCreated }: TaskCreateFormProps) {
         dispatchOptimisticTask({ type: 'settle', id: optimisticId });
         router.refresh();
         onCreated?.();
+        notify({
+          type: 'success',
+          title: 'タスクを追加しました',
+          description: trimmedTitle
+        });
       }
     });
   };

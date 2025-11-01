@@ -1,6 +1,5 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { StoryContext } from '@storybook/react';
 import { within } from '@storybook/test';
 import type { Task } from '@shared/api';
 import { TaskCard } from './task-card';
@@ -58,7 +57,7 @@ export const Default: Story = {
     dueDateContent: <dd>2025/11/10</dd>,
     tagContent: <TagPreview tags={baseTask.tags} />
   },
-  play: async ({ canvasElement }: StoryContext<typeof TaskCard>) => {
+  play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText('ストーリーブック対応の整備');
   }

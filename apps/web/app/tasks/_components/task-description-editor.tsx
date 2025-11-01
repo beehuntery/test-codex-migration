@@ -2,6 +2,7 @@
 
 import React, { useOptimistic, useState, useTransition } from 'react';
 import { updateTaskDescriptionAction } from '../actions';
+import { useTaskNotifications } from './task-notification-provider';
 
 interface TaskDescriptionEditorProps {
   taskId: string;
@@ -15,6 +16,7 @@ export function TaskDescriptionEditor({ taskId, description, placeholder }: Task
   const [optimisticDescription, setOptimisticDescription] = useOptimistic(stableDescription, (_, next: string) => next);
   const [inputValue, setInputValue] = useState(description);
   const [error, setError] = useState<string | null>(null);
+  const { notify } = useTaskNotifications();
 
   const syncOptimistic = (nextValue: string) => {
     startTransition(() => {
@@ -29,11 +31,26 @@ export function TaskDescriptionEditor({ taskId, description, placeholder }: Task
         await updateTaskDescriptionAction(taskId, nextValue);
         setStableDescription(nextValue);
         setError(null);
+        const descriptionPreview = nextValue
+          ? nextValue.length > 40
+            ? `${nextValue.slice(0, 37)}…`
+            : nextValue
+          : '説明なし';
+        notify({
+          type: 'success',
+          title: '説明を更新しました',
+          description: descriptionPreview
+        });
       } catch (err) {
         const message = err instanceof Error ? err.message : '説明の更新に失敗しました。';
         setError(message);
         syncOptimistic(stableDescription);
         setInputValue(stableDescription);
+        notify({
+          type: 'error',
+          title: '説明の更新に失敗しました',
+          description: message
+        });
       }
     })();
   };

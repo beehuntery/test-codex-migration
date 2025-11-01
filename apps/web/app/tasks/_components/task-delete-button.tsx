@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from 'react';
 import { deleteTaskAction } from '../actions';
+import { useTaskNotifications } from './task-notification-provider';
 
 interface TaskDeleteButtonProps {
   taskId: string;
@@ -12,6 +13,7 @@ export function TaskDeleteButton({ taskId, taskTitle }: TaskDeleteButtonProps) {
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { notify } = useTaskNotifications();
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -19,9 +21,19 @@ export function TaskDeleteButton({ taskId, taskTitle }: TaskDeleteButtonProps) {
       if (result?.error) {
         setError(result.error);
         setConfirming(false);
+        notify({
+          type: 'error',
+          title: 'タスクの削除に失敗しました',
+          description: result.error
+        });
       } else {
         setError(null);
         setConfirming(false);
+        notify({
+          type: 'success',
+          title: 'タスクを削除しました',
+          description: taskTitle
+        });
       }
     });
   };

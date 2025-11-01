@@ -2,6 +2,7 @@
 
 import React, { useOptimistic, useState, useTransition } from 'react';
 import { updateTaskDueDateAction } from '../actions';
+import { useTaskNotifications } from './task-notification-provider';
 
 function normalizeInput(value: string): string {
   return value.trim();
@@ -24,6 +25,7 @@ export function TaskDueDateEditor({ taskId, dueDate }: { taskId: string; dueDate
   const [optimisticDueDate, setOptimisticDueDate] = useOptimistic(stableDueDate, (_, next: string | null) => next);
   const [inputValue, setInputValue] = useState(dueDate ?? '');
   const [error, setError] = useState<string | null>(null);
+  const { notify } = useTaskNotifications();
 
   const syncOptimistic = (nextValue: string | null) => {
     startTransition(() => {
@@ -41,10 +43,20 @@ export function TaskDueDateEditor({ taskId, dueDate }: { taskId: string; dueDate
         await updateTaskDueDateAction(taskId, nextValue);
         setStableDueDate(nextValue);
         setError(null);
+        notify({
+          type: 'success',
+          title: '期限を更新しました',
+          description: nextValue ? formatDisplay(nextValue) : '期限なし'
+        });
       } catch (err) {
         setError(err instanceof Error ? err.message : '期限の更新に失敗しました。');
         syncOptimistic(stableDueDate);
         setInputValue(stableDueDate ?? '');
+        notify({
+          type: 'error',
+          title: '期限の更新に失敗しました',
+          description: err instanceof Error ? err.message : undefined
+        });
       }
     })();
   };

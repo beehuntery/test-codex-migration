@@ -2,58 +2,60 @@
 
 ## 概要
 
-シンプルなタスク管理アプリです。Express (Node.js) をバックエンドに、純粋な HTML/CSS/JavaScript で構築したフロントエンドが REST API を呼び出します。タスクの追加・編集・ステータス変更に加え、タグの作成／インライン編集／削除、さらにタスクごとのタグ付けが可能です。データは `data/tasks.json` と `data/tags.json` に保存されるため、デモ用途や小規模チームの共有に向いています。
+シンプルなタスク管理アプリです。バックエンドは Express (Node.js)、フロントエンドは Next.js 15 App Router + Tailwind CSS をベースに再構築済みで、旧来の Vanilla JS UI も比較・検証用に残しています。タスクの追加・編集・ステータス変更に加え、タグの作成／インライン編集／削除、さらにタスクごとのタグ付けが可能です。データは `data/tasks.json` と `data/tags.json` に保存されるため、デモ用途や小規模チームの共有に向いています。
 
 ## 技術スタック
 
 | レイヤ | 使用技術 | 用途 |
 | --- | --- | --- |
-| フロントエンド | HTML5 / CSS3 / Vanilla JavaScript | シングルページ風 UI の描画と REST API の呼び出し |
+| フロントエンド (現行) | Next.js 15 App Router / React 19 / Tailwind CSS 4 | `/tasks` の SSR/CSR、通知・フィルター UI、Storybook |
+| フロントエンド (レガシー) | HTML5 / CSS3 / Vanilla JavaScript | 比較/検証用の従来 UI (`public/index.html`) |
 | バックエンド | Node.js / Express 5 / TypeScript | API エンドポイントの提供と静的ファイル配信 |
 | データストア | JSON ファイル (`data/tasks.json`, `data/tags.json`) / SQLite (`dev.db`) | 既定では JSON 永続化。`DATA_STORE=prisma` で Prisma + SQLite にスイッチ可能、移行ユーティリティを同梱 |
 | 開発ツール | Nodemon / ts-node / TypeScript Compiler | `npm run dev` / `npm run build` 実行時のホットリロードとトランスパイル |
 
-## 開発環境での起動手順（Express + Vanilla UI）
+## 開発環境での起動手順
+
+### Next.js + Express（推奨）
 
 1. 依存関係をインストールします。
- ```bash
-  npm install
-  ```
-2. SQLite を利用する場合は環境ファイルを設定します（任意）。
    ```bash
-   cp .env.example .env
+   npm install
    ```
-3. 開発用サーバーを起動します（自動再起動付き）。
+2. （任意）SQLite を利用する場合は `.env` を準備し、`DATABASE_URL` を設定します。
+3. Express API と Next.js App Router を並行で起動します。
+   ```bash
+   npm run dev:ts                                 # Express API (http://localhost:3000)
+   NEXT_PORT=3001 npm --workspace @test-codex/web run dev  # Next.js (http://localhost:3001)
+   ```
+4. ブラウザで `http://localhost:3001/tasks` を開き、最新の UI を確認します。
+   - タスク作成/更新/削除時のトースト通知
+   - タグ・ステータス・詳細フィルター（折りたたみ UI と URL 同期）
+   - Alt + ↑/↓ またはドラッグ＆ドロップによる並び替え + 完了ハイライト
+
+> メモ: Next.js を本番モードで確認したい場合は `npm --workspace @test-codex/web run build` → `npm --workspace @test-codex/web run start` を利用してください。
+
+### Express + Vanilla UI（レガシー比較用）
+
+1. Express サーバーを起動します。
    ```bash
    npm run dev
    ```
-   または、シンプルに起動する場合は `npm start` を利用します。
-4. ブラウザで `http://localhost:3000` を開き、アプリにアクセスします。
+2. ブラウザで `http://localhost:3000` を開き、従来 UI を比較検証できます。
 
-> メモ: JSON ファイルにデータが保存されます。リポジトリにコミットしたくない場合は `.gitignore` で除外してください。
-
-## フェーズ3: Next.js プレビュー UI を試す
-
-Next.js 版のフロントエンド（フェーズ3）は既存 Express API と並行で動作します。以下の 2 プロセスを起動してください。
-
-```bash
-npm run start                       # Express API (http://localhost:3000)
-NEXT_PORT=3001 npm run web:dev      # Next.js App Router (http://localhost:3001)
-```
-
-ブラウザで `http://localhost:3001/tasks` を開くと、新しい UI を確認できます。タグ／ステータスのフィルター、Alt + ↑/↓ での並び替え、削除ボタンなどフェーズ3で移植した機能が含まれています。
+> JSON ファイルにデータが保存されます。リポジトリにコミットしたくない場合は `.gitignore` で除外してください。
 
 ### Storybook でコンポーネントを確認
 
 ```bash
-npm run web:storybook
+npm --workspace @test-codex/web run storybook
 ```
 
-Storybook では `Tasks/TaskCard` や `Tasks/TaskDeleteButton` のドキュメントを参照できます。削除ボタンのストーリーでは確認ダイアログまでの流れを再現しています。
+Storybook では `Tasks/Notifications` や `Tasks/Filters/CombinedFilters` など、Next.js UI の状態管理を確認できます。削除ボタンやタグフィルターの操作は URL クエリやトースト通知のモックと連動しています。
 
 ## Playwright E2E テスト
 
-フェーズ3で追加した Next.js UI を自動テストする Playwright スイートがあります。実行前に上記 2 プロセスを起動したうえで、以下のように実行してください。
+Next.js UI を自動テストする Playwright スイートがあります。実行前に上記 2 プロセスを起動したうえで、以下のように実行してください。
 
 ```bash
 npm run playwright:e2e
@@ -65,7 +67,13 @@ npx playwright test tests/e2e/delete-task.spec.ts
 
 ### GitHub Actions での自動実行
 
-`.github/workflows/playwright.yml` では、`main` ブランチへの push / PR 時に Playwright E2E を自動実行します。ローカルで追加した `playwright.config.ts` の `webServer` 設定により、Express と Next.js の両方が起動した状態でテストが走ります。
+`.github/workflows/playwright.yml` では、`main` ブランチへの push / PR 時に Next.js ビルド → Storybook ビルド → Vitest → Playwright の順で自動実行します。`playwright.config.ts` の `webServer` 設定により Express と Next.js の両方が起動します。ワークフローの完了時には GitHub Actions の summary に成否が集約され、失敗時は `playwright_failed` フラグで原因を追跡できます。`SLACK_WEBHOOK_URL` シークレットを設定すると、成功/失敗の結果が Slack へ自動通知されます。
+
+## Cutover 準備 (Phase4)
+
+- 最新の移行ドキュメントは `docs/migration/phase4.md` を参照してください。Cutover Runbook、ロールバック手順、監視ポイントを随時更新しています。
+- Next.js `/tasks` を本番化する際は、CI が緑であることと Playwright スモーク（タスク作成/フィルター/削除）が成功していることをチェックリストに含めてください。
+- 旧 UI (`public/index.html`) は比較用に残っていますが、Phase4 内で削除計画を策定します。新規開発・修正は Next.js 側で行ってください。
 
 ## Prisma / SQLite ワークフロー（任意）
 

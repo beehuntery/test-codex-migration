@@ -6,6 +6,18 @@ import { TaskCreateForm } from './_components/task-create-form';
 import { TaskTagFilterControls } from './_components/task-tag-filter-controls';
 import { TaskReorderList } from './_components/task-reorder-list';
 import { TaskStatusFilterControls } from './_components/task-status-filter-controls';
+import { TaskAdvancedFilterControls } from './_components/task-advanced-filter-controls';
+import { STATUS_LABELS } from './_components/status-badge';
+import { TaskNotificationProvider } from './_components/task-notification-provider';
+import {
+  matchesDateRange,
+  matchesSearch,
+  normalizeDateRange,
+  parseDateInput,
+  parseFilterStatuses,
+  parseFilterTags,
+  parseSearchQuery
+} from './_lib/filter-utils';
 
 export const metadata = {
   title: 'Tasks (Next.js)',
@@ -15,45 +27,27 @@ export const metadata = {
 type TasksPageSearchParams = {
   tags?: string | string[];
   statuses?: string | string[];
+  search?: string | string[];
+  dueFrom?: string | string[];
+  dueTo?: string | string[];
+  createdFrom?: string | string[];
+  createdTo?: string | string[];
+  updatedFrom?: string | string[];
+  updatedTo?: string | string[];
 };
 
-function parseFilterTags(input: TasksPageSearchParams['tags']) {
-  if (!input) {
-    return [];
-  }
-  const raw = Array.isArray(input) ? input.join(',') : input;
-  return raw
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter((tag, index, array) => tag.length > 0 && array.indexOf(tag) === index);
-}
+type TasksPageProps = {
+  searchParams?: Promise<TasksPageSearchParams>;
+};
 
-function parseFilterStatuses(input: TasksPageSearchParams['statuses']) {
-  if (!input) {
-    return [];
-  }
-  const raw = Array.isArray(input) ? input.join(',') : input;
-  return raw
-    .split(',')
-    .map((status) => status.trim())
-    .filter((status, index, array) => status.length > 0 && array.indexOf(status) === index);
-}
-
-export default async function TasksPage({
-  searchParams
-}: {
-  searchParams?: TasksPageSearchParams | Promise<TasksPageSearchParams>;
-}) {
+export default async function TasksPage({ searchParams }: TasksPageProps) {
   const [tasks, tags] = await Promise.all([
     getTasks().catch(() => []),
     getTags().catch(() => [])
   ]);
 
   const availableTags = Array.from(new Set(tags));
-  const resolvedSearchParams =
-    searchParams && typeof (searchParams as PromiseLike<unknown>).then === 'function'
-      ? await searchParams
-      : (searchParams as TasksPageSearchParams | undefined);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const requestedTags = parseFilterTags(resolvedSearchParams?.tags);
   const activeFilterTags = requestedTags.filter((tag) => availableTags.includes(tag));
   const requestedStatuses = parseFilterStatuses(resolvedSearchParams?.statuses);
@@ -62,7 +56,22 @@ export default async function TasksPage({
     statusOptions.includes(status as (typeof statusOptions)[number])
   );
 
+  const searchQuery = parseSearchQuery(resolvedSearchParams?.search);
+  const dueFrom = parseDateInput(resolvedSearchParams?.dueFrom);
+  const dueTo = parseDateInput(resolvedSearchParams?.dueTo);
+  const { from: normalizedDueFrom, to: normalizedDueTo } = normalizeDateRange(dueFrom, dueTo);
+  const createdFrom = parseDateInput(resolvedSearchParams?.createdFrom);
+  const createdTo = parseDateInput(resolvedSearchParams?.createdTo);
+  const { from: normalizedCreatedFrom, to: normalizedCreatedTo } = normalizeDateRange(createdFrom, createdTo);
+  const updatedFrom = parseDateInput(resolvedSearchParams?.updatedFrom);
+  const updatedTo = parseDateInput(resolvedSearchParams?.updatedTo);
+  const { from: normalizedUpdatedFrom, to: normalizedUpdatedTo } = normalizeDateRange(updatedFrom, updatedTo);
+
   let filteredTasks = tasks;
+
+  if (searchQuery) {
+    filteredTasks = filteredTasks.filter((task) => matchesSearch(task, searchQuery));
+  }
 
   if (activeFilterTags.length) {
     filteredTasks = filteredTasks.filter((task) => activeFilterTags.every((tag) => task.tags.includes(tag)));
@@ -73,11 +82,38 @@ export default async function TasksPage({
     filteredTasks = filteredTasks.filter((task) => statusSet.has(task.status));
   }
 
+  if (normalizedDueFrom || normalizedDueTo) {
+    filteredTasks = filteredTasks.filter((task) => matchesDateRange(task.dueDate, normalizedDueFrom, normalizedDueTo));
+  }
+
+  if (normalizedCreatedFrom || normalizedCreatedTo) {
+    filteredTasks = filteredTasks.filter((task) =>
+      matchesDateRange(task.createdAt, normalizedCreatedFrom, normalizedCreatedTo)
+    );
+  }
+
+  if (normalizedUpdatedFrom || normalizedUpdatedTo) {
+    filteredTasks = filteredTasks.filter((task) =>
+      matchesDateRange(task.updatedAt, normalizedUpdatedFrom, normalizedUpdatedTo)
+    );
+  }
+
   const totalCount = tasks.length;
   const filteredCount = filteredTasks.length;
+  const hasActiveFilters =
+    Boolean(searchQuery) ||
+    Boolean(normalizedDueFrom) ||
+    Boolean(normalizedDueTo) ||
+    Boolean(normalizedCreatedFrom) ||
+    Boolean(normalizedCreatedTo) ||
+    Boolean(normalizedUpdatedFrom) ||
+    Boolean(normalizedUpdatedTo) ||
+    activeFilterTags.length > 0 ||
+    activeStatuses.length > 0;
 
   return (
-    <section className="mx-auto flex min-h-screen max-w-5xl flex-col gap-10 px-6 py-16">
+    <TaskNotificationProvider>
+      <section className="mx-auto flex min-h-screen max-w-5xl flex-col gap-10 px-6 py-16">
       <header className="flex flex-col gap-3">
         <h1 className="text-3xl font-semibold text-[color:var(--color-text)]">タスク一覧（準備中）</h1>
         <p className="max-w-2xl text-base text-[color:var(--color-text-muted)]">
@@ -88,6 +124,15 @@ export default async function TasksPage({
         <TaskCreateForm />
         <TaskTagFilterControls availableTags={availableTags} selectedTags={activeFilterTags} />
         <TaskStatusFilterControls selectedStatuses={activeStatuses} />
+        <TaskAdvancedFilterControls
+          initialQuery={searchQuery}
+          initialDueFrom={normalizedDueFrom}
+          initialDueTo={normalizedDueTo}
+          initialCreatedFrom={normalizedCreatedFrom}
+          initialCreatedTo={normalizedCreatedTo}
+          initialUpdatedFrom={normalizedUpdatedFrom}
+          initialUpdatedTo={normalizedUpdatedTo}
+        />
         <p className="text-xs text-[color:var(--color-text-muted)]">
           タスクはドラッグまたは <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">Alt</kbd> +
           <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">↑/↓</kbd> で並び替えできます。
@@ -95,7 +140,7 @@ export default async function TasksPage({
         <div>
           <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
             <p className="text-lg font-semibold text-[color:var(--color-text)]">
-              タスク一覧（{filteredCount} 件{activeFilterTags.length ? ` / 全 ${totalCount} 件` : ''}）
+              タスク一覧（{filteredCount} 件{hasActiveFilters ? ` / 全 ${totalCount} 件` : ''}）
             </p>
             <span className="text-xs uppercase tracking-[0.24em] text-[color:var(--color-text-muted)]">
               データソース: Express REST API
@@ -114,16 +159,17 @@ export default async function TasksPage({
         <div>
           <p className="mb-3 text-lg font-semibold text-[color:var(--color-text)]">次のステップ</p>
           <ul className="flex list-disc flex-col gap-2 pl-6">
-            <li>API フェッチ層の共通化（`src/shared/api.ts` を活用）</li>
-            <li>SSG/ISR の適用検討</li>
-            <li>既存 Vanilla JS モジュールの洗い出しと React 版への段階的移植</li>
-            <li>ドラッグ＆ドロップ操作のキーボード操作対応と E2E テスト拡充</li>
+            <li>`public/app.js` の未使用フィルター処理を整理し、通知 UI の React 化を進める</li>
+            <li>フィルター系コンポーネントを Storybook で可視化し、デザイン差分を検証</li>
+            <li>API フェッチ層の共通化（`src/shared/api.ts` ベースで SSR/ISR を検討）</li>
+            <li>キーボード並び替えのアクセシビリティ強化と Playwright カバレッジ拡張</li>
           </ul>
         </div>
       </div>
       <Link href="/" className="btn-secondary w-fit">
         トップへ戻る
       </Link>
-    </section>
+      </section>
+    </TaskNotificationProvider>
   );
 }
