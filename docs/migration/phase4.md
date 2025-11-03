@@ -28,7 +28,7 @@
 - [ ] CI パイプラインの通知・成否可視化（GitHub Actions Status, Slack/メール連携案）を検討。
 - [x] Storybook/Playwright に追加すべきシナリオを列挙し、自動化の優先度を決定。
 - [x] Next.js / Express 同期ポイント（API ベース URL, セッション等）を確認し、切替時の注意点を整理。
-- [ ] Cutover リハーサル（ステージング/本番相当）を計画し、ドライランの手順とサインオフ基準を定義。
+- [x] Cutover リハーサル（ステージング/本番相当）を計画し、ドライランの手順とサインオフ基準を定義。
 - [ ] 監視・アラート（メトリクス、ログ、UX フィードバック）の更新計画を策定し、Cutover 時のチェックを自動化。
 - [ ] ステークホルダー向けコミュニケーションパック（アナウンス文、FAQ、リリースノート下書き）を準備。
 - [ ] Cutover 後の検証チェックリスト（機能スモーク、パフォーマンス、SEO/リンク等）と担当者振り分けを整理。
@@ -101,6 +101,28 @@
 - Cutover 前に staging で `NEXT_PUBLIC_API_BASE_URL` を staging API へ向け、Playwright の `baseURL` と一致させてドライランする。
 - `apps/web/lib/api.ts` は HEAD リクエストも `cache: 'no-store'` で実行するため、API への rate limit が問題になりそうな場合は App Router の `fetch` オプションを調整する。
 - Next.js を serverless 環境に配置する場合は、`NEXT_PUBLIC_API_BASE_URL` を VPC 内の Private URL か API Gateway に切り替えることを Runbook に明記する。
+
+## Cutover リハーサル計画（2025-11-02 更新）
+
+| フェーズ | 作業項目 | 詳細 | 担当 |
+| --- | --- | --- | --- |
+| 準備 (T-3〜T-2) | リハーサル環境の整備 | Staging に最新 `main` をデプロイ。`NEXT_PUBLIC_API_BASE_URL` を staging API に設定し、Prisma/JSON データを同期。 | DevOps |
+| 準備 (T-2) | テストデータ投入 | Playwright で使用するテストシナリオ用のタスクを Seeds スクリプトで投入。 | QA |
+| 実施 (T-1 午前) | 並行起動確認 | Express(3000) + Next.js(3001) を同時起動し、リバースプロキシで `/tasks` の向き先を手動で切り替え。 | DevOps |
+| 実施 (T-1 午前) | 自動テスト | `npm run playwright:e2e -- --project next-smoke` を実行し、主要シナリオ（作成/削除/フィルター/通知）を確認。失敗時は Issue と Runbook を更新。 | QA |
+| 実施 (T-1 午後) | 手動チェック | Storybook `Tasks/Notifications` と Next.js UI を手動で操作し、完了ハイライトやトースト表示を確認。 | Product/Design |
+| 実施 (T-1 午後) | サインオフ会議 | Dev/QA/PM で 30 分の確認ミーティング。CI 緑化・Playwright結果・手動確認メモを共有し、Cutover 実施可否を判断。 | PM |
+| 事後 (T-1 夕方) | ロールバック手順リハーサル | `NEXT_UI_ENABLED=false` とリバースプロキシ差し替えを実際に実施し、5 分以内に旧 UI へ戻せることを確認。 | DevOps |
+
+### サインオフ基準
+- Playwright スモークが 2 回連続で成功していること（途中で flaky が出た場合は原因を解析し、再実行で安定性を確認）。
+- 手動チェックリスト（通知、完了ハイライト、フィルター、ドラッグ）がすべて ✅ であること。
+- Slack 通知・Actions Summary に失敗がなく、CI 全体が緑であること。
+- ロールバック手順がドキュメント通りに 5 分以内で完了できることをリハーサルで確認。
+
+### 追跡方法
+- GitHub Projects に「Cutover Rehearsal」ボードを作成し、上記タスクをカード化して担当者と期日を設定。
+- チェックリストは `/docs/migration/phase4.md` に反映し、Runbook から参照できるようにする。
 
 ## CI 通知・可視化計画
 - GitHub Actions の `Playwright E2E` ワークフローは Next.js build → Storybook build → Vitest → Playwright の順で実行し、完了後に **Actions Summary** へ成否を集約する。
