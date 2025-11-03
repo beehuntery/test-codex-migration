@@ -35,7 +35,11 @@ jobs:
       - name: Run Playwright E2E
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
-        run: npm run playwright:e2e -- --reporter=line || echo "playwright_failed" >> $GITHUB_ENV
+        run: |
+          npm run playwright:e2e -- --reporter=line || {
+            echo "PLAYWRIGHT_FAILED=true" >> "$GITHUB_ENV"
+            exit 1
+          }
       - name: Notify Slack (success)
         if: success() && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.26.0
@@ -59,7 +63,7 @@ jobs:
           echo "- Next.js build: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Storybook build: ✅" >> $GITHUB_STEP_SUMMARY
           echo "- Vitest: ✅" >> $GITHUB_STEP_SUMMARY
-          if [ '${{ env.playwright_failed }}' = 'playwright_failed' ]; then
+          if [ "${PLAYWRIGHT_FAILED}" = "true" ]; then
             echo "- Playwright: ❌" >> $GITHUB_STEP_SUMMARY
             echo "Playwright failed. See job logs for details." >> $GITHUB_STEP_SUMMARY
           else
