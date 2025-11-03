@@ -15,7 +15,8 @@ async function createTaskViaUI(
   await dueInput.fill(dueDate ?? '');
   await form.getByPlaceholder('カンマ区切りで入力').fill(tags ?? '');
   await form.getByRole('button', { name: 'タスクを追加' }).click();
-  const card = page
+  const taskList = page.getByTestId('task-list');
+  const card = taskList
     .getByRole('listitem')
     .filter({ has: page.getByText(title, { exact: true }) })
     .first();
@@ -37,6 +38,7 @@ test.describe('Task advanced filters', () => {
 
     await page.goto(`${BASE_URL}/tasks`);
     await page.waitForLoadState('networkidle');
+    const taskList = page.getByTestId('task-list');
 
     await createTaskViaUI(page, {
       title: keywordA,
@@ -55,21 +57,20 @@ test.describe('Task advanced filters', () => {
     await filterForm.getByLabel('キーワード').fill(keywordB);
     await filterForm.getByRole('button', { name: '絞り込み' }).click();
 
-    await expect(page.getByRole('listitem').filter({ hasText: keywordB })).toBeVisible();
-    await expect(page.getByRole('listitem').filter({ hasText: keywordA })).toHaveCount(0);
+    await expect(taskList.getByRole('listitem').filter({ hasText: keywordB })).toBeVisible();
+    await expect(taskList.getByRole('listitem').filter({ hasText: keywordA })).toHaveCount(0);
 
     await page.getByRole('button', { name: 'フィルターをリセット' }).click();
-    await expect(page.getByRole('listitem').filter({ hasText: keywordA })).toBeVisible();
-    await expect(page.getByRole('listitem').filter({ hasText: keywordB })).toBeVisible();
+    await expect(taskList.getByRole('listitem').filter({ hasText: keywordA })).toBeVisible();
+    await expect(taskList.getByRole('listitem').filter({ hasText: keywordB })).toBeVisible();
 
     await filterForm.getByLabel('期限（開始）').fill('2026-03-01');
     await filterForm.getByLabel('期限（終了）').fill('2026-03-31');
     await filterForm.getByRole('button', { name: '絞り込み' }).click();
 
-    await expect(page.getByRole('listitem').filter({ hasText: keywordB })).toBeVisible();
-    await expect(page.getByRole('listitem').filter({ hasText: keywordA })).toHaveCount(0);
+    await expect(taskList.getByRole('listitem').filter({ hasText: keywordB })).toBeVisible();
+    await expect(taskList.getByRole('listitem').filter({ hasText: keywordA })).toHaveCount(0);
 
     expect(consoleErrors).toEqual([]);
   });
 });
-

@@ -19,7 +19,8 @@ test.describe('Create task form', () => {
 
     await form.getByRole('button', { name: 'タスクを追加' }).click();
 
-    const card = page
+    const taskList = page.getByTestId('task-list');
+    const card = taskList
       .getByRole('listitem')
       .filter({ has: page.getByText(title, { exact: true }) })
       .first();

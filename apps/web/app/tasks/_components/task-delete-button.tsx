@@ -1,19 +1,22 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { deleteTaskAction } from '../actions';
 import { useTaskNotifications } from './task-notification-provider';
 
 interface TaskDeleteButtonProps {
   taskId: string;
   taskTitle: string;
+  onDeleted?: (taskId: string) => void;
 }
 
-export function TaskDeleteButton({ taskId, taskTitle }: TaskDeleteButtonProps) {
+export function TaskDeleteButton({ taskId, taskTitle, onDeleted }: TaskDeleteButtonProps) {
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const { notify } = useTaskNotifications();
+  const router = useRouter();
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -29,6 +32,8 @@ export function TaskDeleteButton({ taskId, taskTitle }: TaskDeleteButtonProps) {
       } else {
         setError(null);
         setConfirming(false);
+        onDeleted?.(taskId);
+        router.refresh();
         notify({
           type: 'success',
           title: 'タスクを削除しました',

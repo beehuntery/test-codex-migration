@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import type { Task } from '@shared/api';
 import { reorderTasksAction } from '../actions';
 import { TaskCard } from './task-card';
@@ -192,12 +192,22 @@ export function TaskReorderList({ tasks }: TaskReorderListProps) {
     setFocusAfterOrder(taskId);
   };
 
+  const handleTaskRemoved = useCallback((removedId: string) => {
+    setOrderedTasks((current) => current.filter((task) => task.id !== removedId));
+    setFocusedTaskId((current) => (current === removedId ? null : current));
+  }, []);
+
   return (
     <div className="flex flex-col gap-3">
       <p aria-live="polite" className="text-xs text-[color:var(--color-text-muted)]" data-testid="focused-task-indicator">
         {focusedTask ? `フォーカス中: ${focusedTask.title}` : 'フォーカス中のタスクはありません'}
       </p>
-      <div className="flex flex-col gap-4" data-dragging={Boolean(draggingId)} role="list">
+      <div
+        className="flex flex-col gap-4"
+        data-dragging={Boolean(draggingId)}
+        role="list"
+        data-testid="task-list"
+      >
         {orderedTasks.map((task) => {
         const isDragging = draggingId === task.id;
         const isFocused = focusedTaskId === task.id;
@@ -247,7 +257,9 @@ export function TaskReorderList({ tasks }: TaskReorderListProps) {
               statusActions={<TaskStatusToggle taskId={task.id} status={task.status} />}
               dueDateContent={<TaskDueDateEditor taskId={task.id} dueDate={task.dueDate} />}
               tagContent={<TaskTagEditor taskId={task.id} initialTags={task.tags} />}
-              deleteAction={<TaskDeleteButton taskId={task.id} taskTitle={task.title} />}
+              deleteAction={
+                <TaskDeleteButton taskId={task.id} taskTitle={task.title} onDeleted={handleTaskRemoved} />
+              }
             />
           </div>
         );

@@ -11,7 +11,8 @@ async function createTaskViaUI(page: Page, title: string) {
   await form.getByLabel('期限').fill('');
   await form.getByPlaceholder('カンマ区切りで入力').fill('delete-test');
   await form.getByRole('button', { name: 'タスクを追加' }).click();
-  const card = page
+  const taskList = page.getByTestId('task-list');
+  const card = taskList
     .getByRole('listitem')
     .filter({ has: page.getByText(title, { exact: true }) })
     .first();

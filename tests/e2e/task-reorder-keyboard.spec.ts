@@ -14,7 +14,8 @@ async function createTaskViaUI(
   await dueInput.fill('');
   await form.getByPlaceholder('カンマ区切りで入力').fill(tags ?? 'keyboard-test');
   await form.getByRole('button', { name: 'タスクを追加' }).click();
-  const card = page
+  const taskList = page.getByTestId('task-list');
+  const card = taskList
     .getByRole('listitem')
     .filter({ has: page.getByText(title, { exact: true }) })
     .first();
