@@ -46,7 +46,7 @@ jobs:
         with:
           payload: |
             {
-              "text": ":white_check_mark: Playwright E2E workflow succeeded on ${GITHUB_REPOSITORY} (run #${GITHUB_RUN_NUMBER})."
+              "text": ":white_check_mark: Playwright E2E workflow succeeded on ${{ github.repository }} (run #${{ github.run_number }})."
             }
       - name: Notify Slack (failure)
         if: failure() && env.SLACK_WEBHOOK_URL != ''
@@ -54,7 +54,7 @@ jobs:
         with:
           payload: |
             {
-              "text": ":x: Playwright E2E workflow failed on ${GITHUB_REPOSITORY} (run #${GITHUB_RUN_NUMBER}). Check logs: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+              "text": ":x: Playwright E2E workflow failed on ${{ github.repository }} (run #${{ github.run_number }}). Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             }
       - name: Publish workflow summary
         if: always()
