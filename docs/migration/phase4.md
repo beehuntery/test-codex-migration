@@ -29,7 +29,7 @@
 - [x] Storybook/Playwright に追加すべきシナリオを列挙し、自動化の優先度を決定。
 - [x] Next.js / Express 同期ポイント（API ベース URL, セッション等）を確認し、切替時の注意点を整理。
 - [x] Cutover リハーサル（ステージング/本番相当）を計画し、ドライランの手順とサインオフ基準を定義。
-- [ ] 監視・アラート（メトリクス、ログ、UX フィードバック）の更新計画を策定し、Cutover 時のチェックを自動化。
+- [x] 監視・アラート（メトリクス、ログ、UX フィードバック）の更新計画を策定し、Cutover 時のチェックを自動化。
 - [ ] ステークホルダー向けコミュニケーションパック（アナウンス文、FAQ、リリースノート下書き）を準備。
 - [ ] Cutover 後の検証チェックリスト（機能スモーク、パフォーマンス、SEO/リンク等）と担当者振り分けを整理。
 
@@ -131,6 +131,25 @@
 - Runbook フェーズ2（本番カットオーバー）では、CI が緑であることと Slack 通知が成功していることを出発条件に追加する。
 - 設定手順メモ: ① GitHub -> Repository Settings -> Actions -> Secrets and variables に `SLACK_WEBHOOK_URL` を登録。② `.github/workflows/playwright.yml` の Slack ステップが成功/失敗時に summary と通知を出すことを確認。③ 失敗時は `PLAYWRIGHT_FAILED` フラグが `GITHUB_ENV` に記録されるため、run の Actions Summary に ❌ とログリンクが表示される。
 
+## 監視・アラート計画
+
+| カテゴリ | 監視対象 | ツール / 設定 | アラート条件 | Cutover 時の確認 |
+| --- | --- | --- | --- | --- |
+| メトリクス | API レイテンシ・エラーレート (`/api/tasks*`) | Render Metrics または Prometheus/Grafana。`status=5xx` とレスポンスタイム 95%tile を収集。 | 5xx > 2% または レイテンシ > 800ms が 5 分継続。 | Cutover 直後 15 分間ウォッチし、グラフに大きなスパイクがないか確認。 |
+| ログ | Express アプリログ、Next.js Server Action エラー | Pino 出力を JSON 形式で Cloud Logging / Loki へ送信。Next.js 側は `NEXT_RUNTIME_LOG=1` を有効化。 | `error` レベルが 5 分で 3 回以上発生したら通知。 | カットオーバー後 30 分間で新規エラーがないかフィルター。 |
+| UX シグナル | フロントエンドのトースト送信数、Unhandled Promise Rejection | Next.js `_app` で `window.addEventListener('unhandledrejection')` を計測イベントとして送信。トーストイベントは Segment 等に送出。 | Unhandled Rejection > 0 または トーストメッセージに `error` が多発。 | カットオーバー当日はダッシュボードでトースト内訳を確認し、エラー比率が 5% 未満かチェック。 |
+| Playwright | `/tasks` スモーク（作成/削除/フィルター） | GitHub Actions + Playwright。`next-smoke` プロジェクトをスケジュール実行（cron 毎日）。 | E2E 失敗時に Slack 通知。 | Cutover リハーサルと本番直後に手動で実行し結果を Runbook に記録。 |
+
+### 運用ルール
+- アラート送信先は Slack `#alerts-nextjs` チャンネル（未作成の場合は QA/DevOps で準備）。Urgent な場合はオンコールに転送するフローを別途定義。 
+- メトリクス/ログダッシュボードは Cutover 1 週間前にスクリーンショットと URL を Runbook に添付する。 
+- 監視閾値は Cutover 後に再チューニング可能なよう、ダッシュボード設定を Git 管理（Grafana provisioning など）する。 
+- 重大アラートが発生した場合は Runbook のロールバック手順を即時実施し、事後に原因と対策を `docs/migration/phase4.md` に追記する。 
+
+### 自動化アイデア
+- GitHub Actions に nightly スケジュールを追加し、Playwright スモークを実施 → 成否を Slack 通知。 
+- Render/Heroku などのホスティングで Webhook を利用し、再起動やエラー時に Slack/メールへ通知。 
+- Next.js 側で簡易ヘルスチェック API (`/api/health`) を追加し、監視サービスから 1 分間隔で確認。 
 ## 関連ドキュメント
 - [フェーズ3: フロントエンド再構築](./phase3.md)
 - [技術スタック移行計画 概要](./plan.md)
