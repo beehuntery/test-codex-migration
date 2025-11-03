@@ -45,9 +45,6 @@ pids
 *.pid
 *.seed
 
-# Misc
-package-lock.json
-
 # Local tooling / test artifacts
 .serena/
 temp.playwright.config.ts
