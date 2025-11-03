@@ -25,7 +25,7 @@
 - [x] `public/` ディレクトリの棚卸しおよび削除対象・保守対象のリストアップ。
 - [x] README と運用ドキュメントを Next.js ベースへ更新し、旧 UI 参照をアーカイブに移動。
 - [x] Cutover Runbook（並行稼働・ロールバック・監視）の初稿を作成。
-- [ ] CI パイプラインの通知・成否可視化（GitHub Actions Status, Slack/メール連携案）を検討。
+- [x] CI パイプラインの通知・成否可視化（GitHub Actions Status, Slack/メール連携案）を検討。
 - [x] Storybook/Playwright に追加すべきシナリオを列挙し、自動化の優先度を決定。
 - [x] Next.js / Express 同期ポイント（API ベース URL, セッション等）を確認し、切替時の注意点を整理。
 - [x] Cutover リハーサル（ステージング/本番相当）を計画し、ドライランの手順とサインオフ基準を定義。
@@ -129,6 +129,7 @@
 - Slack Webhook（`SLACK_WEBHOOK_URL` シークレット）を設定すると、成功・失敗で自動通知される。失敗通知には該当 Run へのリンクを含め、即時調査を可能にする。
 - Slack を設定していない場合でも Summary で確認可能。将来的に OpsGenie 等のオンコール通知が必要になった場合は GitHub Actions の `workflow_run` トリガーと組み合わせた拡張を行う。
 - Runbook フェーズ2（本番カットオーバー）では、CI が緑であることと Slack 通知が成功していることを出発条件に追加する。
+- 設定手順メモ: ① GitHub -> Repository Settings -> Actions -> Secrets and variables に `SLACK_WEBHOOK_URL` を登録。② `.github/workflows/playwright.yml` の Slack ステップが成功/失敗時に summary と通知を出すことを確認。③ 失敗時は `PLAYWRIGHT_FAILED` フラグが `GITHUB_ENV` に記録されるため、run の Actions Summary に ❌ とログリンクが表示される。
 
 ## 関連ドキュメント
 - [フェーズ3: フロントエンド再構築](./phase3.md)
