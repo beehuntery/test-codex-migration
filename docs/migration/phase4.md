@@ -27,7 +27,7 @@
 - [x] Cutover Runbook（並行稼働・ロールバック・監視）の初稿を作成。
 - [ ] CI パイプラインの通知・成否可視化（GitHub Actions Status, Slack/メール連携案）を検討。
 - [x] Storybook/Playwright に追加すべきシナリオを列挙し、自動化の優先度を決定。
-- [ ] Next.js / Express 同期ポイント（API ベース URL, セッション等）を確認し、切替時の注意点を整理。
+- [x] Next.js / Express 同期ポイント（API ベース URL, セッション等）を確認し、切替時の注意点を整理。
 - [ ] Cutover リハーサル（ステージング/本番相当）を計画し、ドライランの手順とサインオフ基準を定義。
 - [ ] 監視・アラート（メトリクス、ログ、UX フィードバック）の更新計画を策定し、Cutover 時のチェックを自動化。
 - [ ] ステークホルダー向けコミュニケーションパック（アナウンス文、FAQ、リリースノート下書き）を準備。
@@ -84,6 +84,23 @@
 4. 監視/アラート設定を本番運用モードへ更新し、フレーク検知を通知チャネルへ連携。 
 
 > 次回更新予定: フェーズ1・2で実施するチェックリストを GitHub Projects に落とし込み、担当者アサインを自動化する。
+
+## Next.js / Express 同期ポイントメモ（2025-11-02 更新）
+
+| 項目 | Next.js 側 | Express 側 | 注意点 |
+| --- | --- | --- | --- |
+| API 呼び出し先 | `apps/web/lib/api.ts` の `API_BASE_URL`（`NEXT_PUBLIC_API_BASE_URL` 未指定時は `http://localhost:3000`） | `src/server/index.ts` の REST API (`/api/*`, ポート 3000) | Cutover 時は環境ごとに `NEXT_PUBLIC_API_BASE_URL` を更新し、HTTPS/ドメインを一致させる。 |
+| 開発時ポート | `NEXT_PORT` 環境変数で調整（未指定なら 3000）。ドキュメントでは `NEXT_PORT=3001 npm --workspace @test-codex/web run dev` を利用。 | `npm run dev:ts` が 3000 を使用し、`public/` を静的配信。 | 並行起動時はポート衝突を避けるため Next.js を 3001 へ移行。Cutover 後はリバースプロキシで `/tasks` を Next.js へルーティング。 |
+| データストア | Server Actions が REST API を介して書き込み後 `revalidatePath('/tasks')`。クライアント側 Fetch は `cache: 'no-store'`。 | `getDataStore()` が JSON もしくは Prisma を選択。 | Prisma へ切替える際は Express 側の `DATABASE_URL` を更新するだけで Next.js の API 呼び出しはそのまま利用可能。 |
+| スキーマ | `@shared/api` の Zod スキーマを Next.js から参照。 | 同じスキーマを Express 側でも利用。 | API 変更時はスキーマ更新 → 両環境を再ビルド。互換性テストを追加する。 |
+| セッション / 認証 | 現状なし（匿名利用）。 | 同じく未実装。 | 認証導入時は Cookie/Token の共有方法、CORS 設定を Runbook に追記する。 |
+| CI での設定 | `.github/workflows/playwright.yml` で `NEXT_PUBLIC_API_BASE_URL=http://localhost:3000` を指定。Playwright の `baseURL` は `http://localhost:${process.env.NEXT_PORT ?? 3001}/tasks`。 | Playwright の `webServer` が `npm run dev:ts` を起動し、REST API を提供。 | 本番用 Runbook では同じ環境変数をステージング/本番の URL に差し替え、スモークテストの接続先を統一する。 |
+
+### 運用メモ
+- フィーチャーフラグ `NEXT_UI_ENABLED` を導入する際は Express / Next.js / リバースプロキシで同じ値を参照する。
+- Cutover 前に staging で `NEXT_PUBLIC_API_BASE_URL` を staging API へ向け、Playwright の `baseURL` と一致させてドライランする。
+- `apps/web/lib/api.ts` は HEAD リクエストも `cache: 'no-store'` で実行するため、API への rate limit が問題になりそうな場合は App Router の `fetch` オプションを調整する。
+- Next.js を serverless 環境に配置する場合は、`NEXT_PUBLIC_API_BASE_URL` を VPC 内の Private URL か API Gateway に切り替えることを Runbook に明記する。
 
 ## CI 通知・可視化計画
 - GitHub Actions の `Playwright E2E` ワークフローは Next.js build → Storybook build → Vitest → Playwright の順で実行し、完了後に **Actions Summary** へ成否を集約する。
