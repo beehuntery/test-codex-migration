@@ -23,7 +23,7 @@
     "pretest": "npm run prisma:generate",
     "test": "vitest run --reporter verbose",
     "test:e2e": "npm run build && playwright test",
-    "playwright:e2e": "playwright test tests/e2e --workers=1",
+    "playwright:e2e": "npm run build && playwright test tests/e2e --workers=1",
     "web:dev": "npm --workspace @test-codex/web run dev",
     "web:build": "npm --workspace @test-codex/web run build",
     "web:start": "npm --workspace @test-codex/web run start",

@@ -16,6 +16,7 @@
 - Playwright MCP サーバーを経由して Chromium 実ブラウザ上でドラッグ＆ドロップ UI の動作を検証する。
 - テスト前に `npm run build` が実行され、`tests/e2e/task-reorder.spec.mjs` が内蔵のモック API を使って UI を読み込み、テスト用ヘルパー (`window.__testHelpers.reorderTasks`) を介して並び替え処理と DOM 更新を検証する。
 - 実行は Codex CLI から MCP ツール `playwright.test` を呼び出す。Playwright CLI (`npm run test:e2e`) は補助用途に限定し、定常の E2E テストは MCP 版を利用する。
+- CI では Playwright が `npm run start:ts` と `npm run start --prefix apps/web` を用いてビルド済みの API/Next.js サーバーを上げるため、`npm run playwright:e2e` が事前にバックエンドの TypeScript ビルドを自動実行するようになった。
 
 ## 実行手順
 

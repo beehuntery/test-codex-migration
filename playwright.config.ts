@@ -1,15 +1,21 @@
 import { defineConfig } from '@playwright/test';
 
-const reuseServer = !process.env.CI;
+const isCI = Boolean(process.env.CI);
+const reuseServer = !isCI;
 
 if (!process.env.NEXT_PORT) {
   process.env.NEXT_PORT = '3001';
 }
 
+const apiServerCommand = isCI ? 'NODE_ENV=production npm run start:ts' : 'npm run dev:ts';
+const webServerCommand = isCI
+  ? 'NODE_ENV=production PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run start --prefix apps/web'
+  : 'PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run dev --prefix apps/web';
+
 export default defineConfig({
   testDir: 'tests/e2e',
   timeout: 60_000,
-  retries: process.env.CI ? 1 : 0,
+  retries: isCI ? 1 : 0,
   use: {
     headless: true,
     browserName: 'chromium',
@@ -20,13 +26,13 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'npm run dev:ts',
+      command: apiServerCommand,
       port: 3000,
       reuseExistingServer: reuseServer,
       timeout: 180_000
     },
     {
-      command: 'PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run dev --prefix apps/web',
+      command: webServerCommand,
       port: 3001,
       reuseExistingServer: reuseServer,
       timeout: 240_000
