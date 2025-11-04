@@ -72,7 +72,10 @@ export function TaskStatusFilterControls({ selectedStatuses }: TaskStatusFilterC
     : 'すべてのステータス';
 
   return (
-    <section className="flex flex-col gap-2 rounded-xl border border-[rgba(107,102,95,0.16)] bg-white/80 p-4">
+    <section
+      className="flex flex-col gap-2 rounded-xl border border-[rgba(107,102,95,0.16)] bg-white/80 p-4"
+      data-testid="status-filter-section"
+    >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col">
           <p className="text-sm font-semibold text-[color:var(--color-text)]">ステータスで絞り込み</p>
@@ -88,6 +91,7 @@ export function TaskStatusFilterControls({ selectedStatuses }: TaskStatusFilterC
             aria-expanded={isOpen}
             aria-controls={listId}
             onClick={() => setIsOpen((prev) => !prev)}
+            data-testid="status-filter-toggle"
           >
             {isOpen ? '閉じる' : '開く'}
           </button>
@@ -101,6 +105,7 @@ export function TaskStatusFilterControls({ selectedStatuses }: TaskStatusFilterC
         role="group"
         aria-label="ステータスで絞り込み"
         aria-hidden={!isOpen}
+        data-testid="status-filter-options"
       >
         {isOpen
           ? statusOptions.map(({ status, label }) => {

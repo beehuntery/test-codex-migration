@@ -1,37 +1,6 @@
-# フェーズ4: 開発体制整備
+# フェーズ4 補助ドキュメント集
 
-- ステータス: 🚧 着手 (2025-11-02)
-- 目的: Next.js / Express 並行稼働の Cutover Plan を確立し、テスト・CI/CD 体制を統合して本番移行に備える。
-
-## スコープ
-- Express と Next.js の共存期間におけるルーティング/プロキシ設計、ロールバック手順、監視ポイントのドキュメント化。
-- Storybook・Playwright・Vitest を用いた統合テストパイプラインの整備と自動実行。
-- `public/` 配下のレガシー資産を棚卸しし、Next.js 版へ完全移行するための削除/アーカイブ計画を策定。
-- README / 運用手順書の更新により、新 UI をデフォルトの動線として明示。
-
-## 成果物
-- Cutover Runbook（チェックリスト、ロールバック手順、リスク対策）。
-- CI パイプライン（Next.js build, Storybook build, Vitest, Playwright）まとめと成否通知の整備。
-- `public/` アセット削除計画と対応スケジュール。
-- 利用者/オペレーター向けの更新済みドキュメント一式。
-
-## マイルストーン
-- **M4.1: Runbook Draft** – Cutover 計画とロールバック手順をドキュメント化。
-- **M4.2: Unified CI** – Storybook / Playwright / Vitest を統合した CI を安定運用。
-- **M4.3: Legacy Sunset** – `public/` 資産の削除計画とリポジトリ整備を完了。
-- **M4.4: Comms Ready** – README・リリースノート・運用手順を更新し、利害関係者へのアナウンス準備を整える。
-
-## バックログ
-- [x] `public/` ディレクトリの棚卸しおよび削除対象・保守対象のリストアップ。
-- [x] README と運用ドキュメントを Next.js ベースへ更新し、旧 UI 参照をアーカイブに移動。
-- [x] Cutover Runbook（並行稼働・ロールバック・監視）の初稿を作成。
-- [x] CI パイプラインの通知・成否可視化（GitHub Actions Status, Slack/メール連携案）を検討。
-- [x] Storybook/Playwright に追加すべきシナリオを列挙し、自動化の優先度を決定。
-- [x] Next.js / Express 同期ポイント（API ベース URL, セッション等）を確認し、切替時の注意点を整理。
-- [x] Cutover リハーサル（ステージング/本番相当）を計画し、ドライランの手順とサインオフ基準を定義。
-- [x] 監視・アラート（メトリクス、ログ、UX フィードバック）の更新計画を策定し、Cutover 時のチェックを自動化。
-- [x] ステークホルダー向けコミュニケーションパック（アナウンス文、FAQ、リリースノート下書き）を準備。
-- [x] Cutover 後の検証チェックリスト（機能スモーク、パフォーマンス、SEO/リンク等）と担当者振り分けを整理。
+フェーズ4「開発体制整備」の詳細情報をまとめた Runbook です。フェーズ全体のステータスと概要は `docs/migration/phase4.md` を参照してください。
 
 ## バックログ詳細
 | # | 項目 | ステータス | 備考 |
@@ -164,19 +133,15 @@
 - GitHub Actions に nightly スケジュールを追加し、Playwright スモークを実施 → 成否を Slack 通知。 
 - Render/Heroku などのホスティングで Webhook を利用し、再起動やエラー時に Slack/メールへ通知。 
 - Next.js 側で簡易ヘルスチェック API (`/api/health`) を追加し、監視サービスから 1 分間隔で確認。 
-## 関連ドキュメント
-- [フェーズ3: フロントエンド再構築](./phase3.md)
-- [技術スタック移行計画 概要](./plan.md)
-- [テスト戦略ガイド](../testing/README.md)
 
 ### Storybook / Playwright シナリオ拡張
-- TODO: Storybook 追加ストーリー
-  - [ ] Tasks/Notifications – 成功/エラー/情報トースト＋完了ハイライトを確認
-  - [ ] Tasks/ReorderList – ドラッグ・キーボード操作・完了ハイライト表示
-- TODO: Playwright 追加シナリオ
-  - [ ] notifications.spec.ts – CRUD/ステータス操作時のトースト内容と完了ハイライト検証
-  - [ ] filters-combination.spec.ts – タグ/ステータス/詳細フィルター組み合わせとURL同期
-  - [ ] legacy-parity.spec.ts（任意） – 旧 UI と Next.js UI の基本機能比較
+- Storybook 追加ストーリー
+  - [x] Tasks/Notifications – 成功/エラー/情報トースト＋完了ハイライトを確認
+  - [x] Tasks/ReorderList – ドラッグ・キーボード操作・完了ハイライト表示（`task-reorder-list.stories.tsx`）
+- Playwright 追加シナリオ
+  - [x] `notifications.spec.ts` – CRUD/ステータス操作時のトースト内容と完了ハイライト検証
+  - [x] `filters-combination.spec.ts` – タグ/ステータス/詳細フィルター組み合わせと URL 同期
+  - [x] `legacy-parity.spec.ts` – 旧 UI と Next.js UI の基本機能比較（検索フィルター含む）
 
 ## ステークホルダー向けコミュニケーションパック（2025-11-02）
 

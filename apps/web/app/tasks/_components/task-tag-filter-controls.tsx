@@ -64,7 +64,10 @@ export function TaskTagFilterControls({ availableTags, selectedTags }: TaskTagFi
   }
 
   return (
-    <section className="flex flex-col gap-2 rounded-xl border border-[rgba(107,102,95,0.16)] bg-white/80 p-4">
+    <section
+      className="flex flex-col gap-2 rounded-xl border border-[rgba(107,102,95,0.16)] bg-white/80 p-4"
+      data-testid="tag-filter-section"
+    >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col">
           <p className="text-sm font-semibold text-[color:var(--color-text)]">タグで絞り込み</p>
@@ -87,6 +90,7 @@ export function TaskTagFilterControls({ availableTags, selectedTags }: TaskTagFi
             aria-expanded={isOpen}
             aria-controls={listId}
             onClick={() => setIsOpen((prev) => !prev)}
+            data-testid="tag-filter-toggle"
           >
             {isOpen ? '閉じる' : '開く'}
           </button>
@@ -98,6 +102,7 @@ export function TaskTagFilterControls({ availableTags, selectedTags }: TaskTagFi
           isOpen ? 'opacity-100' : 'max-h-0 overflow-hidden opacity-0 pointer-events-none'
         }`}
         aria-hidden={!isOpen}
+        data-testid="tag-filter-options"
       >
         {isOpen
           ? sortedTags.map((tag) => {

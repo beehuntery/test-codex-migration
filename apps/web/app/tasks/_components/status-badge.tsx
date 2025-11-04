@@ -37,6 +37,8 @@ export function StatusBadge({ status }: { status: TaskStatus }) {
   return (
     <span
       className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${meta.bg} ${meta.text}`}
+      data-status-value={status}
+      data-testid="status-badge"
     >
       {meta.label}
     </span>

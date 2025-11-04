@@ -13,8 +13,11 @@ import { TaskTagEditor } from './task-tag-editor';
 import { TaskDeleteButton } from './task-delete-button';
 import { subscribeTaskCompleted } from '../_lib/task-events';
 
+type PersistOrderResult = { success?: boolean; error?: string } | void;
+
 interface TaskReorderListProps {
   tasks: Task[];
+  persistOrder?: (order: string[]) => Promise<PersistOrderResult>;
 }
 
 function moveTask(list: Task[], activeId: string, targetId: string, placeBefore: boolean): Task[] {
@@ -53,7 +56,7 @@ function ordersAreEqual(a: Task[], b: Task[]) {
   return true;
 }
 
-export function TaskReorderList({ tasks }: TaskReorderListProps) {
+export function TaskReorderList({ tasks, persistOrder = reorderTasksAction }: TaskReorderListProps) {
   const [orderedTasks, setOrderedTasks] = useState(tasks);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [focusedTaskId, setFocusedTaskId] = useState<string | null>(null);
@@ -127,9 +130,14 @@ export function TaskReorderList({ tasks }: TaskReorderListProps) {
 
     const orderIds = nextOrder.map((task) => task.id);
     startTransition(async () => {
-      const result = await reorderTasksAction(orderIds);
-      if (result?.error) {
-        console.error(result.error);
+      try {
+        const result = await persistOrder(orderIds);
+        if (result && typeof result === 'object' && 'error' in result && result.error) {
+          console.error(result.error);
+          setOrderedTasks(tasks);
+        }
+      } catch (error) {
+        console.error(error);
         setOrderedTasks(tasks);
       }
     });
@@ -216,6 +224,7 @@ export function TaskReorderList({ tasks }: TaskReorderListProps) {
           <div
             key={task.id}
             data-task-id={task.id}
+            data-task-title={task.title}
             draggable
             onDragStart={(event) => handleDragStart(event, task.id)}
             onDragOver={(event) => handleDragOver(event, task.id)}

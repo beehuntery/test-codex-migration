@@ -5,7 +5,6 @@ declare const global: typeof globalThis & { process?: { env: Record<string, stri
 
 // Provide sensible defaults for environment variables when running in Storybook
 if (typeof global.process === 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   global.process = { env: {} } as { env: Record<string, string | undefined> };
 }
 

@@ -23,13 +23,13 @@ export default defineConfig({
       command: 'npm run dev:ts',
       port: 3000,
       reuseExistingServer: reuseServer,
-      timeout: 120_000
+      timeout: 180_000
     },
     {
       command: 'PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run dev --prefix apps/web',
       port: 3001,
       reuseExistingServer: reuseServer,
-      timeout: 180_000
+      timeout: 240_000
     }
   ]
 });
