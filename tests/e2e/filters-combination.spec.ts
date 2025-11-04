@@ -55,15 +55,20 @@ test.describe('Combined task filters', () => {
     });
 
     await page.getByRole('button', { name: 'フィルターをリセット' }).click();
-    await expect.poll(async () => taskList.locator(`[data-task-title="${primaryTitle}"]`).count(), {
-      timeout: 10_000,
-      message: 'Primary task should reappear after reset'
-    }).toBeGreaterThan(0);
+    await page.waitForFunction(() => {
+      const params = new URLSearchParams(window.location.search);
+      return ['tags', 'statuses', 'search', 'dueFrom', 'dueTo'].every((key) => !params.has(key));
+    }, {}, { timeout: 10_000 });
 
-    await expect.poll(async () => taskList.locator(`[data-task-title="${secondaryTitle}"]`).count(), {
-      timeout: 10_000,
-      message: 'Secondary task should reappear after reset'
-    }).toBeGreaterThan(0);
+    await expect(async () => {
+      const count = await taskList.locator(`[data-task-title="${primaryTitle}"]`).count();
+      expect(count).toBeGreaterThan(0);
+    }).toPass({ timeout: 10_000 });
+
+    await expect(async () => {
+      const count = await taskList.locator(`[data-task-title="${secondaryTitle}"]`).count();
+      expect(count).toBeGreaterThan(0);
+    }).toPass({ timeout: 10_000 });
 
     dispose();
     expect(errors).toEqual([]);
