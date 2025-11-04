@@ -91,7 +91,8 @@ export function TaskAdvancedFilterControls({
     nextCreatedFrom,
     nextCreatedTo,
     nextUpdatedFrom,
-    nextUpdatedTo
+    nextUpdatedTo,
+    clearAuxiliaryFilters = false
   }: {
     nextQuery: string;
     nextDueFrom: string;
@@ -100,6 +101,7 @@ export function TaskAdvancedFilterControls({
     nextCreatedTo: string;
     nextUpdatedFrom: string;
     nextUpdatedTo: string;
+    clearAuxiliaryFilters?: boolean;
   }) => {
     const params = searchParams ? new URLSearchParams(searchParams.toString()) : new URLSearchParams();
     const trimmedQuery = nextQuery.trim();
@@ -153,6 +155,11 @@ export function TaskAdvancedFilterControls({
       params.delete('updatedTo');
     }
 
+    if (clearAuxiliaryFilters) {
+      params.delete('tags');
+      params.delete('statuses');
+    }
+
     const queryString = params.toString();
     const nextUrl = queryString ? `${pathname}?${queryString}` : pathname;
     router.replace(nextUrl as Parameters<typeof router.replace>[0], { scroll: false });
@@ -167,7 +174,8 @@ export function TaskAdvancedFilterControls({
       nextCreatedFrom: createdFrom,
       nextCreatedTo: createdTo,
       nextUpdatedFrom: updatedFrom,
-      nextUpdatedTo: updatedTo
+      nextUpdatedTo: updatedTo,
+      clearAuxiliaryFilters: false
     });
   };
 
@@ -186,7 +194,8 @@ export function TaskAdvancedFilterControls({
       nextCreatedFrom: '',
       nextCreatedTo: '',
       nextUpdatedFrom: '',
-      nextUpdatedTo: ''
+      nextUpdatedTo: '',
+      clearAuxiliaryFilters: true
     });
   };
 
