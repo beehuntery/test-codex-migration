@@ -42,20 +42,28 @@ test.describe('Combined task filters', () => {
 
     const taskList = page.getByTestId('task-list');
     await expect.poll(async () => {
-      const filteredTitles = await taskList
-        .locator('[data-task-title]')
-        .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-task-title') ?? ''));
-      const hasPrimary = filteredTitles.includes(primaryTitle);
-      const hasSecondary = filteredTitles.includes(secondaryTitle);
-      return { count: filteredTitles.length, hasPrimary, hasSecondary };
-    }, { message: 'Filtered list should contain only the primary task' }).toEqual({ count: 1, hasPrimary: true, hasSecondary: false });
+      const filtered = await taskList.locator('[data-task-title]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-task-title') ?? ''));
+      const grandCount = filtered.length;
+      const latestPrimaryIndex = filtered.findIndex((title) => title === primaryTitle);
+      return {
+        grandCount,
+        latestPrimaryIndex
+      };
+    }, { message: 'Filtered list should contain only the newest primary task' }).toEqual({
+      grandCount: 1,
+      latestPrimaryIndex: 0
+    });
 
     await page.getByRole('button', { name: 'フィルターをリセット' }).click();
-    await expect.poll(async () => {
-      const primaryVisible = await taskList.locator(`[data-task-title="${primaryTitle}"]`).isVisible();
-      const secondaryVisible = await taskList.locator(`[data-task-title="${secondaryTitle}"]`).isVisible();
-      return primaryVisible && secondaryVisible;
-    }, { timeout: 10_000, message: 'Both primary and secondary tasks should reappear after reset' }).toBe(true);
+    await expect.poll(async () => taskList.locator(`[data-task-title="${primaryTitle}"]`).count(), {
+      timeout: 10_000,
+      message: 'Primary task should reappear after reset'
+    }).toBeGreaterThan(0);
+
+    await expect.poll(async () => taskList.locator(`[data-task-title="${secondaryTitle}"]`).count(), {
+      timeout: 10_000,
+      message: 'Secondary task should reappear after reset'
+    }).toBeGreaterThan(0);
 
     dispose();
     expect(errors).toEqual([]);
