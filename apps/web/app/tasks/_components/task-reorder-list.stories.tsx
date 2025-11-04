@@ -150,5 +150,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
+  args: {
+    tasks: fixtureTasks,
+    persistOrder: async () => ({ success: true as const })
+  },
   render: () => <ReorderListPlayground />
 };
