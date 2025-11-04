@@ -23,6 +23,7 @@ dist/
 build/
 .tmp/
 .cache/
+apps/web/.next/
 coverage/
 prisma/generated/
 
