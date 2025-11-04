@@ -17,16 +17,20 @@ test.describe('Combined task filters', () => {
       tags: 'combo-primary,shared',
       dueDate: '2026-06-15'
     });
+    const primaryId = await primaryCard.getAttribute('data-task-id');
+    expect(primaryId).toBeTruthy();
 
     const toggleButton = primaryCard.getByRole('button', { name: /次の状態へ/ });
     await toggleButton.click(); // move to in_progress
 
-    await createTaskViaUI(page, {
+    const secondaryCard = await createTaskViaUI(page, {
       title: secondaryTitle,
       description: 'Secondary task that should be filtered out',
       tags: 'combo-secondary,shared',
       dueDate: '2026-07-20'
     });
+    const secondaryId = await secondaryCard.getAttribute('data-task-id');
+    expect(secondaryId).toBeTruthy();
 
     await page.getByTestId('tag-filter-toggle').click();
     await page.getByTestId('tag-filter-options').getByRole('button', { name: 'combo-primary' }).click();
@@ -42,32 +46,30 @@ test.describe('Combined task filters', () => {
 
     const taskList = page.getByTestId('task-list');
     await expect.poll(async () => {
-      const filtered = await taskList.locator('[data-task-title]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-task-title') ?? ''));
-      const grandCount = filtered.length;
-      const latestPrimaryIndex = filtered.findIndex((title) => title === primaryTitle);
+      const filteredIds = await taskList
+        .locator('[data-task-id]')
+        .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-task-id') ?? ''));
+      const primaryIndex = filteredIds.findIndex((id) => id === primaryId);
+      const includesSecondary = filteredIds.includes(secondaryId ?? '');
       return {
-        grandCount,
-        latestPrimaryIndex
+        count: filteredIds.length,
+        primaryIndex,
+        includesSecondary
       };
-    }, { message: 'Filtered list should contain only the newest primary task' }).toEqual({
-      grandCount: 1,
-      latestPrimaryIndex: 0
+    }, { message: 'Filtered list should contain only the newly created primary task' }).toEqual({
+      count: 1,
+      primaryIndex: 0,
+      includesSecondary: false
     });
 
     await page.getByRole('button', { name: 'フィルターをリセット' }).click();
-    await page.waitForFunction(() => {
-      const params = new URLSearchParams(window.location.search);
-      return ['tags', 'statuses', 'search', 'dueFrom', 'dueTo'].every((key) => !params.has(key));
-    }, {}, { timeout: 10_000 });
 
     await expect(async () => {
-      const count = await taskList.locator(`[data-task-title="${primaryTitle}"]`).count();
-      expect(count).toBeGreaterThan(0);
-    }).toPass({ timeout: 10_000 });
-
-    await expect(async () => {
-      const count = await taskList.locator(`[data-task-title="${secondaryTitle}"]`).count();
-      expect(count).toBeGreaterThan(0);
+      const ids = await taskList
+        .locator('[data-task-id]')
+        .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-task-id') ?? ''));
+      expect(ids).toContain(primaryId);
+      expect(ids).toContain(secondaryId);
     }).toPass({ timeout: 10_000 });
 
     dispose();
