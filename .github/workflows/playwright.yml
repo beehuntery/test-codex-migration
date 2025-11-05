@@ -93,8 +93,8 @@ jobs:
         if: success() && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.26.0
         env:
-          STORYBOOK_STATUS: ${{ steps.changes.outputs.storybook == 'true' ? 'built' : 'skipped' }}
-          NEXT_BUILD_STATUS: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') ? 'built' : 'skipped' }}
+          STORYBOOK_STATUS: ${{ steps.changes.outputs.storybook == 'true' && 'built' || 'skipped' }}
+          NEXT_BUILD_STATUS: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'built' || 'skipped' }}
         with:
           payload: |
             {
