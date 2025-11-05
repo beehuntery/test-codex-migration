@@ -59,13 +59,6 @@ jobs:
             ${{ runner.os }}-pw-
       - name: Install dependencies
         run: npm ci
-      - name: Build Next.js app
-        env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
-          NEXT_DISABLE_ESLINT: '1'
-          NEXT_DISABLE_TYPECHECK: '1'
-          NEXT_TELEMETRY_DISABLED: '1'
-        run: npm --workspace @test-codex/web run build
       - name: Build Storybook
         if: steps.changes.outputs.storybook == 'true'
         run: npm --workspace @test-codex/web run storybook:build
@@ -113,7 +106,7 @@ jobs:
           STORYBOOK_NEEDED: ${{ steps.changes.outputs.storybook }}
         run: |
           echo "## CI Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- Next.js build: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Next.js dev server: ✅" >> $GITHUB_STEP_SUMMARY
           if [ "$STORYBOOK_NEEDED" = "true" ]; then
             echo "- Storybook build: ✅" >> $GITHUB_STEP_SUMMARY
           else

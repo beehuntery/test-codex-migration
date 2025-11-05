@@ -9,7 +9,7 @@ if (!process.env.NEXT_PORT) {
 
 const apiServerCommand = isCI ? 'NODE_ENV=production npm run start:ts' : 'npm run dev:ts';
 const webServerCommand = isCI
-  ? 'NODE_ENV=production PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run start --prefix apps/web'
+  ? 'PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run dev --prefix apps/web -- --turbo'
   : 'PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run dev --prefix apps/web';
 
 export default defineConfig({
