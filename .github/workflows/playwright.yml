@@ -20,6 +20,21 @@ jobs:
         with:
           list-files: shell
           filters: |
+            next_build:
+              - 'apps/web/**'
+              - 'apps/web.*'
+              - 'apps/web.*/*'
+              - 'apps/web/package.json'
+              - 'apps/web/package-lock.json'
+              - 'apps/web/tsconfig.json'
+              - 'apps/web/tsconfig.*'
+              - 'apps/web/next.config.*'
+              - 'apps/web/postcss.config.*'
+              - 'apps/web/tailwind.config.*'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'public/**'
+              - 'apps/web/public/**'
             storybook:
               - 'apps/web/**'
               - 'public/**'
@@ -85,7 +100,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - name: Validate Next.js production build
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.changes.outputs.next_build == 'true'
         env:
           NEXT_TELEMETRY_DISABLED: '1'
         run: npm --workspace @test-codex/web run build
@@ -94,7 +109,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.26.0
         env:
           STORYBOOK_STATUS: ${{ steps.changes.outputs.storybook == 'true' && 'built' || 'skipped' }}
-          NEXT_BUILD_STATUS: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'built' || 'skipped' }}
+          NEXT_BUILD_STATUS: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.changes.outputs.next_build == 'true') && 'built' || 'skipped' }}
         with:
           payload: |
             {
@@ -112,10 +127,11 @@ jobs:
         if: always()
         env:
           STORYBOOK_NEEDED: ${{ steps.changes.outputs.storybook }}
+          NEXT_BUILD_NEEDED: ${{ steps.changes.outputs.next_build }}
         run: |
           echo "## CI Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Next.js dev server: ✅" >> $GITHUB_STEP_SUMMARY
-          if [ "$GITHUB_EVENT_NAME" = "push" ] && [ "$GITHUB_REF" = "refs/heads/main" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "push" ] && [ "$GITHUB_REF" = "refs/heads/main" ] && [ "$NEXT_BUILD_NEEDED" = "true" ]; then
             echo "- Next.js build: ✅" >> $GITHUB_STEP_SUMMARY
           else
             echo "- Next.js build: ⏭️ (not run)" >> $GITHUB_STEP_SUMMARY
