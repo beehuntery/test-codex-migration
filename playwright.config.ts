@@ -16,14 +16,27 @@ export default defineConfig({
   testDir: 'tests/e2e',
   timeout: 60_000,
   retries: isCI ? 1 : 0,
+  reporter: isCI
+    ? [
+        ['line'],
+        ['html', { outputFolder: 'playwright-report', open: 'never' }]
+      ]
+    : [
+        ['list'],
+        ['html', { open: 'never' }]
+      ],
   use: {
     headless: true,
     browserName: 'chromium',
     baseURL: 'http://localhost:3001',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
     launchOptions: {
       args: ['--no-sandbox', '--disable-dev-shm-usage']
     }
   },
+  outputDir: 'test-results',
   webServer: [
     {
       command: apiServerCommand,

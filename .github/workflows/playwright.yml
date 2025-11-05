@@ -14,6 +14,19 @@ jobs:
       PLAYWRIGHT_BROWSERS_PATH: .playwright-browsers
     steps:
       - uses: actions/checkout@v4
+      - name: Detect frontend changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          list-files: shell
+          filters: |
+            storybook:
+              - 'apps/web/**'
+              - 'public/**'
+              - 'docs/**/*.md'
+              - 'docs/**/*.mdx'
+      - name: Prepare Playwright cache directory
+        run: mkdir -p .playwright-browsers
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -28,6 +41,15 @@ jobs:
           key: ${{ runner.os }}-nextjs-${{ hashFiles('apps/web/package-lock.json') }}-${{ hashFiles('apps/web/**/*.js', 'apps/web/**/*.jsx', 'apps/web/**/*.ts', 'apps/web/**/*.tsx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('apps/web/package-lock.json') }}-
+      - name: Cache Storybook build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/web/node_modules/.cache/storybook
+            apps/web/node_modules/.vite
+          key: ${{ runner.os }}-storybook-${{ hashFiles('package-lock.json', 'apps/web/package.json', 'apps/web/.storybook/**', 'apps/web/app/**/*.ts', 'apps/web/app/**/*.tsx', 'apps/web/components/**/*.ts', 'apps/web/components/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-storybook-${{ hashFiles('package-lock.json', 'apps/web/package.json') }}-
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -42,6 +64,7 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
         run: npm --workspace @test-codex/web run build
       - name: Build Storybook
+        if: steps.changes.outputs.storybook == 'true'
         run: npm --workspace @test-codex/web run storybook:build
       - name: Run unit tests
         run: npm test
@@ -51,10 +74,20 @@ jobs:
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
         run: |
-          npm run playwright:e2e -- --reporter=line || {
+          npm run playwright:e2e || {
             echo "PLAYWRIGHT_FAILED=true" >> "$GITHUB_ENV"
             exit 1
           }
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-${{ github.run_attempt }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: warn
+          retention-days: 14
       - name: Notify Slack (success)
         if: success() && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.26.0
@@ -73,10 +106,16 @@ jobs:
             }
       - name: Publish workflow summary
         if: always()
+        env:
+          STORYBOOK_NEEDED: ${{ steps.changes.outputs.storybook }}
         run: |
           echo "## CI Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Next.js build: ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- Storybook build: ✅" >> $GITHUB_STEP_SUMMARY
+          if [ "$STORYBOOK_NEEDED" = "true" ]; then
+            echo "- Storybook build: ✅" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Storybook build: ⏭️ (skipped)" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "- Vitest: ✅" >> $GITHUB_STEP_SUMMARY
           if [ "${PLAYWRIGHT_FAILED}" = "true" ]; then
             echo "- Playwright: ❌" >> $GITHUB_STEP_SUMMARY

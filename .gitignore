@@ -51,3 +51,4 @@ pids
 temp.playwright.config.ts
 test-results/
 tmp-playwright/
+.playwright-browsers/
