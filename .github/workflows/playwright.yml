@@ -31,7 +31,7 @@ jobs:
       - name: Run unit tests
         run: npm test
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
       - name: Run Playwright E2E
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
