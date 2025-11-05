@@ -16,6 +16,7 @@ export default defineConfig({
   testDir: 'tests/e2e',
   timeout: 60_000,
   retries: isCI ? 1 : 0,
+  globalSetup: require.resolve('./tests/e2e/global-setup'),
   reporter: isCI
     ? [
         ['line'],
