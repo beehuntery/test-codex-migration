@@ -20,7 +20,7 @@
 - CI 実行時は Next.js / Storybook / Playwright ブラウザを `actions/cache` で再利用し、Storybook はフロントエンド差分がある場合のみビルドする。
 - Next.js フロントエンドは Turbopack ベースの `next dev` サーバーを立ち上げ、プロダクションビルドをスキップして起動時間を最小化している。
 - Playwright は `retain-on-failure` のトレースと HTML レポート（`playwright-report`）を生成し、`playwright-artifacts-*` としてアップロードする。
-- 本番セットアップの破断検知は別ジョブ `next-build` が `npm --workspace @test-codex/web run build` を走らせて担保し、E2E と独立して完了を報告する。
+- 本番セットアップの破断検知は main への push 時に同ジョブ末尾で `npm --workspace @test-codex/web run build` を実行して担保している。
 - テスト開始前にグローバルセットアップで `/tasks` へウォームアップリクエストを送り、Turbopack の初回コンパイル待ち時間を吸収している。
 
 ## 実行手順
