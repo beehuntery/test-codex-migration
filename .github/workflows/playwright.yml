@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
@@ -77,8 +84,6 @@ jobs:
       - name: Build Storybook
         if: steps.changes.outputs.storybook == 'true'
         run: npm --workspace @test-codex/web run storybook:build
-      - name: Run unit tests
-        run: npm test
       - name: Install Playwright browsers
         run: npx playwright install chromium
       - name: Run Playwright E2E

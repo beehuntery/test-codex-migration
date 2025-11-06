@@ -1,0 +1,18 @@
+* text=auto
+
+# Treat shell scripts as text with LF endings
+*.sh text eol=lf
+
+# Ensure TypeScript/JavaScript files keep LF
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+
+# Keep generated assets as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary

@@ -5,23 +5,24 @@
 | スイート | 対象 | 実行方法 |
 | --- | --- | --- |
 | ユニットテスト | Node.js サイドのデータストアおよびドラッグ演算ユーティリティ | `npm run test` |
-| E2E テスト (Chromium / MCP) | フロントエンドのドラッグ＆ドロップ挙動 | Codex CLI で `:call playwright.test {"command":"test tests/e2e --config=playwright.config.ts"}` |
+| E2E テスト (Chromium / MCP) | フロントエンドのドラッグ＆ドロップ挙動 | `npm run playwright:e2e` または Codex CLI で `:call playwright.test {"command":"test tests/e2e --config=playwright.config.ts"}` |
 
 ### ユニットテスト
 - `src/server/storage/jsonStore.ts`: JSON データストアの CRUD/並び替えを検証。
 - `src/frontend/drag-utils.ts`: ドラッグ対象位置計算ロジック `findInsertTarget` の境界ケースを検証。
 - ユニットテストは Vitest を使用し、Node 環境で実行される。
 
-### E2E テスト (MCP)
+### E2E テスト (Playwright / MCP)
 - Playwright MCP サーバーを経由して Chromium 実ブラウザ上でドラッグ＆ドロップ UI の動作を検証する。
-- テスト前に `npm run build` が実行され、`tests/e2e/task-reorder.spec.mjs` が内蔵のモック API を使って UI を読み込み、テスト用ヘルパー (`window.__testHelpers.reorderTasks`) を介して並び替え処理と DOM 更新を検証する。
-- 実行は Codex CLI から MCP ツール `playwright.test` を呼び出す。Playwright CLI (`npm run test:e2e`) は補助用途に限定し、定常の E2E テストは MCP 版を利用する。
-- CI では Playwright が `npm run start:ts` と `npm run start --prefix apps/web` を用いてビルド済みの API/Next.js サーバーを上げるため、`npm run playwright:e2e` が事前にバックエンドの TypeScript ビルドを自動実行するようになった。
-- CI 実行時は Next.js / Storybook / Playwright ブラウザを `actions/cache` で再利用し、Storybook はフロントエンド差分がある場合のみビルドする。
-- Next.js フロントエンドは Turbopack ベースの `next dev` サーバーを立ち上げ、プロダクションビルドをスキップして起動時間を最小化している。
-- Playwright は `retain-on-failure` のトレースと HTML レポート（`playwright-report`）を生成し、`playwright-artifacts-*` としてアップロードする。
-- 本番セットアップの破断検知は main への push かつフロントエンド差分がある場合のみ `npm --workspace @test-codex/web run build` を実行して担保している。
-- テスト開始前にグローバルセットアップで `/tasks` へウォームアップリクエストを送り、Turbopack の初回コンパイル待ち時間を吸収している。
+- `tests/e2e/task-reorder.spec.mjs` をはじめとしたシナリオが内蔵モック API を用い、DOM 更新や reorder ヘルパー (`window.__testHelpers.reorderTasks`) の挙動を検証する。
+- ローカルでは `npm run playwright:e2e`（CI と同じ構成）または Codex CLI の MCP コマンドで実行可能。
+- `tests/e2e/global-setup.ts` が `/tasks` へウォームアップリクエストを送り、Turbopack dev サーバー初回コンパイルを吸収してからテストを開始する。
+
+### CI パイプライン要約
+- GitHub Actions では `next dev --turbo`（API 側は `npm run start:ts`）を Playwright の `webServer` として起動し、本番ビルドを事前に作らずに E2E を実施する。
+- `actions/cache` で Next.js `.next/cache`、Storybook/Vite キャッシュ、Playwright ブラウザバイナリ (`.playwright-browsers/`) を再利用。Storybook ビルドもパス差分を検知し、必要時のみ実行する。
+- main への push かつフロントエンド差分がある場合のみ `npm --workspace @test-codex/web run build` を追加で実行して本番ビルドの破断を検知。差分が無い場合はスキップするため CI 所要時間は ~1m25s 程度。
+- Playwright は `retain-on-failure` のトレース、スクリーンショット、HTML レポートを生成し、`playwright-artifacts-*` としてアップロードする。Slack 通知とサマリーにも Storybook/Next.js ビルドの実行可否が表示される。
 
 ## 実行手順
 

@@ -6,3 +6,5 @@
 - フェーズ3: ./migration/phase3.md
 - フェーズ4: ./migration/phase4.md
 - テスト戦略: ./testing/README.md
+- テスト項目一覧: ./testing/test-catalog.md
+- Git/GitHub運用ガイド: ./operations/github-policy.md

@@ -8,6 +8,7 @@
   ],
   "main": "server.js",
   "scripts": {
+    "lint": "npm --workspace @test-codex/web run lint",
     "prepare": "npm run prisma:generate",
     "start": "node server.js",
     "prestart": "npm run build",

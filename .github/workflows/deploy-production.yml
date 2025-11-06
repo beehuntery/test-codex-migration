@@ -1,0 +1,48 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'SemVer tag to deploy (e.g. v1.2.3)'
+        required: true
+      commit:
+        description: 'Commit SHA corresponding to the tag'
+        required: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Validate tag
+        run: |
+          if [[ "${{ inputs.release_tag }}" != v*.*.* ]]; then
+            echo "release_tag must follow SemVer (vMAJOR.MINOR.PATCH)" >&2
+            exit 1
+          fi
+      - name: Install dependencies
+        run: npm ci
+      - name: Build application
+        run: npm run build
+      - name: Deploy to production
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.PRODUCTION_API_BASE_URL }}
+        run: |
+          echo "Replace this step with the actual production deploy command (e.g. npm run deploy:production)."

@@ -1,0 +1,54 @@
+name: バグ報告
+description: 不具合や回帰の報告に利用してください。
+title: "[Bug] "
+labels:
+  - type: bug
+  - priority: p1
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## バグ報告テンプレート
+        できるだけ多くの情報を埋めていただくと迅速に対応できます。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: 発生した問題を簡潔に記載してください。
+      placeholder: どの画面で何が起きたかを記載
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 手順を番号付きで記載してください。
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待される結果
+      placeholder: 本来期待していた挙動を記載
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の結果
+      placeholder: 実際に発生した挙動を記載
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 環境
+      description: 利用したブラウザ・OS・ビルド番号などを記載してください。
+      placeholder: 例) Chrome 130 / macOS 15 / staging build #123
+  - type: textarea
+    id: attachments
+    attributes:
+      label: 追加情報
+      description: ログ・スクリーンショット・関連Issueなどがあれば記載してください。

@@ -1,0 +1,25 @@
+template: |
+  ## Changes
+  $CHANGES
+
+  ## Contributors
+  $CONTRIBUTORS
+
+name-template: 'v$RESOLVED_VERSION'
+tags-order: 'ascending'
+version-resolver:
+  minor:
+    labels: ['type: feature']
+  patch:
+    labels: ['type: bug', 'type: chore', 'type: docs']
+  default: patch
+change-template: '- $TITLE (#$NUMBER) by @$AUTHOR'
+categories:
+  - title: 🚀 Features
+    labels: ['type: feature']
+  - title: 🐛 Fixes
+    labels: ['type: bug']
+  - title: 🧹 Maintenance
+    labels: ['type: chore']
+  - title: 📚 Docs
+    labels: ['type: docs']

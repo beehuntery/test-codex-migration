@@ -1,0 +1,30 @@
+name: Branch Name Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure branch naming convention is respected
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.payload.pull_request.head.ref;
+            const patterns = [
+              /^feature\/[0-9]+-[a-z0-9-]+$/,
+              /^fix\/[0-9]+-[a-z0-9-]+$/,
+              /^chore\/[a-z0-9-]+$/,
+              /^hotfix\/[a-z0-9-]+$/,
+              /^release\/(\d{4}-\d{2}-\d{2}|v?\d+\.\d+\.\d+)$/
+            ];
+            if (!patterns.some((pattern) => pattern.test(branch))) {
+              core.setFailed(`Branch "${branch}" does not meet the naming guidelines.\n` +
+                'Use feature/{issue}-{desc}, fix/{issue}-{desc}, chore/{desc}, hotfix/{desc}, or release/{date|version}.');
+            }
