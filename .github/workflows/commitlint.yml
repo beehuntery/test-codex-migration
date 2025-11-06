@@ -16,6 +16,4 @@ jobs:
       - name: Validate commits with commitlint
         uses: wagoid/commitlint-github-action@v6
         with:
-          configFile: commitlint.config.js
-          additionalPackages: |
-            @commitlint/config-conventional
+          configFile: commitlint.config.cjs
