@@ -111,7 +111,7 @@ jobs:
         run: npm --workspace @test-codex/web run build
       - name: Notify Slack (success)
         if: success() && env.SLACK_WEBHOOK_URL != ''
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v2.1.1
         env:
           STORYBOOK_STATUS: ${{ steps.changes.outputs.storybook == 'true' && 'built' || 'skipped' }}
           NEXT_BUILD_STATUS: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.changes.outputs.next_build == 'true') && 'built' || 'skipped' }}
@@ -122,7 +122,7 @@ jobs:
             }
       - name: Notify Slack (failure)
         if: failure() && env.SLACK_WEBHOOK_URL != ''
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           payload: |
             {
