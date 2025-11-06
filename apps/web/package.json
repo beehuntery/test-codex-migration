@@ -27,7 +27,7 @@
     "@types/node": "^22.10.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "eslint": "9.39.0",
+    "eslint": "9.39.1",
     "eslint-config-next": "16.0.1",
     "postcss": "^8.4.47",
     "storybook": "^8.6.14",
