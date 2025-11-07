@@ -19,7 +19,7 @@ jobs:
     if: github.actor != 'dependabot[bot]' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Ensure branch naming convention is respected
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const branch = context.eventName === 'workflow_dispatch'
