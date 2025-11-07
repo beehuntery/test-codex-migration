@@ -111,22 +111,24 @@ jobs:
         run: npm --workspace @test-codex/web run build
       - name: Notify Slack (success)
         if: success() && env.SLACK_WEBHOOK_URL != ''
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v2.1.1
         env:
           STORYBOOK_STATUS: ${{ steps.changes.outputs.storybook == 'true' && 'built' || 'skipped' }}
           NEXT_BUILD_STATUS: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.changes.outputs.next_build == 'true') && 'built' || 'skipped' }}
         with:
+          webhook-type: incoming-webhook
           payload: |
             {
               "text": ":white_check_mark: Playwright E2E workflow succeeded on ${{ github.repository }} (run #${{ github.run_number }}).\nStorybook: ${{ env.STORYBOOK_STATUS }}\nNext.js build: ${{ env.NEXT_BUILD_STATUS }}"
             }
       - name: Notify Slack (failure)
         if: failure() && env.SLACK_WEBHOOK_URL != ''
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
+          webhook-type: incoming-webhook
           payload: |
             {
-              "text": ":x: Playwright E2E workflow failed on ${{ github.repository }} (run #${{ github.run_number }}). Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              "text": ":x: Playwright E2E workflow failed on ${{ github.repository }} (run #${{ github.run_number }}). Check logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             }
       - name: Publish workflow summary
         if: always()
