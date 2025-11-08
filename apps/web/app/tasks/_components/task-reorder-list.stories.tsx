@@ -1,24 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { Task } from '@shared/api';
-import { vi } from 'vitest';
 import { TaskReorderList } from './task-reorder-list';
 import { TaskNotificationProvider } from './task-notification-provider';
 import { emitTaskCompleted } from '../_lib/task-events';
-
-vi.mock('../actions', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../actions')>();
-  return {
-    ...actual,
-    updateTaskTitleAction: async () => undefined,
-    updateTaskDescriptionAction: async () => undefined,
-    updateTaskDueDateAction: async () => undefined,
-    updateTaskTagsAction: async () => undefined,
-    setTaskStatusAction: async () => undefined,
-    reorderTasksAction: async () => ({ success: true }),
-    deleteTaskAction: async () => ({ success: true })
-  };
-});
 
 const fixtureTasks: Task[] = [
   {
