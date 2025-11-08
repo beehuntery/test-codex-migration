@@ -19,6 +19,7 @@ jobs:
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       PLAYWRIGHT_BROWSERS_PATH: .playwright-browsers
+      NEXT_PUBLIC_API_BASE_URL: ${{ vars.PLAYWRIGHT_API_BASE_URL || 'http://localhost:3000' }}
     steps:
       - uses: actions/checkout@v4
       - name: Detect frontend changes
@@ -87,8 +88,6 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium
       - name: Run Playwright E2E
-        env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
         run: |
           npm run playwright:e2e || {
             echo "PLAYWRIGHT_FAILED=true" >> "$GITHUB_ENV"
