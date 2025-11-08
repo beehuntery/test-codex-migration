@@ -25,6 +25,7 @@
 3. README に記載のビルド/スタートコマンドを再確認し、`package.json` の `prestart` が `npm run build` を呼ぶため、Render 側の Build Command は `npm install --include=dev`（devDependencies も取得）を推奨します。Prisma モードで JSON から初期データを投入する場合、Start Command を `npm run start:render`（`prisma:migrate` → `migrate:json` → 本番起動）に変更するとテーブルが自動作成されます。README.md#L108-L129
    - `start:render` は `prisma db push --force-reset` を実行するため、既存データが消えて困る環境では使用しないでください。本番では `DATA_STORE=json` で先にデータをバックアップするか、`prisma migrate deploy` ベースの別スクリプトを用意してください。
    - 既存データを保持したままマイグレーションを適用したい場合は `npm run start:render-safe`（= `prisma migrate deploy` → `npm start`）に Start Command を切り替えます。schema 変更のみ反映され、`migrate:json` のような再投入は行いません。
+   - Next.js 用の Web Service では Prisma を使わないため、Build Command 実行時に `SKIP_PRISMA_GENERATE=1` の環境変数を設定してください（`package.json` の `prepare` スクリプトがスキップされ、`prisma` コマンドを探しに行かなくなります）。
 
 ## 2. Render でステージング Web Service を作成
 1. Render ダッシュボードで「New」→「Web Service」を選択。
@@ -60,16 +61,5 @@
 4. 監視: Render Metrics（レスポンスタイム/エラーレート）を確認し、閾値を Phase4 Runbook のチェックリストに記録。
 
 ## 6. Slack / Grafana 連携
-1. Render の Notification（Events → Webhook）を使う場合は、`SLACK_WEBHOOK_URL` にステージング用チャンネルを指定し、デプロイ完了/失敗を通知。
-2. Grafana を導入済みの場合は、`canary-request` 系メトリクスの `environment=staging` ラベルが収集されるよう、Exporter をステージングに接続します（詳細は `docs/observability/canary-dashboard.md`）。
-3. Incident 連絡系はステージングでも #incidents-stg など分け、本番と混在しないようにする。
-
-## 7. 証跡の残し方
-- Render デプロイログ、環境変数一覧、Persistent Disk 設定画面のスクリーンショットを取得し、`docs/migration/phase5.md` の Hosting & Deployment セクションにリンク。
-- Go/No-Go チェックリスト #12 の「証跡リンク」に上記スクショ or Wiki ページを記載。
-- Runbook（`docs/migration/phase4-runbook.md`）の「リハーサル環境」欄にステージング URL と担当者を追記。
-
-## 次のステップ
-- 本番 Web Service を同手順で構築し、環境変数を本番値に差し替える。
-- フェーズ5バックログ #3 のステータスを更新し、Grafana スタック (#4) と接続テストを行う。
-- Cutover Prep (T-3) でステージングに最新 `main` をデプロイし、Playwright + Storybook スモークと Canary ダッシュボードを使ったリハーサルを実施する。
+1. Render の Notification（Events → Webhook）を使う場合は、`SLACK_WEBHOOK_URL` にステージング用チャ
+[... output truncated to fit 10240 bytes ...]

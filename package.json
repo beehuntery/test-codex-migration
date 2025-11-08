@@ -9,7 +9,7 @@
   "main": "server.js",
   "scripts": {
     "lint": "npm --workspace @test-codex/web run lint",
-    "prepare": "npm run prisma:generate",
+    "prepare": "node scripts/run-prisma-generate.js",
     "start": "node server.js",
     "start:render": "npm run prisma:migrate && npm run migrate:json && npm start",
     "start:render-safe": "npm run prisma:deploy && npm start",
