@@ -7,10 +7,13 @@ if (!process.env.NEXT_PORT) {
   process.env.NEXT_PORT = '3001';
 }
 
+const nextPort = process.env.NEXT_PORT;
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+
 const apiServerCommand = isCI ? 'NODE_ENV=production npm run start:ts' : 'npm run dev:ts';
 const webServerCommand = isCI
-  ? 'LOG_API_REQUESTS=1 PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run dev --prefix apps/web -- --turbo'
-  : 'PORT=3001 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 npm run dev --prefix apps/web';
+  ? `LOG_API_REQUESTS=1 PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${apiBaseUrl} npm run dev --prefix apps/web -- --turbo`
+  : `PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${apiBaseUrl} npm run dev --prefix apps/web`;
 
 export default defineConfig({
   testDir: 'tests/e2e',
