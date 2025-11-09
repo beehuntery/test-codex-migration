@@ -1,6 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { BASE_URL, captureConsoleErrors, createTaskViaUI, getTaskCardByTitle } from './utils';
 
+const LEGACY_BASE_URL =
+  process.env.PLAYWRIGHT_LEGACY_BASE_URL ??
+  process.env.LEGACY_BASE_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  'http://localhost:3000';
+const LEGACY_ROOT_URL = new URL('/', LEGACY_BASE_URL).toString();
+
 test.describe('Legacy UI parity', () => {
   test('legacy static UI reflects Next.js task updates', async ({ page, context }) => {
     const uniqueId = Date.now();
@@ -27,7 +34,7 @@ test.describe('Legacy UI parity', () => {
 
     const legacyPage = await context.newPage();
     const legacyConsole = captureConsoleErrors(legacyPage);
-    await legacyPage.goto('http://localhost:3000');
+    await legacyPage.goto(LEGACY_ROOT_URL);
 
     const legacyTask = legacyPage.locator(`[data-task-id="${taskId}"]`).first();
     await expect(legacyTask).toBeVisible();
