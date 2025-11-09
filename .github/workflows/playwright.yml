@@ -97,17 +97,9 @@ jobs:
         run: npx playwright install chromium
       - name: Build backend artifacts
         run: npm run build
-      - name: Log staging API response
+      - name: Run Playwright E2E
         run: |
-          echo "Pinging ${NEXT_PUBLIC_API_BASE_URL}/api/tasks"
-          curl -s -o /tmp/staging-api.json \
-               -w 'status=%{http_code} total=%{time_total}s size=%{size_download} bytes\n' \
-               --max-time 60 "${NEXT_PUBLIC_API_BASE_URL}/api/tasks"
-          echo "--- API response preview ---"
-          head -n 20 /tmp/staging-api.json || true
-      - name: Run Playwright E2E (trace on)
-        run: |
-          npx playwright test --trace on tests/e2e || {
+          npx playwright test --trace off tests/e2e || {
             echo "PLAYWRIGHT_FAILED=true" >> "$GITHUB_ENV"
             exit 1
           }
