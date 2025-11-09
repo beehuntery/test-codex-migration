@@ -95,6 +95,14 @@ jobs:
         run: npm --workspace @test-codex/web run storybook:build
       - name: Install Playwright browsers
         run: npx playwright install chromium
+      - name: Log staging API response
+        run: |
+          echo "Pinging ${NEXT_PUBLIC_API_BASE_URL}/api/tasks"
+          curl -s -o /tmp/staging-api.json \
+               -w 'status=%{http_code} total=%{time_total}s size=%{size_download} bytes\n' \
+               --max-time 60 "${NEXT_PUBLIC_API_BASE_URL}/api/tasks"
+          echo "--- API response preview ---"
+          head -n 20 /tmp/staging-api.json || true
       - name: Run Playwright E2E
         run: |
           npm run playwright:e2e || {
