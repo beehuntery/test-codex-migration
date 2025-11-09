@@ -164,7 +164,7 @@ export async function deleteTaskRequest(taskId: string): Promise<Task> {
 
   const parsedTask = TaskSchema.safeParse(data);
   if (!parsedTask.success) {
-    throw a Error('Failed to parse delete task response');
+    throw new Error('Failed to parse delete task response');
   }
 
   return parsedTask.data;
