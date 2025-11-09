@@ -13,9 +13,13 @@ import {
 } from '@shared/api';
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+const LOG_API_REQUESTS = process.env.LOG_API_REQUESTS === '1';
 
 export async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
   const url = new URL(path, API_BASE_URL);
+  const method = init?.method ?? 'GET';
+  const startedAt = LOG_API_REQUESTS ? Date.now() : 0;
+
   const res = await fetch(url.toString(), {
     cache: 'no-store',
     headers: {
@@ -24,6 +28,11 @@ export async function fetchFromApi<T>(path: string, init?: RequestInit): Promise
     },
     ...init
   });
+
+  if (LOG_API_REQUESTS) {
+    const elapsed = Date.now() - startedAt;
+    console.log(`[Next API] ${method} ${url.toString()} -> ${res.status} (${elapsed}ms)`);
+  }
 
   if (!res.ok) {
     const payload = await res.json().catch(() => ({}));
@@ -155,7 +164,7 @@ export async function deleteTaskRequest(taskId: string): Promise<Task> {
 
   const parsedTask = TaskSchema.safeParse(data);
   if (!parsedTask.success) {
-    throw new Error('Failed to parse delete task response');
+    throw a Error('Failed to parse delete task response');
   }
 
   return parsedTask.data;
