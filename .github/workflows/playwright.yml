@@ -5,6 +5,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      target-branch:
+        description: 'Branch to test'
+        required: false
+        default: 'main'
 
 concurrency:
   group: e2e-${{ github.workflow }}-${{ github.ref }}
