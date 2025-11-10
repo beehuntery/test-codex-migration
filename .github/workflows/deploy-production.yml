@@ -43,12 +43,15 @@ jobs:
         id: meta
         run: |
           echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Show deployment targets
+        run: |
+          echo "Express API URL: ${{ vars.PRODUCTION_API_BASE_URL }}"
+          echo "Next.js URL   : ${{ vars.PRODUCTION_NEXT_BASE_URL }}"
       - name: Deploy Express API (Render production)
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_EXPRESS_PRD }}
           DEPLOY_COMMIT: ${{ steps.meta.outputs.commit_sha }}
-          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.PRODUCTION_API_BASE_URL }}
         run: |
           if [[ -z "$RENDER_API_KEY" || -z "$RENDER_SERVICE_ID" ]]; then
             echo "Render production service variables are not configured." >&2
@@ -65,7 +68,6 @@ jobs:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_NEXT_PRD }}
           DEPLOY_COMMIT: ${{ steps.meta.outputs.commit_sha }}
-          NEXT_PUBLIC_BASE_URL: ${{ secrets.PRODUCTION_NEXT_BASE_URL }}
         run: |
           if [[ -z "$RENDER_API_KEY" || -z "$RENDER_SERVICE_ID" ]]; then
             echo "Render production NEXT service variables are not configured." >&2
