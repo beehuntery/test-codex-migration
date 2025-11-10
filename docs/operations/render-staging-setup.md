@@ -13,7 +13,7 @@
 ## 手順概要
 1. デプロイ設定と GitHub Environments の役割整理（[設定手順はこちら](./github-environments.md)）。
 2. Render 上に **Express 用** と **Next.js 用** の 2 サービスを作成。
-3. サービスごとに環境変数・Secrets・Persistent Disk を設定。
+3. サービスごとに環境変数・Secrets・Persistent Disk を設定。Render API を用いた自動デプロイを行う場合、**サービス名だけでなく Service ID（`srv-...`）を控える**。CLI/MCP から `render list_services` を実行すると ID を取得できる。
 4. 初回デプロイと Smoke テストを実施。
 5. 監視/通知（Slack, Grafana）との連携。
 
@@ -30,6 +30,7 @@
 ## 2. Render でステージング Web Service を作成
 
 ### 2.1 Express (API) サービス `test-codex-migration-stg`
+> Service ID: `srv-d47e4a6r433s739f6lig`
 1. Render ダッシュボードで「New」→「Web Service」。リポジトリは `beehuntery/test-codex-migration`（ルート直下）を指定し、ブランチは `main`。
 2. Service name は `test-codex-migration-stg`（本番は `-prod` を推奨）。リージョンは本番と同じにする。
 3. プランは `Starter` 以上。Free プランだとスリープ復帰が遅く Cutover スモークに支障が出る。
@@ -38,6 +39,7 @@
 6. Auto Deploy を ON、PR Preview は任意。ステージング URL を Runbook に記載し、GitHub Environment `staging` に紐付けます。
 
 ### 2.2 Next.js (App Router) サービス `test-codex-migration-next-stg`
+> Service ID: `srv-d47ga4ndiees739bm360`
 1. 同じく「New」→「Web Service」。リポジトリは `beehuntery/test-codex-migration`、ただし `Root Directory` に `apps/web` を指定。
 2. Service name は `test-codex-migration-next-stg`。リージョン/プランは Express と同じく `Starter` 以上。
 3. Build Command: `SKIP_PRISMA_GENERATE=1 npm install --include=dev && npm run build`（Prisma 依存を避けるため環境変数を付与）。

@@ -43,7 +43,7 @@ jobs:
         id: meta
         run: |
           echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Deploy to production (Render Express)
+      - name: Deploy Express API (Render production)
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_EXPRESS_PRD }}
@@ -56,6 +56,23 @@ jobs:
           fi
 
           echo "Triggering Render deploy for service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
+          curl -sS -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"clearCache\":false,\"commitId\":\"$DEPLOY_COMMIT\"}"
+      - name: Deploy Next.js frontend (Render production)
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_NEXT_PRD }}
+          DEPLOY_COMMIT: ${{ steps.meta.outputs.commit_sha }}
+          NEXT_PUBLIC_BASE_URL: ${{ secrets.PRODUCTION_NEXT_BASE_URL }}
+        run: |
+          if [[ -z "$RENDER_API_KEY" || -z "$RENDER_SERVICE_ID" ]]; then
+            echo "Render production NEXT service variables are not configured." >&2
+            exit 1
+          fi
+
+          echo "Triggering Render deploy for Next.js service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
           curl -sS -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json" \

@@ -6,8 +6,8 @@ Render のステージング/本番サービスと GitHub Actions を安全に�
 ## 2. 作成する Environment と紐付け
 | Environment | 用途 | 紐付く Render サービス | 備考 |
 | --- | --- | --- | --- |
-| `staging` | `main` 自動反映・Cutover リハーサル | `test-codex-migration-stg` (Express), `test-codex-migration-next-stg` (Next.js) | Auto Deploy / Preview を許可。**Reviewer 承認は不要（トリアージ迅速化のため未設定）**。|
-| `production` | 本番カットオーバー／Cutover 本番 | 予定: `test-codex-migration-prd`, `test-codex-migration-next-prd` | `workflow_dispatch` からのみデプロイ。レビュー必須: Tech Lead + PM。|
+| `staging` | `main` 自動反映・Cutover リハーサル | Service IDs<br>Express: `srv-d47e4a6r433s739f6lig`<br>Next.js: `srv-d47ga4ndiees739bm360` | Auto Deploy / Preview を許可。**Reviewer 承認は不要（トリアージ迅速化のため未設定）**。|
+| `production` | 本番カットオーバー／Cutover 本番 | Service IDs<br>Express: `srv-d47mk5ndiees739g0nag`<br>Next.js: `srv-d47mq2umcj7s73dgc6fg` | `workflow_dispatch` からのみデプロイ。レビュー必須: Tech Lead + PM。|
 
 ## 3. 設定手順
 ### 3.1 共通フロー
@@ -24,8 +24,8 @@ Render のステージング/本番サービスと GitHub Actions を安全に�
   - `STAGING_NEXT_BASE_URL`: `https://test-codex-migration-next-stg.onrender.com`
   - `SLACK_WEBHOOK_URL`: ステージング通知用チャンネルの Incoming Webhook
 - **Variables**（任意）
-  - `RENDER_SERVICE_EXPRESS_STG`: `test-codex-migration-stg`
-  - `RENDER_SERVICE_NEXT_STG`: `test-codex-migration-next-stg`
+  - `RENDER_SERVICE_EXPRESS_STG`: `srv-d47e4a6r433s739f6lig`（`test-codex-migration-stg`）
+  - `RENDER_SERVICE_NEXT_STG`: `srv-d47ga4ndiees739bm360`（`test-codex-migration-next-stg`）
 - **Protection**
   - Reviewer設定は不要（Approvals 0）。Cutover リハーサルを頻繁に回せるようフリーパスとする。
 - **Workflow 連携**
@@ -37,8 +37,8 @@ Render のステージング/本番サービスと GitHub Actions を安全に�
   - `PRODUCTION_NEXT_BASE_URL`: 本番 Next.js URL
   - `SLACK_WEBHOOK_URL`: 本番用通知チャンネル（Staging と分離）
 - **Variables**（任意）
-  - `RENDER_SERVICE_EXPRESS_PRD`
-  - `RENDER_SERVICE_NEXT_PRD`
+  - `RENDER_SERVICE_EXPRESS_PRD`: `srv-d47mk5ndiees739g0nag`（`test-codex-migration-prd`）
+  - `RENDER_SERVICE_NEXT_PRD`: `srv-d47mq2umcj7s73dgc6fg`（`test-codex-migration-next-prd`）
 - **Protection**
   - Reviewer: Tech Lead + PM など 2 名を Required reviewers に指定。
   - 待機時間（任意）: 5 分など。Cutover Go/No-Go のフローに合わせる。
@@ -50,7 +50,7 @@ Render のステージング/本番サービスと GitHub Actions を安全に�
 | Workflow | Environment | 主な参照シークレット/変数 |
 | --- | --- | --- |
 | `.github/workflows/deploy-staging.yml` | `staging` | `STAGING_API_BASE_URL`, `SLACK_WEBHOOK_URL` |
-| `.github/workflows/deploy-production.yml` | `production` | `PRODUCTION_API_BASE_URL`, `SLACK_WEBHOOK_URL` |
+| `.github/workflows/deploy-production.yml` | `production` | `PRODUCTION_API_BASE_URL`, `PRODUCTION_NEXT_BASE_URL`, `RENDER_SERVICE_EXPRESS_PRD`, `RENDER_SERVICE_NEXT_PRD`, `RENDER_API_KEY`, `SLACK_WEBHOOK_URL` |
 | `.github/workflows/playwright.yml` | （任意）staging | Playwright の `NEXT_PUBLIC_API_BASE_URL` を環境変数化する場合に利用 |
 
 > 参考: Render 側のサービス名・環境変数との対応は [Render ステージング環境セットアップ手順](./render-staging-setup.md) を参照してください。
