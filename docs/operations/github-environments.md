@@ -20,10 +20,10 @@ Render のステージング/本番サービスと GitHub Actions を安全に�
 
 ### 3.2 `staging` 環境
 - **Secrets**（最低限）
+  - `SLACK_WEBHOOK_URL`: ステージング通知用チャンネルの Incoming Webhook
+- **Variables**
   - `STAGING_API_BASE_URL`: `https://test-codex-migration-stg.onrender.com`
   - `STAGING_NEXT_BASE_URL`: `https://test-codex-migration-next-stg.onrender.com`
-  - `SLACK_WEBHOOK_URL`: ステージング通知用チャンネルの Incoming Webhook
-- **Variables**（任意）
   - `RENDER_SERVICE_EXPRESS_STG`: `srv-d47e4a6r433s739f6lig`（`test-codex-migration-stg`）
   - `RENDER_SERVICE_NEXT_STG`: `srv-d47ga4ndiees739bm360`（`test-codex-migration-next-stg`）
 - **Protection**
@@ -33,11 +33,11 @@ Render のステージング/本番サービスと GitHub Actions を安全に�
 
 ### 3.3 `production` 環境
 - **Secrets**
-  - `PRODUCTION_API_BASE_URL`: 本番 Express URL
-  - `PRODUCTION_NEXT_BASE_URL`: 本番 Next.js URL
   - `RENDER_API_KEY`: Render API トークン（Dashboard > Account > API Keys）
   - `SLACK_WEBHOOK_URL`: 本番用通知チャンネル（Staging と分離）
-- **Variables**（任意）
+- **Variables**
+  - `PRODUCTION_API_BASE_URL`: 本番 Express URL
+  - `PRODUCTION_NEXT_BASE_URL`: 本番 Next.js URL
   - `RENDER_SERVICE_EXPRESS_PRD`: `srv-d47mk5ndiees739g0nag`（`test-codex-migration-prd`）
   - `RENDER_SERVICE_NEXT_PRD`: `srv-d47mq2umcj7s73dgc6fg`（`test-codex-migration-next-prd`）
 - **Protection**
