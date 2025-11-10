@@ -65,6 +65,8 @@ export interface PrismaDataStoreOptions {
   slowQueryThresholdMs?: number;
   logDiagnostics?: boolean;
   retryWrites?: boolean;
+  sqliteBusyTimeoutMs?: number;
+  enableSQLiteWal?: boolean;
 }
 
 export interface PrismaDataStoreMetrics {
@@ -98,7 +100,9 @@ const DEFAULT_OPTIONS: Required<Omit<PrismaDataStoreOptions, 'maxRetries'>> & { 
   retryDelayMs: 150,
   slowQueryThresholdMs: 500,
   logDiagnostics: true,
-  retryWrites: false
+  retryWrites: false,
+  sqliteBusyTimeoutMs: 5000,
+  enableSQLiteWal: true
 };
 
 const RETRYABLE_ERROR_CODES = new Set(['P1001', 'P1002', 'P1008', 'P1017', 'P2024']);
@@ -143,6 +147,8 @@ export class PrismaDataStore implements DataStore {
 
   private readonly metrics: PrismaDataStoreMetrics;
 
+  private readonly ready: Promise<void>;
+
   constructor(options: PrismaDataStoreOptions = {}, client?: PrismaClientType) {
     this.options = { ...DEFAULT_OPTIONS, ...options };
     this.prisma = client ?? new PrismaClient();
@@ -151,6 +157,11 @@ export class PrismaDataStore implements DataStore {
       slowQueryCount: 0,
       transactionCount: 0
     };
+    this.ready = this.configureDatasource().catch((error) => {
+      if (this.options.logDiagnostics) {
+        console.warn('[PrismaDataStore] Failed to run datasource initialization', error);
+      }
+    });
   }
 
   getRuntimeMetrics(): PrismaDataStoreMetrics {
@@ -197,6 +208,7 @@ export class PrismaDataStore implements DataStore {
   }
 
   private async execute<T>(meta: PrismaOperationMeta, run: () => Promise<T>): Promise<T> {
+    await this.ready;
     let delay = this.options.retryDelayMs;
 
     for (let attempt = 0; attempt <= this.options.maxRetries; attempt += 1) {
@@ -220,6 +232,37 @@ export class PrismaDataStore implements DataStore {
     }
 
     throw new Error(`Retry budget exhausted for ${meta.operation}`);
+  }
+
+  private isSQLiteDatasource(): boolean {
+    const url = process.env.DATABASE_URL ?? '';
+    return url.startsWith('file:');
+  }
+
+  private async configureDatasource(): Promise<void> {
+    if (!this.isSQLiteDatasource()) {
+      return;
+    }
+
+    if (this.options.enableSQLiteWal) {
+      try {
+        await this.prisma.$executeRawUnsafe('PRAGMA journal_mode=WAL');
+      } catch (error) {
+        if (this.options.logDiagnostics) {
+          console.warn('[PrismaDataStore] Failed to enable WAL journal mode', error);
+        }
+      }
+    }
+
+    if (this.options.sqliteBusyTimeoutMs > 0) {
+      try {
+        await this.prisma.$executeRawUnsafe(`PRAGMA busy_timeout = ${this.options.sqliteBusyTimeoutMs}`);
+      } catch (error) {
+        if (this.options.logDiagnostics) {
+          console.warn('[PrismaDataStore] Failed to configure busy_timeout', error);
+        }
+      }
+    }
   }
 
   async listTasks(): Promise<Task[]> {
