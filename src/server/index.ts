@@ -19,6 +19,25 @@ const app = express();
 const dataStore = getDataStore();
 
 app.use(express.json());
+
+const shouldLogApiRequests = process.env.LOG_API_REQUESTS === '1';
+if (shouldLogApiRequests) {
+  app.use((req, res, next) => {
+    if (!req.path?.startsWith('/api/')) {
+      return next();
+    }
+    const startedAt = Date.now();
+    res.on('finish', () => {
+      const elapsed = Date.now() - startedAt;
+      const userAgent = req.get('user-agent') || 'unknown';
+      console.log(
+        `[API] ${req.method} ${req.originalUrl} -> ${res.statusCode} (${elapsed}ms) UA="${userAgent}"`
+      );
+    });
+    return next();
+  });
+}
+
 app.use(express.static(path.resolve(process.cwd(), 'public')));
 
 function normalizeDate(value: unknown): string | null {
