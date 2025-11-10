@@ -6,9 +6,6 @@ on:
       release_tag:
         description: 'SemVer tag to deploy (e.g. v1.2.3)'
         required: true
-      commit:
-        description: 'Commit SHA corresponding to the tag'
-        required: true
 
 concurrency:
   group: deploy-production
@@ -26,7 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.commit }}
+          ref: refs/tags/${{ inputs.release_tag }}
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: 20
@@ -41,8 +39,24 @@ jobs:
         run: npm ci
       - name: Build application
         run: npm run build
-      - name: Deploy to production
+      - name: Capture metadata
+        id: meta
+        run: |
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Deploy to production (Render Express)
         env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_EXPRESS_PRD }}
+          DEPLOY_COMMIT: ${{ steps.meta.outputs.commit_sha }}
           NEXT_PUBLIC_API_BASE_URL: ${{ secrets.PRODUCTION_API_BASE_URL }}
         run: |
-          echo "Replace this step with the actual production deploy command (e.g. npm run deploy:production)."
+          if [[ -z "$RENDER_API_KEY" || -z "$RENDER_SERVICE_ID" ]]; then
+            echo "Render production service variables are not configured." >&2
+            exit 1
+          fi
+
+          echo "Triggering Render deploy for service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
+          curl -sS -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"clearCache\":false,\"commitId\":\"$DEPLOY_COMMIT\"}"
