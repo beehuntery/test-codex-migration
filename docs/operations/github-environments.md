@@ -35,6 +35,7 @@ Render のステージング/本番サービスと GitHub Actions を安全に�
 - **Secrets**
   - `PRODUCTION_API_BASE_URL`: 本番 Express URL
   - `PRODUCTION_NEXT_BASE_URL`: 本番 Next.js URL
+  - `RENDER_API_KEY`: Render API トークン（Dashboard > Account > API Keys）
   - `SLACK_WEBHOOK_URL`: 本番用通知チャンネル（Staging と分離）
 - **Variables**（任意）
   - `RENDER_SERVICE_EXPRESS_PRD`: `srv-d47mk5ndiees739g0nag`（`test-codex-migration-prd`）
