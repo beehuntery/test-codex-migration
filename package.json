@@ -43,7 +43,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "^19.5.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "@playwright/test": "^1.56.1",
     "@types/express": "^4.17.21",
     "@types/node": "^24.10.0",
