@@ -64,6 +64,7 @@ print(json.dumps({"clearCache": False, "commitId": os.environ["DEPLOY_COMMIT"]})
 PY
 )
 
+          echo "Payload: $payload"
           echo "Triggering Render deploy for service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
           response=$(curl -sS -w "\n%{http_code}" -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
@@ -87,8 +88,13 @@ PY
             exit 1
           fi
 
-          payload=$(jq -n --arg commit "$DEPLOY_COMMIT" '{clearCache:false, commitId:$commit}')
+          payload=$(python - <<'PY'
+import json, os
+print(json.dumps({"clearCache": False, "commitId": os.environ["DEPLOY_COMMIT"]}))
+PY
+)
 
+          echo "Payload: $payload"
           echo "Triggering Render deploy for Next.js service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
           response=$(curl -sS -w "\n%{http_code}" -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
