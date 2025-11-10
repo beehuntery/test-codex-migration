@@ -61,10 +61,17 @@ jobs:
           payload=$(jq -n --arg commit "$DEPLOY_COMMIT" '{clearCache:false, commitId:$commit}')
 
           echo "Triggering Render deploy for service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
-          curl -sSf -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+          response=$(curl -sS -w "\n%{http_code}" -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json" \
-            -d "$payload"
+            -d "$payload")
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          if [[ "$status" != 200 ]]; then
+            echo "Render deploy failed ($status): $body" >&2
+            exit 1
+          fi
+          echo "Render response: $body"
       - name: Deploy Next.js frontend (Render production)
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
@@ -79,7 +86,14 @@ jobs:
           payload=$(jq -n --arg commit "$DEPLOY_COMMIT" '{clearCache:false, commitId:$commit}')
 
           echo "Triggering Render deploy for Next.js service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
-          curl -sSf -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+          response=$(curl -sS -w "\n%{http_code}" -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json" \
-            -d "$payload"
+            -d "$payload")
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          if [[ "$status" != 200 ]]; then
+            echo "Render deploy failed ($status): $body" >&2
+            exit 1
+          fi
+          echo "Render response: $body"
