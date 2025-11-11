@@ -246,7 +246,7 @@ export class PrismaDataStore implements DataStore {
 
     if (this.options.enableSQLiteWal) {
       try {
-        await this.prisma.$executeRawUnsafe('PRAGMA journal_mode=WAL');
+        await this.prisma.$queryRawUnsafe('PRAGMA journal_mode=WAL');
       } catch (error) {
         if (this.options.logDiagnostics) {
           console.warn('[PrismaDataStore] Failed to enable WAL journal mode', error);
@@ -256,7 +256,7 @@ export class PrismaDataStore implements DataStore {
 
     if (this.options.sqliteBusyTimeoutMs > 0) {
       try {
-        await this.prisma.$executeRawUnsafe(`PRAGMA busy_timeout = ${this.options.sqliteBusyTimeoutMs}`);
+        await this.prisma.$queryRawUnsafe(`PRAGMA busy_timeout = ${this.options.sqliteBusyTimeoutMs}`);
       } catch (error) {
         if (this.options.logDiagnostics) {
           console.warn('[PrismaDataStore] Failed to configure busy_timeout', error);

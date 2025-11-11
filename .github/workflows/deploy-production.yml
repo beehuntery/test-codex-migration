@@ -49,61 +49,29 @@ jobs:
           echo "Next.js URL   : ${{ vars.PRODUCTION_NEXT_BASE_URL }}"
       - name: Deploy Express API (Render production)
         env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_EXPRESS_PRD }}
+          RENDER_DEPLOY_HOOK_KEY: ${{ secrets.RENDER_DEPLOY_HOOK_EXPRESS_KEY }}
           DEPLOY_COMMIT: ${{ steps.meta.outputs.commit_sha }}
         run: |
-          if [[ -z "$RENDER_API_KEY" || -z "$RENDER_SERVICE_ID" ]]; then
-            echo "Render production service variables are not configured." >&2
+          if [[ -z "$RENDER_DEPLOY_HOOK_KEY" || -z "$RENDER_SERVICE_ID" ]]; then
+            echo "Render production service deploy hook variables are not configured." >&2
             exit 1
           fi
 
-          payload=$(python - <<'PY'
-import json, os
-print(json.dumps({"clearCache": False, "commitId": os.environ["DEPLOY_COMMIT"]}))
-PY
-)
-
-          echo "Payload: $payload"
-          echo "Triggering Render deploy for service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
-          response=$(curl -sS -w "\n%{http_code}" -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
-            -H "Authorization: Bearer $RENDER_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$payload")
-          status=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-          if [[ "$status" != 200 ]]; then
-            echo "Render deploy failed ($status): $body" >&2
-            exit 1
-          fi
-          echo "Render response: $body"
+          hook="https://api.render.com/deploy/$RENDER_SERVICE_ID?key=$RENDER_DEPLOY_HOOK_KEY&ref=$DEPLOY_COMMIT"
+          echo "Triggering Render deploy hook for service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
+          curl -fsSL -X POST "$hook"
       - name: Deploy Next.js frontend (Render production)
         env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_NEXT_PRD }}
+          RENDER_DEPLOY_HOOK_KEY: ${{ secrets.RENDER_DEPLOY_HOOK_NEXT_KEY }}
           DEPLOY_COMMIT: ${{ steps.meta.outputs.commit_sha }}
         run: |
-          if [[ -z "$RENDER_API_KEY" || -z "$RENDER_SERVICE_ID" ]]; then
-            echo "Render production NEXT service variables are not configured." >&2
+          if [[ -z "$RENDER_DEPLOY_HOOK_KEY" || -z "$RENDER_SERVICE_ID" ]]; then
+            echo "Render production NEXT service deploy hook variables are not configured." >&2
             exit 1
           fi
 
-          payload=$(python - <<'PY'
-import json, os
-print(json.dumps({"clearCache": False, "commitId": os.environ["DEPLOY_COMMIT"]}))
-PY
-)
-
-          echo "Payload: $payload"
-          echo "Triggering Render deploy for Next.js service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
-          response=$(curl -sS -w "\n%{http_code}" -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
-            -H "Authorization: Bearer $RENDER_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$payload")
-          status=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-          if [[ "$status" != 200 ]]; then
-            echo "Render deploy failed ($status): $body" >&2
-            exit 1
-          fi
-          echo "Render response: $body"
+          hook="https://api.render.com/deploy/$RENDER_SERVICE_ID?key=$RENDER_DEPLOY_HOOK_KEY&ref=$DEPLOY_COMMIT"
+          echo "Triggering Render deploy hook for Next.js service $RENDER_SERVICE_ID (commit $DEPLOY_COMMIT)"
+          curl -fsSL -X POST "$hook"
