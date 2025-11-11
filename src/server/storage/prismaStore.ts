@@ -67,6 +67,7 @@ export interface PrismaDataStoreOptions {
   retryWrites?: boolean;
   sqliteBusyTimeoutMs?: number;
   enableSQLiteWal?: boolean;
+  transactionTimeoutMs?: number;
 }
 
 export interface PrismaDataStoreMetrics {
@@ -102,7 +103,8 @@ const DEFAULT_OPTIONS: Required<Omit<PrismaDataStoreOptions, 'maxRetries'>> & { 
   logDiagnostics: true,
   retryWrites: false,
   sqliteBusyTimeoutMs: 5000,
-  enableSQLiteWal: true
+  enableSQLiteWal: true,
+  transactionTimeoutMs: 15000
 };
 
 const RETRYABLE_ERROR_CODES = new Set(['P1001', 'P1002', 'P1008', 'P1017', 'P2024']);
@@ -288,9 +290,10 @@ export class PrismaDataStore implements DataStore {
         transactional: true
       },
       async () => {
-        const created = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-          const aggregate = await tx.task.aggregate({ _max: { order: true } });
-          const order = (aggregate._max.order ?? -1) + 1;
+        const created = await this.prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            const aggregate = await tx.task.aggregate({ _max: { order: true } });
+            const order = (aggregate._max.order ?? -1) + 1;
 
           const result: PrismaTaskWithTags = await tx.task.create({
             data: {
@@ -309,8 +312,10 @@ export class PrismaDataStore implements DataStore {
             include: { tags: { select: { name: true } } }
           });
 
-          return mapTask(result);
-        });
+            return mapTask(result);
+          },
+          { timeout: this.options.transactionTimeoutMs }
+        );
 
         return created;
       }
@@ -328,8 +333,9 @@ export class PrismaDataStore implements DataStore {
       },
       async () => {
         try {
-          const updated = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            const updateData: Record<string, unknown> = {};
+          const updated = await this.prisma.$transaction(
+            async (tx: Prisma.TransactionClient) => {
+              const updateData: Record<string, unknown> = {};
 
             if (data.title !== undefined) {
               updateData.title = data.title;
@@ -363,14 +369,16 @@ export class PrismaDataStore implements DataStore {
               };
             }
 
-            const result: PrismaTaskWithTags = await tx.task.update({
-              where: { id },
-              data: updateData,
-              include: { tags: { select: { name: true } } }
-            });
+              const result: PrismaTaskWithTags = await tx.task.update({
+                where: { id },
+                data: updateData,
+                include: { tags: { select: { name: true } } }
+              });
 
-            return mapTask(result);
-          });
+              return mapTask(result);
+            },
+            { timeout: this.options.transactionTimeoutMs }
+          );
 
           return updated;
         } catch (error: any) {
@@ -413,9 +421,10 @@ export class PrismaDataStore implements DataStore {
         transactional: true
       },
       async () =>
-        this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-          const tasks: Array<{ id: string; order: number | null }> = await tx.task.findMany({
-            select: { id: true, order: true }
+        this.prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            const tasks: Array<{ id: string; order: number | null }> = await tx.task.findMany({
+              select: { id: true, order: true }
           });
           const orderMap = new Map(order.map((id, idx) => [id, idx] as const));
           let changed = false;
@@ -448,12 +457,14 @@ export class PrismaDataStore implements DataStore {
             return existing.map(mapTask);
           }
 
-          const updated: PrismaTaskWithTags[] = await tx.task.findMany({
-            orderBy: { order: 'asc' },
-            include: { tags: { select: { name: true } } }
-          });
-          return updated.map(mapTask);
-        })
+            const updated: PrismaTaskWithTags[] = await tx.task.findMany({
+              orderBy: { order: 'asc' },
+              include: { tags: { select: { name: true } } }
+            });
+            return updated.map(mapTask);
+          },
+          { timeout: this.options.transactionTimeoutMs }
+        )
     );
   }
 
@@ -496,9 +507,10 @@ export class PrismaDataStore implements DataStore {
         transactional: true
       },
       async () =>
-        this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-          const existing = await tx.tag.findUnique({ where: { name: current } });
-          if (!existing) {
+        this.prisma.$transaction(
+          async (tx: Prisma.TransactionClient) => {
+            const existing = await tx.tag.findUnique({ where: { name: current } });
+            if (!existing) {
             throw Object.assign(new Error('Tag not found'), { code: 'NOT_FOUND' });
           }
 
@@ -510,9 +522,11 @@ export class PrismaDataStore implements DataStore {
             await tx.tag.update({ where: { name: current }, data: { name: next } });
           }
 
-          const tags = await tx.tag.findMany({ orderBy: { name: 'asc' } });
-          return { name: next, tags: tags.map((tag: { name: string }) => tag.name) };
-        })
+            const tags = await tx.tag.findMany({ orderBy: { name: 'asc' } });
+            return { name: next, tags: tags.map((tag: { name: string }) => tag.name) };
+          },
+          { timeout: this.options.transactionTimeoutMs }
+        )
     );
   }
 
@@ -528,9 +542,12 @@ export class PrismaDataStore implements DataStore {
       },
       async () => {
         try {
-          await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            await tx.tag.delete({ where: { name: trimmed } });
-          });
+          await this.prisma.$transaction(
+            async (tx: Prisma.TransactionClient) => {
+              await tx.tag.delete({ where: { name: trimmed } });
+            },
+            { timeout: this.options.transactionTimeoutMs }
+          );
         } catch (error: any) {
           if (error?.code === 'P2025') {
             throw Object.assign(new Error('Tag not found'), { code: 'NOT_FOUND' });

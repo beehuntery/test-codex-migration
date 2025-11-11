@@ -55,7 +55,8 @@ const EnvSchema = z
     PRISMA_LOG_DIAGNOSTICS: booleanFromEnv.optional(),
     PRISMA_RETRY_WRITES: booleanFromEnv.optional(),
     PRISMA_SQLITE_BUSY_TIMEOUT_MS: z.coerce.number().int().min(0).default(5000),
-    PRISMA_SQLITE_ENABLE_WAL: booleanFromEnv.optional()
+    PRISMA_SQLITE_ENABLE_WAL: booleanFromEnv.optional(),
+    PRISMA_TRANSACTION_TIMEOUT_MS: z.coerce.number().int().min(1000).default(15000)
   })
   .transform((value) => ({
     env: value.NODE_ENV,
@@ -72,7 +73,8 @@ const EnvSchema = z
         value.PRISMA_RETRY_WRITES ??
         (value.DATABASE_URL && value.DATABASE_URL.startsWith('file:') ? true : false),
       sqliteBusyTimeoutMs: value.PRISMA_SQLITE_BUSY_TIMEOUT_MS,
-      enableSQLiteWal: value.PRISMA_SQLITE_ENABLE_WAL ?? true
+      enableSQLiteWal: value.PRISMA_SQLITE_ENABLE_WAL ?? true,
+      transactionTimeoutMs: value.PRISMA_TRANSACTION_TIMEOUT_MS
     }
   }));
 

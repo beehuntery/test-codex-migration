@@ -33,7 +33,9 @@ Render のステージング/本番サービスと GitHub Actions を安全に�
 
 ### 3.3 `production` 環境
 - **Secrets**
-  - `RENDER_API_KEY`: Render API トークン（Dashboard > Account > API Keys）
+  - `RENDER_API_KEY`: Render API トークン（Dashboard > Account > API Keys）※（任意で cache クリア用 API を呼ぶ場合のみ）
+  - `RENDER_DEPLOY_HOOK_EXPRESS_KEY`: Render Express 本番サービスの Deploy Hook キー
+  - `RENDER_DEPLOY_HOOK_NEXT_KEY`: Render Next.js 本番サービスの Deploy Hook キー
   - `SLACK_WEBHOOK_URL`: 本番用通知チャンネル（Staging と分離）
 - **Variables**
   - `PRODUCTION_API_BASE_URL`: 本番 Express URL

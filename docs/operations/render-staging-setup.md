@@ -22,9 +22,9 @@
 ## 1. デプロイ設定
 1. Trunk-Based GitHub Flow を維持するため、ステージング環境も `main` ブランチから自動デプロイします。機能開発は短命ブランチ（`feature/...` 等）→ PR → `main` マージ → Render staging へ自動反映、という流れに統一してください。
 2. ステージングと本番の住み分けは **Render の Web Service（stg/prod で Express＋Next.js の 2 本立て）＋ GitHub Environments（staging, production）** で管理します。ステージング環境はレビュアー承認なしの自動デプロイ、本番環境は `workflow_dispatch` + 必須レビューで昇格させます。
-3. README に記載のビルド/スタートコマンドを再確認し、`package.json` の `prestart` が `npm run build` を呼ぶため、Render 側の Build Command は `npm install --include=dev`（devDependencies も取得）を推奨します。Prisma モードで JSON から初期データを投入する場合、Start Command を `npm run start:render`（`prisma:migrate` → `migrate:json` → 本番起動）に変更するとテーブルが自動作成されます。README.md#L108-L129
-   - `start:render` は `prisma db push --force-reset` を実行するため、既存データが消えて困る環境では使用しないでください。本番では `DATA_STORE=json` で先にデータをバックアップするか、`prisma migrate deploy` ベースの別スクリプトを用意してください。
-   - 既存データを保持したままマイグレーションを適用したい場合は `npm run start:render-safe`（= `prisma migrate deploy` → `npm start`）に Start Command を切り替えます。schema 変更のみ反映され、`migrate:json` のような再投入は行いません。
+3. README に記載のビルド/スタートコマンドを再確認し、`package.json` の `prestart` が `npm run build` を呼ぶため、Render 側の Build Command は `npm install --include=dev`（devDependencies も取得）を推奨します。  
+   - **Staging/Production の Start Command は必ず `npm run start:render-safe` を設定**してください。`start:render` は `prisma db push --force-reset` → `migrate:json` を実行し、SQLite を毎回初期化するため、並列アクセスやPlaywright実行と衝突するとトランザクションが失敗します。  
+   - データリセットを伴うリハーサルが必要な場合は、Render ダッシュボードで一時的に `start:render` に切り替えて実行し、完了後に `start:render-safe` に戻す運用とします。
    - Next.js 用の Web Service では Prisma を使わないため、Build Command 実行時に `SKIP_PRISMA_GENERATE=1` の環境変数を設定してください（`package.json` の `prepare` スクリプトがスキップされ、`prisma` コマンドを探しに行かなくなります）。
 
 ## 2. Render でステージング Web Service を作成
