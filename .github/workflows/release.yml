@@ -48,3 +48,5 @@ jobs:
           tag_name: v${{ inputs.version }}
           name: v${{ inputs.version }}
           body: ${{ steps.notes.outputs.body }}
+          draft: false
+          prerelease: false

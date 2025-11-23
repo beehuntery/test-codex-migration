@@ -3,8 +3,24 @@ name: Playwright E2E
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/**'
+      - '.gitignore'
+      - '.editorconfig'
+      - '.gitattributes'
+      - 'public/**'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/**'
+      - '.gitignore'
+      - '.editorconfig'
+      - '.gitattributes'
+      - 'public/**'
   workflow_dispatch:
     inputs:
       target-branch:
