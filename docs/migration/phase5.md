@@ -45,6 +45,7 @@
 - [x] GitHub Actions `Deploy Production` を Deploy Hook で成功させる（手動実行で確認）
 - [x] Playwright ジョブのターゲット: 現状はステージング/ローカル用に固定（本番直叩きは不要と判断、変更が必要な場合のみ変数を切り替える運用）
 - [x] タグ作成/入力フローを明文化（SemVer、手動or自動を統一）
+- [x] 最新デプロイ（v0.0.7）承認完了を確認
 
 **テスト**
 - [x] スモーク: `/api/health`, `/api/tasks` GET/POST が本番で成功
