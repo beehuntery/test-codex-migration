@@ -43,7 +43,7 @@
 
 **CI/CD**
 - [x] GitHub Actions `Deploy Production` を Deploy Hook で成功させる（手動実行で確認）
-- [ ] Playwright ジョブが本番 URL を参照する環境変数（Secrets/Variables）を整理
+- [x] Playwright ジョブのターゲット: 現状はステージング/ローカル用に固定（本番直叩きは不要と判断、変更が必要な場合のみ変数を切り替える運用）
 - [x] タグ作成/入力フローを明文化（SemVer、手動or自動を統一）
 
 **テスト**
