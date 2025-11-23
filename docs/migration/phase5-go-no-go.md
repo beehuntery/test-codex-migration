@@ -18,8 +18,8 @@
 - [x] Prisma マイグレーションが本番適用済み（`20251122134157_create_tag_to_task` を含む）
 - [x] Render Deploy Hook（Express/Next）キー・URLが Secrets/Env にセット済み
 - [x] GitHub Actions `Deploy Production` が直近の実行で成功（v0.0.7 作成済み／環境承認後デプロイ完了）
-- [ ] Playwright E2E 主要3シナリオ：ステージング/ローカル運用とし、本番直叩きは不要（必要時のみ実施）
-- [ ] スモーク `/api/health`, `/api/tasks` GET/POST が本番で成功
+- [x] Playwright E2E 主要3シナリオ：ステージング/ローカル運用とし、本番直叩きは不要（必要時のみ実施）
+- [x] スモーク `/api/health`, `/api/tasks` GET/POST が本番で成功
 
 ## 運用・リスク
 - [ ] 監視手順（Render ログ + Uptime/エラーレート）が Runbook に記載
