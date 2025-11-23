@@ -18,12 +18,19 @@
 - デプロイ: Render Web Service（stg/prd）、Deploy Hook で commit pin デプロイ、Start Command `npm run start:render-safe`
 - 監視: Render ログ（MCP経由で確認）、簡易 Uptime/エラーレート（手動）
 
+## 移行後（計画: フェーズ6以降）
+- バックエンド: API を Next.js Route Handlers へ統合し、Express サービスを段階的に廃止
+- データ: Render Postgres へ永続化（SQLite から移行）
+- サービス構成: Next.js サービス単一でフロント/APIを提供（Express は切替完了後に停止）
+
 ## コンポーネント構成（移行後）
 - Next.js (apps/web)
   - API クライアント: `NEXT_PUBLIC_API_BASE_URL` で Express API を呼び出し
-- Express API
+- Express API（現行）
   - ルート: `/api/tasks`, `/api/tags`, `/api/health`
   - データアクセス: Prisma -> SQLite/Postgres(予定)
+- Next.js Route Handlers（計画）
+  - 上記 API を順次移設し、Express を撤去
 - Prisma
   - マイグレーション: `prisma/migrations`（最新 `20251122134157_create_tag_to_task`）
 - CI/CD
@@ -40,5 +47,6 @@
 ## フェーズ6への課題
 - データ永続化（Postgres）
 - 監視/通知の定常運用強化
+- API の Next.js への統合と Express 撤去
 - 追加E2Eシナリオ（必要に応じ本番URL対応）
 - ロールバックの自動化
