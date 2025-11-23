@@ -42,10 +42,14 @@ app.use(express.static(path.resolve(process.cwd(), 'public')));
 
 // Simple health check for monitors and smoke tests
 app.get('/api/health', (_req: Request, res: Response) => {
+  const serviceId = process.env.RENDER_SERVICE_ID ?? 'unknown';
+  const serviceName = process.env.RENDER_SERVICE_NAME ?? process.env.RENDER_EXTERNAL_HOSTNAME ?? 'unknown';
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV ?? 'production'
+    nodeEnv: process.env.NODE_ENV ?? 'production',
+    serviceId,
+    serviceName
   });
 });
 
