@@ -22,9 +22,9 @@
 - [x] スモーク `/api/health`, `/api/tasks` GET/POST が本番で成功
 
 ## 運用・リスク
-- [ ] 監視手順（Render ログ + Uptime/エラーレート）が Runbook に記載
-- [ ] Playwright 失敗時の調査フロー（Render ログ突合）が Runbook に記載
-- [ ] ロールバック手順（直前タグへ Deploy Hook 再実行）が更新済み
+- [x] 監視手順（Render ログ + Uptime/エラーレート）が Runbook に記載
+- [x] Playwright 失敗時の調査フロー（Render ログ突合）が Runbook に記載
+- [x] ロールバック手順（直前タグへ Deploy Hook 再実行）が更新済み
 - [x] コミュニケーションプラン（通知テンプレ、連絡先）が準備済み
 
 ## データ/リリース管理
