@@ -40,6 +40,15 @@ if (shouldLogApiRequests) {
 
 app.use(express.static(path.resolve(process.cwd(), 'public')));
 
+// Simple health check for monitors and smoke tests
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV ?? 'production'
+  });
+});
+
 function normalizeDate(value: unknown): string | null {
   if (value === undefined || value === null) {
     return null;
