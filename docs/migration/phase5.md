@@ -33,18 +33,18 @@
 
 ## 作業項目（チェックリスト兼WBS）
 **インフラ・設定**
-- [ ] ステージング/本番の Start Command を `npm run start:render-safe` に固定確認
-- [ ] Render Deploy Hook（Express/Next）キー・URLを再確認し、Secrets/Env に設定
-- [ ] 本番 Render で最新 Prisma マイグレーション適用（`20251122134157_create_tag_to_task` を含む）
+- [x] ステージング/本番の Start Command を `npm run start:render-safe` に固定確認
+- [x] Render Deploy Hook（Express/Next）キー・URLを再確認し、Secrets/Env に設定
+- [x] 本番 Render で最新 Prisma マイグレーション適用（`20251122134157_create_tag_to_task` を含む）
 
 **アプリ/DB**
 - [ ] 本番で `db push`/`migrate:json` が走らない手順を固定（本番は `prisma migrate deploy` のみ）
 - [ ] 初期データ投入が必要なら手順を確定（実行有無を決定）
 
 **CI/CD**
-- [ ] GitHub Actions `Deploy Production` を Deploy Hook で成功させる（手動実行で確認）
+- [x] GitHub Actions `Deploy Production` を Deploy Hook で成功させる（手動実行で確認）
 - [ ] Playwright ジョブが本番 URL を参照する環境変数（Secrets/Variables）を整理
-- [ ] タグ作成/入力フローを明文化（SemVer、手動or自動を統一）
+- [x] タグ作成/入力フローを明文化（SemVer、手動or自動を統一）
 
 **テスト**
 - [ ] スモーク: `/api/health`, `/api/tasks` GET/POST が本番で成功
