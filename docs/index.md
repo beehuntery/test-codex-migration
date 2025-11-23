@@ -6,6 +6,7 @@
 - フェーズ3: ./migration/phase3.md
 - フェーズ4: ./migration/phase4.md
 - フェーズ5: ./migration/phase5.md
+- フェーズ6: ./migration/phase6.md
 - フェーズ5 Go/No-Go チェックリスト: ./migration/phase5-go-no-go.md
 - カナリア監視ダッシュボード: ./observability/canary-dashboard.md
 - システム構成: ./architecture/system-architecture.md
