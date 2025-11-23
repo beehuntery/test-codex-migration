@@ -11,13 +11,13 @@
 - [ ] リリース対象コミット/タグ: ____________________
 - [ ] 判定日時 (UTC/JST): ____________________
 - [ ] 判定者: ____________________
-- [ ] 連絡チャネル（Slack/Issue）周知済み
+- [x] 連絡チャネル（Slack/Issue）周知済み
 
 ## 技術条件
-- [ ] Start Command (stg/prd) が `npm run start:render-safe` である
-- [ ] Prisma マイグレーションが本番適用済み（`20251122134157_create_tag_to_task` を含む）
-- [ ] Render Deploy Hook（Express/Next）キー・URLが Secrets/Env にセット済み
-- [ ] GitHub Actions `Deploy Production` が直近の実行で成功
+- [x] Start Command (stg/prd) が `npm run start:render-safe` である
+- [x] Prisma マイグレーションが本番適用済み（`20251122134157_create_tag_to_task` を含む）
+- [x] Render Deploy Hook（Express/Next）キー・URLが Secrets/Env にセット済み
+- [x] GitHub Actions `Deploy Production` が直近の実行で成功（v0.0.7 作成済み／環境承認後デプロイ完了）
 - [ ] Playwright E2E 主要3シナリオ（タスクCRUD・タグ付け・並び替え）が本番URLでグリーン
 - [ ] スモーク `/api/health`, `/api/tasks` GET/POST が本番で成功
 
@@ -25,13 +25,13 @@
 - [ ] 監視手順（Render ログ + Uptime/エラーレート）が Runbook に記載
 - [ ] Playwright 失敗時の調査フロー（Render ログ突合）が Runbook に記載
 - [ ] ロールバック手順（直前タグへ Deploy Hook 再実行）が更新済み
-- [ ] コミュニケーションプラン（通知テンプレ、連絡先）が準備済み
+- [x] コミュニケーションプラン（通知テンプレ、連絡先）が準備済み
 
 ## データ/リリース管理
-- [ ] 本番で `db push`/`migrate:json` が走らない設定になっている（`start:render-safe` のみ）
+- [x] 本番で `db push`/`migrate:json` が走らない設定になっている（`start:render-safe` のみ）
 - [ ] 必要な初期データ投入の要否が判断済み（実施なら完了を確認）
-- [ ] タグ作成/入力フロー（SemVer）の運用が決定し、対象タグが発行済み
-- [ ] リリースノート（Release Drafter 等）が準備済み
+- [x] タグ作成/入力フロー（SemVer）の運用が決定し、対象タグが発行済み（v0.0.7 最新）
+- [x] リリースノート（Release Drafter 等）が準備済み（v0.0.7 公開）
 
 ## 判定結果
 - [ ] **Go** / [ ] **No-Go**
@@ -39,4 +39,3 @@
   - ___________________________________________
   - ___________________________________________
   - ___________________________________________
-
