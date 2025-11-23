@@ -38,8 +38,8 @@
 - [x] 本番 Render で最新 Prisma マイグレーション適用（`20251122134157_create_tag_to_task` を含む）
 
 **アプリ/DB**
-- [ ] 本番で `db push`/`migrate:json` が走らない手順を固定（本番は `prisma migrate deploy` のみ）
-- [ ] 初期データ投入が必要なら手順を確定（実行有無を決定）
+- [x] 本番で `db push`/`migrate:json` が走らない手順を固定（本番は `prisma migrate deploy` のみ、Start Command `start:render-safe` で運用）
+- [x] 初期データ投入の要否: **不要**（既存データ維持。必要時は手動で `prisma db execute` により限定投入）
 
 **CI/CD**
 - [x] GitHub Actions `Deploy Production` を Deploy Hook で成功させる（手動実行で確認）
