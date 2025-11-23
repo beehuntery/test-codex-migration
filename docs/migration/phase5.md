@@ -10,12 +10,12 @@
 - 非スコープ: 旧フロントの追加開発、データモデル拡張、デザイン刷新（Phase6以降）。
 
 ## 完了基準（Done）
-1. 本番サービスの Start Command が `npm run start:render-safe` に固定されている。
-2. Prisma マイグレーションが本番で最新適用（`20251122134157_create_tag_to_task` を含む）。
-3. デプロイ手段が Render Deploy Hook で統一され、GitHub Actions `Deploy Production` が成功する。
-4. Playwright E2E（主要 3 シナリオ: タスクCRUD、タグ付け、キーボード並び替え）が本番 URL でグリーン。
-5. 監視ダッシュボード／アラート（Render ログ閲覧 + Uptime + Error rate）が運用ハンドブックに記載されている。
-6. Go/No-Go チェックリスト（`phase5-go-no-go.md`）が更新済みで、Go 判定が取得できる。
+1. 本番 Start Command が `npm run start:render-safe` に固定。
+2. Prisma 最新マイグレーション（`20251122134157_create_tag_to_task` 含む）が本番適用済み。
+3. Render Deploy Hook 経由の本番デプロイが成功し、GitHub Actions `Deploy Production` が通る。
+4. Playwright E2E 主要 3 シナリオ（タスクCRUD・タグ付け・並び替え）が本番 URL でグリーン。
+5. 監視手順（Render ログ + Uptime/エラーレート）が運用ハンドブックに記載されている。
+6. Go/No-Go チェックリスト（`phase5-go-no-go.md`）が更新され、Go 判定を取得。
 
 ## タイムライン（例）
 - T-5d: Phase5 キックオフ、責務アサイン
@@ -31,23 +31,38 @@
 | QA（Playwright） | QA | Dev |
 | 承認（Go/No-Go） | TL | PM |
 
-## 作業項目（WBS）
-- インフラ
-  - 本番 Start Command を `start:render-safe` に確認/固定（Render ダッシュボード）
-  - Render Deploy Hook 本番（Express/Next）鍵設定確認
-- アプリ/DB
-  - Prisma マイグレーション最新版確認（stg→prd）
-  - Seed/JSON→SQLite 移行スクリプトの本番実行手順を決定（必要なら実行）
-- CI/CD
-  - GitHub Actions `Deploy Production` の入力不要化（Deploy Hook で commit pin 自動取得）
-  - Playwright ジョブを本番 URL で実行できるよう環境変数/Secrets/Variables を整理
-- テスト
-  - スモーク: `/api/health`, `/api/tasks` GET/POST
-  - E2E: タスクCRUD、タグ付け、並び替え
-- 運用
-  - 監視手順: Render ログ（MCP で確認）、Uptime、エラー通知
-  - ロールバック手順ドキュメント更新
-  - コミュニケーションプラン（Slack/Issueテンプレ）準備
+## 作業項目（チェックリスト兼WBS）
+**インフラ・設定**
+- [ ] ステージング/本番の Start Command を `npm run start:render-safe` に固定確認
+- [ ] Render Deploy Hook（Express/Next）キー・URLを再確認し、Secrets/Env に設定
+- [ ] 本番 Render で最新 Prisma マイグレーション適用（`20251122134157_create_tag_to_task` を含む）
+
+**アプリ/DB**
+- [ ] 本番で `db push`/`migrate:json` が走らない手順を固定（本番は `prisma migrate deploy` のみ）
+- [ ] 初期データ投入が必要なら手順を確定（実行有無を決定）
+
+**CI/CD**
+- [ ] GitHub Actions `Deploy Production` を Deploy Hook で成功させる（手動実行で確認）
+- [ ] Playwright ジョブが本番 URL を参照する環境変数（Secrets/Variables）を整理
+- [ ] タグ作成/入力フローを明文化（SemVer、手動or自動を統一）
+
+**テスト**
+- [ ] スモーク: `/api/health`, `/api/tasks` GET/POST が本番で成功
+- [ ] Playwright E2E 主要3シナリオ（タスクCRUD・タグ付け・並び替え）が本番URLでグリーン
+
+**監視・運用**
+- [ ] 監視手順を整備（Render ログ: MCP、Uptime/エラーレートの確認方法）
+- [ ] Playwright 失敗時の調査フロー（同時刻 Render ログ突合）を Runbook 化
+- [ ] ロールバック手順更新：直前タグへ Deploy Hook 再実行を明文化
+- [ ] コミュニケーションプラン準備（通知チャネル、連絡テンプレ）
+
+**Go/No-Go**
+- [ ] `phase5-go-no-go.md` を更新し、上記完了証跡を反映
+- [ ] Go 判定を実施し結果を記録（Go なら本番切替）
+
+**リリース後**
+- [ ] リリースノート（Release Drafter 等）発行
+- [ ] T+1d 監視強化期間終了を確認し、事後レビューを記録
 
 ## デプロイフロー（本番）
 1. 前提確認
@@ -91,4 +106,3 @@
 - 更新された Go/No-Go チェックリスト
 - リリースノート（Release Drafter）
 - デプロイ実行ログ（GitHub Actions + Render）
-
