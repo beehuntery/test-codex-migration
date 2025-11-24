@@ -19,25 +19,31 @@
 5. ロールバック手順が自動化（Deploy Hook再実行/前タグ再デプロイがワンコマンド化）。
 6. 軽微UX改善（P1まで）がクローズ。
 
-## WBS（ドラフト）
-- API統合
-  - Next.js Route Handlers に `/api/health` を移植 → `/api/tasks`, `/api/tags` を段階移行
-  - CORS/ENV/NEXT_PUBLIC_API_BASE_URL の整理（フロントと同一ドメイン化）
-  - Express サービス停止手順とロールバック手順を用意
-- データ永続化（Postgres）
-  - Render Postgres プロビジョニング
-  - Prisma datasource 切替・マイグレーション検証（dev→stg→prd）
-  - データ移行スクリプト（SQLite → Postgres）とリハーサル
-  - 本番切替とロールバック手順（再デプロイ/前スナップショット復元）
-- 監視・運用
-  - 監視ルール（Uptime、HTTP 5xx/latency、DB接続エラー）と通知チャネル当番表
-  - ロールバック自動化スクリプト（前タグ Deploy Hook 再実行）
-- QA/UX 改善
-  - Playwright 追加シナリオ（タグ編集、フィルタ複合、並び替え永続確認）
-  - 軽微UI改善バックログ消化
-- ドキュメント/リリース
-  - Phase6 Go/No-Go チェックリスト作成
-  - リリースノート運用継続
+## WBS（チェックリスト）
+**API統合（Express → Next.js Route Handlers）**
+- [ ] `/api/health` を Route Handlers に移設
+- [ ] `/api/tasks`, `/api/tags` を段階移行（stg でリハーサル → ロールバック確認）
+- [ ] CORS/ENV/NEXT_PUBLIC_API_BASE_URL を同一ドメイン前提に整理
+- [ ] Express サービス停止手順とロールバック手順を Runbook に記載
+
+**データ永続化（Postgres）**
+- [ ] Render Postgres をプロビジョニング
+- [ ] Prisma datasource 切替・マイグレーション検証（dev→stg→prd）
+- [ ] SQLite→Postgres データ移行スクリプト作成 & リハーサル
+- [ ] 本番切替とロールバック手順（再デプロイ/前スナップショット復元）を検証
+
+**監視・運用**
+- [ ] 監視ルール（Uptime、HTTP 5xx/latency、DB接続エラー）を定義・通知先設定・当番表作成
+- [ ] ロールバック自動化スクリプト（前タグ Deploy Hook 再実行）を stg で演習
+- [ ] Runbook 更新（監視、ロールバック、API統合後の手順）
+
+**QA/UX 改善**
+- [ ] Playwright 追加シナリオ（タグ編集、複合フィルタ、並び替え永続確認）を実装し、リリース前チェックに組み込み
+- [ ] 軽微UI改善バックログ（P1まで）をクローズ
+
+**ドキュメント/リリース**
+- [ ] Phase6 Go/No-Go チェックリスト作成
+- [ ] リリースノート運用を継続（Release Drafter + 公開リリース）
 
 ## リスクとメモ
 - DB移行: ダウンタイム/整合性リスク。バックアップとロールバック手順を必須化。
