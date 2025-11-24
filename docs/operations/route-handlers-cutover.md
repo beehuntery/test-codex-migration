@@ -14,9 +14,9 @@ stg/prd で API を Express から Next.js Route Handlers に切り替え、最�
 
 ## 手順（stg → prd）
 1. **stgで切替リハーサル**
-   - stg Environment で `NEXT_PUBLIC_API_BASE_URL` を Next.js サービスURLに設定（もしくは空で同一オリジン）。
+   - stg Environment で `NEXT_PUBLIC_API_BASE_URL` を **Next.js サービスURL（フロントURLと同一ドメイン）** に設定（空でも可）。
    - Deploy Staging を実行。
-   - `curl https://test-codex-migration-stg.onrender.com/api/tasks` などで Next.js Route Handlers が応答することを確認。
+   - 確認は **Next.js サービスの URL**（例: `https://<next-stg-domain>/api/tasks` か、同一オリジンの場合はフロントURL `/api/tasks`）で行う。Express のドメインは叩かない。
    - Playwright（stg向け）を実行し回帰確認。
    - ロールバック確認: `NEXT_PUBLIC_API_BASE_URL` を元に戻し Deploy Staging を再実行して復旧できること。
 
