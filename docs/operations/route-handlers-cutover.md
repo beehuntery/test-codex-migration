@@ -9,7 +9,9 @@ stg/prd で API を Express から Next.js Route Handlers に切り替え、最�
 - 環境変数の更新権限あり（GitHub Environments / Render）。
 
 ## 環境変数/設定
-- Render stg/prd (Next.js サービス): `NEXT_PUBLIC_API_BASE_URL` を空または Next.js サービス URL に設定（同一オリジン化）。
+- Render stg/prd (Next.js サービス)
+  - `NEXT_PUBLIC_API_BASE_URL`: 空または Next.js サービス URL（同一オリジン化）
+  - `DATABASE_URL`: `file:../../prisma/dev.db`（Postgres 移行までの暫定）
 - GitHub Actions (Playwright/ビルド): `PLAYWRIGHT_API_BASE_URL` / `STAGING_API_BASE_URL` はテスト用上書きであり、本番稼働時は Render 側設定を使う。
 - Express サービス: Start Command `npm run start:render-safe`（切替完了後は停止予定）。
 
