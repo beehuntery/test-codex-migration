@@ -1,5 +1,7 @@
 # Phase6 API Migration Plan (Express -> Next.js Route Handlers)
 
+> 進捗管理はフェーズ6 WBS（`phase6.md`）を主とし、本ドキュメントは手順詳細とサブチェックリストとして扱う。
+
 ## 対象エンドポイント
 - `/api/health`
 - `/api/tasks` (GET, POST)
@@ -30,9 +32,9 @@
 - 各段階で Express ルートは一時残存させ、環境変数で Next.js / Express の切替を可能にする。
 - デプロイごとに切替スイッチを持つことで、問題発生時に Express に即時戻せる。
 
-## 残タスク（抜粋）
-- [ ] apps/web に Prisma クライアントの共有実装を追加
-- [ ] `/api/health` Route Handler 実装（stgで確認）
+## 残タスク（抜粋：進捗は phase6.md と同期）
+- [x] apps/web に Prisma クライアントの共有実装を追加
+- [x] `/api/health` Route Handler 実装（stg確認含む）
 - [ ] `/api/tasks` GET/POST Route Handler 実装（バリデーション移植、stgで整合確認）
 - [ ] `/api/tags` GET Route Handler 実装（stg確認）
 - [ ] `/api/tasks/reorder` Route Handler 実装（存在する場合）
