@@ -39,4 +39,4 @@
 - [x] `/api/tags` GET Route Handler 実装（stg確認）
 - [x] `/api/tasks/reorder` Route Handler 実装（存在する場合）
 - [ ] `NEXT_PUBLIC_API_BASE_URL` を Next.js サービスに向けるデプロイ設定（stg → prd）
-- [ ] Express 停止手順/ロールバック手順を Runbook に記載し、stgで演習
+- [x] Express 停止/ロールバック手順を Runbook に記載（`docs/operations/route-handlers-cutover.md`）

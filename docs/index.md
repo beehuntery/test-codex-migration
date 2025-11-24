@@ -14,3 +14,4 @@
 - テスト項目一覧: ./testing/test-catalog.md
 - Git/GitHub運用ガイド: ./operations/github-policy.md
 - Render ステージング手順: ./operations/render-staging-setup.md
+- Route Handlers 切替手順: ./operations/route-handlers-cutover.md
