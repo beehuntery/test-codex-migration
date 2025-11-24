@@ -22,9 +22,10 @@
 ## WBS（チェックリスト）
 **API統合（Express → Next.js Route Handlers）**
 - [x] `/api/health` を Route Handlers に移設
-- [x] `/api/tasks`, `/api/tags` を段階移行（stg でリハーサル → ロールバック確認）
-- [ ] CORS/ENV/NEXT_PUBLIC_API_BASE_URL を同一ドメイン前提に整理
-- [x] Express サービス停止手順とロールバック手順を Runbook に記載（`docs/operations/route-handlers-cutover.md`）
+- [x] `/api/tasks`, `/api/tags`, `/api/tasks/reorder` を段階移行（stg リハーサル済）
+- [x] `/api/tasks/:taskId` (GET/PATCH/DELETE) を Next に実装
+- [x] CORS/ENV: stg/prd で `NEXT_PUBLIC_API_BASE_URL` を Next ドメインに設定（同一オリジン化）。Playwright 用は repo variable `PLAYWRIGHT_API_BASE_URL` で上書き可。
+- [ ] Express サービス停止（ロールバック経路を残したまま）
 
 **データ永続化（Postgres）**
 - [ ] Render Postgres をプロビジョニング

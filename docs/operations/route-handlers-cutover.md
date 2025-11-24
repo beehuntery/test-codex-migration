@@ -4,13 +4,13 @@
 stg/prd で API を Express から Next.js Route Handlers に切り替え、最終的に Express サービスを停止する。
 
 ## 前提
-- Next.js 側に `/api/health`, `/api/tasks`, `/api/tags`, `/api/tasks/reorder` が実装済み（main 最新）。
+- Next.js 側に `/api/health`, `/api/tasks`, `/api/tasks/:taskId (GET/PATCH/DELETE)`, `/api/tasks/reorder`, `/api/tags` が実装済み（main 最新）。
 - Deploy Hook で Next.js/Express 双方をデプロイ可能。
 - 環境変数の更新権限あり（GitHub Environments / Render）。
 
 ## 環境変数/設定
 - Render stg/prd (Next.js サービス)
-  - `NEXT_PUBLIC_API_BASE_URL`: 空または Next.js サービス URL（同一オリジン化）
+  - `NEXT_PUBLIC_API_BASE_URL`: Next.js サービス URL（同一オリジン化）。空でも Next と同一ドメインであれば可。
   - `DATABASE_URL`: `file:../prisma/dev.db`（Nextサービスのcwd=apps/webから見た相対パス。Postgres移行までの暫定）
 - GitHub Actions (Playwright/ビルド): `PLAYWRIGHT_API_BASE_URL` / `STAGING_API_BASE_URL` はテスト用上書きであり、本番稼働時は Render 側設定を使う。
 - Express サービス: Start Command `npm run start:render-safe`（切替完了後は停止予定）。
