@@ -22,7 +22,7 @@
 ## WBS（チェックリスト）
 **API統合（Express → Next.js Route Handlers）**
 - [x] `/api/health` を Route Handlers に移設
-- [ ] `/api/tasks`, `/api/tags` を段階移行（stg でリハーサル → ロールバック確認）
+- [x] `/api/tasks`, `/api/tags` を段階移行（stg でリハーサル → ロールバック確認）
 - [ ] CORS/ENV/NEXT_PUBLIC_API_BASE_URL を同一ドメイン前提に整理
 - [ ] Express サービス停止手順とロールバック手順を Runbook に記載
 

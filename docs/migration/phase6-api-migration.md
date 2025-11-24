@@ -35,8 +35,8 @@
 ## 残タスク（抜粋：進捗は phase6.md と同期）
 - [x] apps/web に Prisma クライアントの共有実装を追加
 - [x] `/api/health` Route Handler 実装（stg確認含む）
-- [ ] `/api/tasks` GET/POST Route Handler 実装（バリデーション移植、stgで整合確認）
-- [ ] `/api/tags` GET Route Handler 実装（stg確認）
-- [ ] `/api/tasks/reorder` Route Handler 実装（存在する場合）
+- [x] `/api/tasks` GET/POST Route Handler 実装（バリデーション移植、stgで整合確認）
+- [x] `/api/tags` GET Route Handler 実装（stg確認）
+- [x] `/api/tasks/reorder` Route Handler 実装（存在する場合）
 - [ ] `NEXT_PUBLIC_API_BASE_URL` を Next.js サービスに向けるデプロイ設定（stg → prd）
 - [ ] Express 停止手順/ロールバック手順を Runbook に記載し、stgで演習
