@@ -5,10 +5,9 @@ import { TagListSchema } from '@shared/api';
 // GET /api/tags
 export async function GET() {
   const tags = await prisma.tag.findMany({ orderBy: { name: 'asc' } });
-  const parsed = TagListSchema.safeParse(tags.map((t) => t.id));
+  const parsed = TagListSchema.safeParse(tags.map((t) => t.name));
   if (!parsed.success) {
     return NextResponse.json({ error: 'Failed to parse tags' }, { status: 500 });
   }
   return NextResponse.json(parsed.data);
 }
-
