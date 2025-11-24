@@ -2,7 +2,6 @@ import { join } from 'node:path';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
   eslint: {
     dirs: ['app', 'lib', 'styles']
   },
