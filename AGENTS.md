@@ -156,3 +156,7 @@ Red → Green → Refactor（最小実装でGreen、設計はRefactorで整え�
 
 **計測/改善**  
 欠陥率・変更当たりのテスト修正量・実行時間・フレーク率を定点観測し、四半期ごとに調整。
+
+## 許可不要のコマンド
+- 参照コマンド
+  - 例: `gh run view`, `gh run list`, `gh run watch` など
