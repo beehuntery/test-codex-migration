@@ -43,3 +43,30 @@ stg/prd で API を Express から Next.js Route Handlers に切り替え、最�
 - [ ] stg: ロールバックして Express で 200 応答
 - [ ] prd: 切替後にスモーク OK
 - [ ] prd: ロールバック手順を手元 Runbook で確認
+
+## ローカル検証手順（Next API 統合）
+1. 依存インストール: `npm ci`
+2. 環境変数を設定
+   ```bash
+   export DATABASE_URL="file:../prisma/dev.db"
+   export NEXT_PUBLIC_API_BASE_URL="http://localhost:3000"
+   # 任意: prisma generate をスキップしたい場合
+   # export SKIP_PRISMA_GENERATE=1
+   ```
+3. スキーマ適用と開発サーバー起動 (Next):
+   ```bash
+   cd apps/web
+   npm run prebuild   # prisma generate（SKIP_PRISMA_GENERATE=1 でスキップ可）
+   npm run build      # migrate deploy + db push + next build（本番挙動確認用）
+   npm run dev        # 開発確認のみの場合はこちらでOK
+   ```
+   ※ dev ではホットリロード、build では本番同等のビルドを検証。
+4. API 動作確認（別ターミナル）
+   ```bash
+   curl -s http://localhost:3000/api/health | jq .
+   curl -s http://localhost:3000/api/tasks | jq .
+   curl -X POST http://localhost:3000/api/tasks \
+     -H 'Content-Type: application/json' \
+     -d '{"title":"local test","description":"","status":"todo","dueDate":null,"tags":["local"]}'
+   ```
+5. タスクページ確認: ブラウザで `http://localhost:3000/tasks` を開き、作成/ステータス変更/削除が通ることを確認。
