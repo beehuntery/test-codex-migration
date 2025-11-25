@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { TaskSchema, TaskUpdateInputSchema, TaskStatusSchema } from '@shared/api';
 
@@ -32,8 +32,10 @@ const fromDateString = (value: string | null | undefined) => {
   return value ? new Date(value) : null;
 };
 
+type RouteContext = { params: { taskId: string } };
+
 // GET /api/tasks/[taskId]
-export async function GET(_: Request, { params }: { params: { taskId: string } }) {
+export async function GET(_: NextRequest, { params }: RouteContext) {
   const taskId = params.taskId;
   const task = await prisma.task.findUnique({
     where: { id: taskId },
@@ -54,7 +56,7 @@ export async function GET(_: Request, { params }: { params: { taskId: string } }
 }
 
 // PATCH /api/tasks/[taskId]
-export async function PATCH(req: Request, { params }: { params: { taskId: string } }) {
+export async function PATCH(req: NextRequest, { params }: RouteContext) {
   const taskId = params.taskId;
   const body = await req.json().catch(() => null);
   const parsed = TaskUpdateInputSchema.safeParse(body ?? {});
@@ -113,7 +115,7 @@ export async function PATCH(req: Request, { params }: { params: { taskId: string
 }
 
 // DELETE /api/tasks/[taskId]
-export async function DELETE(_: Request, { params }: { params: { taskId: string } }) {
+export async function DELETE(_: NextRequest, { params }: RouteContext) {
   const taskId = params.taskId;
   try {
     const deleted = await prisma.task.delete({
