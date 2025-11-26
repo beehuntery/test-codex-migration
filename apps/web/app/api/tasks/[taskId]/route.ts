@@ -32,11 +32,11 @@ const fromDateString = (value: string | null | undefined) => {
   return value ? new Date(value) : null;
 };
 
-type RouteContext = { params: { taskId: string } };
+type RouteContext = { params: Promise<{ taskId: string }> };
 
 // GET /api/tasks/[taskId]
 export async function GET(_: NextRequest, { params }: RouteContext) {
-  const taskId = params.taskId;
+  const { taskId } = await params;
   const task = await prisma.task.findUnique({
     where: { id: taskId },
     include: { tags: { select: { name: true } } }
@@ -57,7 +57,7 @@ export async function GET(_: NextRequest, { params }: RouteContext) {
 
 // PATCH /api/tasks/[taskId]
 export async function PATCH(req: NextRequest, { params }: RouteContext) {
-  const taskId = params.taskId;
+  const { taskId } = await params;
   const body = await req.json().catch(() => null);
   const parsed = TaskUpdateInputSchema.safeParse(body ?? {});
 
@@ -116,7 +116,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
 // DELETE /api/tasks/[taskId]
 export async function DELETE(_: NextRequest, { params }: RouteContext) {
-  const taskId = params.taskId;
+  const { taskId } = await params;
   try {
     const deleted = await prisma.task.delete({
       where: { id: taskId },
