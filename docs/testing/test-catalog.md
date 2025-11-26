@@ -1,6 +1,6 @@
 # テスト項目一覧
 
-最終更新日: 2025-11-05
+最終更新日: 2025-11-25
 
 本書では現在リポジトリに存在する自動テストを種別ごとに列挙し、カバレッジの概要と確認ポイントを整理する。
 
@@ -42,6 +42,12 @@
 | `tests/e2e/task-reorder-keyboard.spec.ts` | Keyboard-based reorder | `Alt + Arrow` によるキーボード並び替えが反映され、順序が戻せる。 |
 | `tests/e2e/legacy-parity.spec.ts` | Legacy UI parity | Next.js UI で行った更新が Express ベースのレガシー UI へ反映される。 |
 | `tests/e2e/simple.spec.mjs` | Harness sanity check | Playwright テスト基盤が最低限動作することの確認。 |
+
+### 追加で整備する予定のシナリオ（QA/UX改善）
+- Tag edit persistence: タグ追加・削除を行い、再読み込み後も反映されることを確認
+- Combined filters + reorder persistence: 複合フィルター適用後に並び替えし、再取得後も順序・フィルター結果が維持されること
+- Notification UX: タスク完了時のトースト表示とアクセシビリティ（フォーカス戻し）を検証
+
 
 ### 補足
 - `tests/e2e/global-setup.ts` は E2E 実行前に `/tasks` へウォームアップフェッチを行い、Next.js dev サーバー立ち上がりの揺らぎを吸収する。
