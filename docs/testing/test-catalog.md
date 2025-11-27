@@ -42,6 +42,8 @@
 | `tests/e2e/task-reorder.spec.mjs` | Drag & drop reorder persistence | HTML モック環境でのドラッグ＆ドロップ順序が API フェッチとリロード後も維持される。 |
 | `tests/e2e/task-reorder-keyboard.spec.ts` | Keyboard-based reorder | `Alt + Arrow` によるキーボード並び替えが反映され、順序が戻せる。 |
 | `tests/e2e/legacy-parity.spec.ts` | Legacy UI parity | Next.js UI で行った更新が Express ベースのレガシー UI へ反映される。 |
+| `tests/e2e/tag-persistence.spec.ts` | Tag persistence | タグ削除が再読み込み後も反映され、コンソールエラーが出ない。 |
+| `tests/e2e/reorder-persistence.spec.ts` | Reorder persistence | Alt+Arrow で変更した順序がリロード後も保持される。 |
 | `tests/e2e/simple.spec.mjs` | Harness sanity check | Playwright テスト基盤が最低限動作することの確認。 |
 
 ### 追加で整備する予定のシナリオ（QA/UX改善）
