@@ -1,7 +1,8 @@
 import { expect } from '@playwright/test';
 import type { Page, Locator, ConsoleMessage } from '@playwright/test';
 
-export const NEXT_PORT = process.env.NEXT_PORT || '3001';
+// Devサーバーのデフォルトポートに合わせて 3000 を既定値にする
+export const NEXT_PORT = process.env.NEXT_PORT || '3000';
 export const BASE_URL = `http://localhost:${NEXT_PORT}`;
 
 export type CreateTaskOptions = {

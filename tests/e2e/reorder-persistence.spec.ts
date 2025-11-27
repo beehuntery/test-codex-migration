@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const NEXT_PORT = process.env.NEXT_PORT || '3001';
+const NEXT_PORT = process.env.NEXT_PORT || '3000';
 const BASE_URL = `http://localhost:${NEXT_PORT}`;
 
 async function createTaskViaUI(
@@ -60,4 +60,3 @@ test.describe('Reorder persistence', () => {
     expect(consoleErrors).toEqual([]);
   });
 });
-
