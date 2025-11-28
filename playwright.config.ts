@@ -3,18 +3,14 @@ import { defineConfig } from '@playwright/test';
 const isCI = Boolean(process.env.CI);
 const reuseServer = !isCI;
 
-if (!process.env.NEXT_PORT) {
-  process.env.NEXT_PORT = '3001';
-}
+const nextPort = process.env.NEXT_PORT ?? '3001';
+const apiBaseUrl = `http://localhost:${nextPort}`;
+const databaseUrl = process.env.DATABASE_URL ?? 'file:../prisma/dev.db';
 
-const nextPort = process.env.NEXT_PORT;
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
-
-// Next.js を唯一の API/フロントエンドとして起動する
-const effectiveApiBaseUrl = `http://localhost:${nextPort}`;
+// Next.js を唯一の API/フロントエンドとして起動し、起動前に SQLite スキーマを適用
 const webServerCommand = isCI
-  ? `LOG_API_REQUESTS=1 PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${effectiveApiBaseUrl} npm run dev --prefix apps/web -- --turbo`
-  : `PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${effectiveApiBaseUrl} npm run dev --prefix apps/web`;
+  ? `LOG_API_REQUESTS=1 PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${apiBaseUrl} DATABASE_URL=${databaseUrl} npm run dev:with-db --prefix apps/web -- --turbo`
+  : `PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${apiBaseUrl} DATABASE_URL=${databaseUrl} npm run dev:with-db --prefix apps/web`;
 
 export default defineConfig({
   testDir: 'tests/e2e',
