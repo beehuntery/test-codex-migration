@@ -10,10 +10,11 @@ if (!process.env.NEXT_PORT) {
 const nextPort = process.env.NEXT_PORT;
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
-const apiServerCommand = isCI ? 'NODE_ENV=production npm run start:ts' : 'npm run dev:ts';
+// Next.js を唯一の API/フロントエンドとして起動する
+const effectiveApiBaseUrl = `http://localhost:${nextPort}`;
 const webServerCommand = isCI
-  ? `LOG_API_REQUESTS=1 PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${apiBaseUrl} npm run dev --prefix apps/web -- --turbo`
-  : `PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${apiBaseUrl} npm run dev --prefix apps/web`;
+  ? `LOG_API_REQUESTS=1 PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${effectiveApiBaseUrl} npm run dev --prefix apps/web -- --turbo`
+  : `PORT=${nextPort} NEXT_PUBLIC_API_BASE_URL=${effectiveApiBaseUrl} npm run dev --prefix apps/web`;
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -32,7 +33,7 @@ export default defineConfig({
   use: {
     headless: true,
     browserName: 'chromium',
-    baseURL: 'http://localhost:3001',
+    baseURL: `http://localhost:${nextPort}`,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -43,14 +44,8 @@ export default defineConfig({
   outputDir: 'test-results',
   webServer: [
     {
-      command: apiServerCommand,
-      port: 3000,
-      reuseExistingServer: reuseServer,
-      timeout: 180_000
-    },
-    {
       command: webServerCommand,
-      port: 3001,
+      port: Number(nextPort),
       reuseExistingServer: reuseServer,
       timeout: 240_000
     }
