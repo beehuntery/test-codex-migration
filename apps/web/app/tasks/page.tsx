@@ -111,67 +111,75 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
     activeFilterTags.length > 0 ||
     activeStatuses.length > 0;
 
+  const isEmpty = filteredCount === 0;
+
   return (
     <TaskNotificationProvider>
       <section className="mx-auto flex min-h-screen max-w-5xl flex-col gap-10 px-6 py-16">
-      <header className="flex flex-col gap-3">
-        <h1 className="text-3xl font-semibold text-[color:var(--color-text)]">タスク一覧（準備中）</h1>
-        <p className="max-w-2xl text-base text-[color:var(--color-text-muted)]">
-          ここでは既存 Express API からのデータをサーバーコンポーネントで取得する予定です。現在はモック状態です。
-        </p>
-      </header>
-      <div className="card-surface space-y-6 p-8 text-[color:var(--color-text-muted)]">
-        <TaskCreateForm />
-        <TaskTagFilterControls availableTags={availableTags} selectedTags={activeFilterTags} />
-        <TaskStatusFilterControls selectedStatuses={activeStatuses} />
-        <TaskAdvancedFilterControls
-          initialQuery={searchQuery}
-          initialDueFrom={normalizedDueFrom}
-          initialDueTo={normalizedDueTo}
-          initialCreatedFrom={normalizedCreatedFrom}
-          initialCreatedTo={normalizedCreatedTo}
-          initialUpdatedFrom={normalizedUpdatedFrom}
-          initialUpdatedTo={normalizedUpdatedTo}
-        />
-        <p
-          className="text-xs text-[color:var(--color-text-muted)]"
-          id="reorder-help"
-        >
-          タスクはドラッグまたは <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">Alt</kbd> +
-          <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">↑/↓</kbd> で並び替えできます。
-        </p>
-        <div aria-describedby="reorder-help">
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-lg font-semibold text-[color:var(--color-text)]">
-              タスク一覧（{filteredCount} 件{hasActiveFilters ? ` / 全 ${totalCount} 件` : ''}）
-            </p>
-            <span className="text-xs uppercase tracking-[0.24em] text-[color:var(--color-text-muted)]">
-              データソース: Express REST API
-            </span>
+        <header className="flex flex-col gap-3">
+          <h1 className="text-3xl font-semibold text-[color:var(--color-text)]">タスク一覧</h1>
+          <p className="max-w-2xl text-base text-[color:var(--color-text-muted)]">
+            タスクの作成・絞り込み・並び替えができます。
+          </p>
+        </header>
+        <div className="card-surface space-y-6 p-8 text-[color:var(--color-text-muted)]">
+          <TaskCreateForm />
+          <TaskTagFilterControls availableTags={availableTags} selectedTags={activeFilterTags} />
+          <TaskStatusFilterControls selectedStatuses={activeStatuses} />
+          <TaskAdvancedFilterControls
+            initialQuery={searchQuery}
+            initialDueFrom={normalizedDueFrom}
+            initialDueTo={normalizedDueTo}
+            initialCreatedFrom={normalizedCreatedFrom}
+            initialCreatedTo={normalizedCreatedTo}
+            initialUpdatedFrom={normalizedUpdatedFrom}
+            initialUpdatedTo={normalizedUpdatedTo}
+          />
+          <p className="text-xs text-[color:var(--color-text-muted)]" id="reorder-help">
+            タスクはドラッグまたは <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">Alt</kbd> +
+            <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">↑/↓</kbd> で並び替えできます。
+          </p>
+
+          <div aria-describedby="reorder-help">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-lg font-semibold text-[color:var(--color-text)]">
+                タスク一覧（{filteredCount} 件{hasActiveFilters ? ` / 全 ${totalCount} 件` : ''}）
+              </p>
+              <span className="text-xs uppercase tracking-[0.24em] text-[color:var(--color-text-muted)]">
+                データソース: Next API
+              </span>
+            </div>
+
+            {isEmpty ? (
+              <div className="space-y-4 rounded-xl border border-dashed border-[rgba(107,102,95,0.25)] bg-white/70 px-4 py-6 text-center text-sm">
+                <p className="text-[color:var(--color-text)]">
+                  {totalCount === 0
+                    ? 'まだタスクがありません。まずは1件追加してみましょう。'
+                    : '条件に一致するタスクがありません。フィルターを見直すか新しいタスクを作成してください。'}
+                </p>
+                <div className="flex justify-center">
+                  <Link href="/tasks" className="btn-primary text-xs">
+                    タスクを追加する
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <TaskReorderList tasks={filteredTasks} />
+            )}
           </div>
-          {filteredCount === 0 ? (
-            <p className="rounded-xl border border-dashed border-[rgba(107,102,95,0.25)] bg-white/70 px-4 py-6 text-center text-sm">
-              {totalCount === 0
-                ? '表示できるタスクがまだありません。既存 UI から作成したデータがここに表示されます。'
-                : '選択したフィルター条件に一致するタスクが見つかりませんでした。条件を見直してください。'}
-            </p>
-          ) : (
-            <TaskReorderList tasks={filteredTasks} />
-          )}
+
+          <div>
+            <p className="mb-3 text-lg font-semibold text-[color:var(--color-text)]">次のステップ</p>
+            <ul className="flex list-disc flex-col gap-2 pl-6">
+              <li>フィルター系コンポーネントを Storybook で可視化し、デザイン差分を検証</li>
+              <li>API フェッチ層の共通化（`src/shared/api.ts` ベースで SSR/ISR を検討）</li>
+              <li>キーボード並び替えのアクセシビリティ強化と Playwright カバレッジ拡張</li>
+            </ul>
+          </div>
         </div>
-        <div>
-          <p className="mb-3 text-lg font-semibold text-[color:var(--color-text)]">次のステップ</p>
-          <ul className="flex list-disc flex-col gap-2 pl-6">
-            <li>`public/app.js` の未使用フィルター処理を整理し、通知 UI の React 化を進める</li>
-            <li>フィルター系コンポーネントを Storybook で可視化し、デザイン差分を検証</li>
-            <li>API フェッチ層の共通化（`src/shared/api.ts` ベースで SSR/ISR を検討）</li>
-            <li>キーボード並び替えのアクセシビリティ強化と Playwright カバレッジ拡張</li>
-          </ul>
-        </div>
-      </div>
-      <Link href="/" className="btn-secondary w-fit">
-        トップへ戻る
-      </Link>
+        <Link href="/" className="btn-secondary w-fit">
+          トップへ戻る
+        </Link>
       </section>
     </TaskNotificationProvider>
   );
