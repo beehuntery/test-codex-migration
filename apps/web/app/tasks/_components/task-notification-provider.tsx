@@ -51,6 +51,12 @@ const TYPE_STYLES: Record<TaskNotificationType, string> = {
   info: 'border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10 text-[color:var(--color-text)]'
 };
 
+const TYPE_ICONS: Record<TaskNotificationType, string> = {
+  success: '✓',
+  error: '!',
+  info: 'ℹ'
+};
+
 export function TaskNotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<TaskNotification[]>([]);
   const timersRef = useRef<Map<string, number>>(new Map());
@@ -115,10 +121,15 @@ export function TaskNotificationProvider({ children }: { children: React.ReactNo
               className={`pointer-events-auto rounded-xl border px-4 py-3 shadow-lg backdrop-blur-sm ${TYPE_STYLES[notification.type]}`}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex flex-col">
-                  <p className="text-sm font-semibold text-[color:var(--color-text)]">
-                    {notification.title}
-                  </p>
+                <div className="flex flex-col" aria-live="polite">
+                  <div className="flex items-center gap-2">
+                    <span aria-hidden="true" className="text-sm leading-none">
+                      {TYPE_ICONS[notification.type]}
+                    </span>
+                    <p className="text-sm font-semibold text-[color:var(--color-text)]">
+                      {notification.title}
+                    </p>
+                  </div>
                   {notification.description ? (
                     <p className="mt-1 text-xs text-[color:var(--color-text-muted)]">
                       {notification.description}
@@ -129,6 +140,7 @@ export function TaskNotificationProvider({ children }: { children: React.ReactNo
                   type="button"
                   onClick={() => dismiss(notification.id)}
                   className="text-xs font-medium text-[color:var(--color-text-muted)] transition hover:text-[color:var(--color-error)]"
+                  aria-label="通知を閉じる (Escでも閉じられます)"
                 >
                   閉じる
                 </button>

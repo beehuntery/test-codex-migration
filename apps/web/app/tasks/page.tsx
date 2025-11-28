@@ -133,11 +133,14 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
           initialUpdatedFrom={normalizedUpdatedFrom}
           initialUpdatedTo={normalizedUpdatedTo}
         />
-        <p className="text-xs text-[color:var(--color-text-muted)]">
+        <p
+          className="text-xs text-[color:var(--color-text-muted)]"
+          id="reorder-help"
+        >
           タスクはドラッグまたは <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">Alt</kbd> +
           <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">↑/↓</kbd> で並び替えできます。
         </p>
-        <div>
+        <div aria-describedby="reorder-help">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
             <p className="text-lg font-semibold text-[color:var(--color-text)]">
               タスク一覧（{filteredCount} 件{hasActiveFilters ? ` / 全 ${totalCount} 件` : ''}）
