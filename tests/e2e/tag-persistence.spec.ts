@@ -42,6 +42,14 @@ test.describe('Tag persistence', () => {
     await expect(card.getByText('beta')).toHaveCount(0);
     await expect(card.getByText('alpha')).toHaveCount(1);
 
+    // バックエンド反映を確認（poll）
+    await expect.poll(async () => {
+      const res = await page.request.get('/api/tasks');
+      const tasks = (await res.json()) as Array<{ title: string; tags: string[] }>;
+      const found = tasks.find((t) => t.title === title);
+      return found ? found.tags.includes('beta') : true;
+    }).toBe(false);
+
     // reload and confirm persistence
     await page.reload();
     const reloadedCard = page
