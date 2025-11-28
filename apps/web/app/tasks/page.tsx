@@ -162,6 +162,20 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
                     タスクを追加する
                   </Link>
                 </div>
+                {totalCount === 0 ? (
+                  <div className="grid gap-2 md:grid-cols-2" aria-hidden="true">
+                    {[...Array(4)].map((_, idx) => (
+                      <div
+                        key={`skeleton-${idx}`}
+                        className="animate-pulse rounded-xl border border-[rgba(107,102,95,0.12)] bg-[color:var(--color-surface-muted)]/70 px-4 py-3 text-left"
+                      >
+                        <div className="mb-2 h-3 w-24 rounded-full bg-[rgba(0,0,0,0.08)]" />
+                        <div className="mb-1 h-2 w-32 rounded-full bg-[rgba(0,0,0,0.06)]" />
+                        <div className="h-2 w-20 rounded-full bg-[rgba(0,0,0,0.06)]" />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             ) : (
               <TaskReorderList tasks={filteredTasks} />
