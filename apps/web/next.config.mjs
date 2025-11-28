@@ -8,10 +8,7 @@ const nextConfig = {
   typescript: {
     tsconfigPath: './tsconfig.json'
   },
-  experimental: {
-    // Next 15+ では experimental から昇格済み
-    typedRoutes: true
-  },
+  typedRoutes: true,
   outputFileTracingRoot: join(process.cwd(), '..', '..')
 };
 

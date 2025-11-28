@@ -91,6 +91,11 @@ export function TaskTagEditor({ taskId, initialTags }: TaskTagEditorProps) {
   const handleRemoveTag = (tag: string) => {
     setError(null);
     void commitTags(optimisticTags.filter((item) => item !== tag));
+    notify({
+      type: 'success',
+      title: 'タグを削除しました',
+      description: tag
+    });
   };
 
   return (
