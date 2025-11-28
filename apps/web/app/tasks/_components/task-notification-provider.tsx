@@ -98,7 +98,18 @@ export function TaskNotificationProvider({ children }: { children: React.ReactNo
   );
 
   useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && notifications.length > 0) {
+        // ESC で最新の通知を閉じる
+        const last = notifications[notifications.length - 1];
+        dismiss(last.id);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown);
+
     return () => {
+      window.removeEventListener('keydown', handleKeydown);
       timersRef.current.forEach((timer) => window.clearTimeout(timer));
       timersRef.current.clear();
     };
