@@ -37,7 +37,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.20.0",
+    "@prisma/client": "^7.0.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "zod": "^4.1.12"
