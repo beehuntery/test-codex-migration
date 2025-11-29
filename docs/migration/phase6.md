@@ -45,6 +45,20 @@
 - DB接続エラー: Prisma の P1001/P1002 ログを 5分で >3件で Warning
 - デプロイ失敗: Render デプロイステータスが failed でアラート
 
+### 監視実装案（Next/Express 共通）
+- Uptime / Latency: 外形監視（例: Upptime / StatusCake / Pingdom）。URLは Next (stg/prd) の `/api/health` を監視対象にする。
+- HTTP 5xx: Render logs を基にした log-based alert（可能なら LogDNA/Datadog など外部連携）。代替としてデプロイ後の Playwright smoke 実行を自動トリガ。
+- DB接続エラー: Prisma ログ（P1001/P1002）を Render logs でフィルタし、閾値超えで Slack 通知。
+- デプロイ失敗: Render Webhook → Slack Incoming Webhook で通知（Render側の通知設定を推奨）。
+
+### Slack 通知（案）
+- Critical: #alerts
+- Warning: #alerts-warn
+
+### 当番（案）
+- 平日日中: Primary / Secondary を週替わりローテ
+- 夜間・休日: ONCALLローテ（別表で管理）
+
 ### 通知先（案）
 - Slack: #alerts (Critical), #alerts-warn (Warning)
 - 当番: 平日日中 Primary/Secondary、夜間はONCALLローテ（別表定義）
