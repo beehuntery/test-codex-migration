@@ -59,6 +59,7 @@ const TYPE_ICONS: Record<TaskNotificationType, string> = {
 
 export function TaskNotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<TaskNotification[]>([]);
+  const notificationsRef = useRef<TaskNotification[]>([]);
   const timersRef = useRef<Map<string, number>>(new Map());
 
   const dismiss = useCallback((id: string) => {
@@ -98,11 +99,16 @@ export function TaskNotificationProvider({ children }: { children: React.ReactNo
   );
 
   useEffect(() => {
+    notificationsRef.current = notifications;
+  }, [notifications]);
+
+  useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && notifications.length > 0) {
-        // ESC で最新の通知を閉じる
-        const last = notifications[notifications.length - 1];
-        dismiss(last.id);
+      if (event.key === 'Escape') {
+        const last = notificationsRef.current.at(-1);
+        if (last) {
+          dismiss(last.id);
+        }
       }
     };
 
