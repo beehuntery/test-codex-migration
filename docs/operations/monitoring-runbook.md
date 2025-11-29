@@ -18,6 +18,13 @@
 ## 通知チャネル（案）
 - Slack: `#alerts-warn`（Warning）, `#alerts`（Critical）
 
+### Render → Slack 通知設定手順（Deploy失敗など）
+1. Slackで Incoming Webhook を作成（`#alerts` 推奨）。Webhook URL を控える。
+2. Render ダッシュボード → Service → Notifications → "Add Destination" → "Slack/Webhook" を選択。
+3. Webhook URL を貼り付け、イベントとして "Deploy Failed" を選択（必要に応じて Deploy Succeeded も）。
+4. 保存してテスト送信を実施。Slack側でメッセージ受信を確認。
+※ 既に設定済みの場合はこの節は参照のみ。
+
 ## 実装方針
 ### 1) HTTP 5xx / Latency
 - 代替案: デプロイ後に Playwright smoke（既存 E2E の一部を短縮版で）を実行し、失敗時に Slack へ通知。
