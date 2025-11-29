@@ -38,6 +38,28 @@
 - [ ] ロールバック自動化スクリプト（前タグ Deploy Hook 再実行）を stg で演習
 - [ ] Runbook 更新（監視、ロールバック、API統合後の手順）
 
+### 監視ルール草案（提案）
+- Uptime: 60s間隔、応答 < 10s、3回連続失敗でアラート（stg/prd）
+- HTTP 5xx: 5分で rate >= 1% or >10件 で Warning、>5% or >30件で Critical
+- Latency (p95): 60s 窓で 2s 超で Warning、4s 超で Critical
+- DB接続エラー: Prisma の P1001/P1002 ログを 5分で >3件で Warning
+- デプロイ失敗: Render デプロイステータスが failed でアラート
+
+### 通知先（案）
+- Slack: #alerts (Critical), #alerts-warn (Warning)
+- 当番: 平日日中 Primary/Secondary、夜間はONCALLローテ（別表定義）
+
+### ロールバック自動化（案）
+- 前回リリースタグの Deploy Hook を再実行するスクリプト `scripts/rollback.sh`
+  - 入力: SERVICE_ID / DEPLOY_HOOK_KEY / TAG
+  - 手順: curl で deploy hook 実行→ステータスpoll→完了報告
+- stg で演習し、prdでは手順書に従い承認後実行
+
+### Runbook 更新対象（案）
+- 監視検知→一次対応フロー（誰が・どこに・何分以内）
+- ロールバック手順（Deploy Hook再実行、前タグ再デプロイ）
+- Next API統合後のヘルスチェック・Playwright手動実行手順
+
 **QA/UX 改善**
 - [x] Playwright 追加シナリオを実装し、リリース前チェックに組み込み
   - [x] タグ追加/削除の永続確認（再読み込み後も反映）
