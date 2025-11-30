@@ -34,9 +34,10 @@
 - [ ] 本番切替とロールバック手順（再デプロイ/前スナップショット復元）を検証
 
 **監視・運用**
-- [ ] 監視ルール（Uptime、HTTP 5xx/latency、DB接続エラー）を定義・通知先設定・当番表作成
-- [ ] ロールバック自動化スクリプト（前タグ Deploy Hook 再実行）を stg で演習
-- [ ] Runbook 更新（監視、ロールバック、API統合後の手順）
+- [x] 監視ルール（Uptime、HTTP 5xx/latency、DB接続エラー）を定義・通知先設定・当番表作成（文書化）
+- [x] ロールバック自動化スクリプト（前タグ Deploy Hook 再実行）を素案作成（scripts/rollback.sh）
+- [x] Runbook 更新（監視、ロールバック、API統合後の手順）→ `docs/operations/monitoring-runbook.md`
+- [ ] 定期監視は実施せず手動確認運用で合意（必要なら将来拡張）
 
 監視・運用の詳細は `docs/operations/monitoring-runbook.md` に分離。ここでは完了チェックのみ管理する。
 
