@@ -28,10 +28,11 @@
 - [ ] Express サービス停止（ロールバック経路を残したまま）
 
 **データ永続化（Postgres）**
-- [ ] Render Postgres をプロビジョニング
+- [ ] Render Postgres をプロビジョニング（stg/prd）
 - [ ] Prisma datasource 切替・マイグレーション検証（dev→stg→prd）
 - [ ] SQLite→Postgres データ移行スクリプト作成 & リハーサル
 - [ ] 本番切替とロールバック手順（再デプロイ/前スナップショット復元）を検証
+- [ ] Runbook 整備（`docs/operations/postgres-migration.md`）
 
 **監視・運用**
 - [x] 監視ルール（Uptime、HTTP 5xx/latency、DB接続エラー）を定義・通知先設定・当番表作成（文書化）
