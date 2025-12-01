@@ -23,8 +23,8 @@
    - 必要に応じて旧SQLiteへリバートするロールバック手順を用意
 
 ## タスク分解
-- [ ] Render Postgres (stg) プロビジョニング
-- [ ] Render Postgres (prd) プロビジョニング
+- [x] Render Postgres (stg) プロビジョニング
+  - [ ] Render Postgres (prd) プロビジョニング
 - [ ] Prisma datasource を Postgres に切替（ブランチで）
 - [ ] 初期マイグレーションを作成（Postgres向け）
 - [ ] データ移行スクリプト（SQLite→Postgres）を作成
@@ -40,3 +40,10 @@
 ## 補足
 - Prisma のマイグレーションは SQLite と Postgres で SQL が異なるため、Postgres用マイグレーションを新規生成する。
 - Playwright などテストは Postgres 環境で再実行し、ロックやトランザクションタイムアウトを確認。
+
+## 現在のリソース
+- stg: Render Postgres (free, v15, region oregon)
+  - name: `test-codex-migration-stg-db`
+  - id: `dpg-d4mdlojuibrs738gqn00-a`
+  - dashboard: https://dashboard.render.com/d/dpg-d4mdlojuibrs738gqn00-a
+  - status: creating（作成直後。稼働後に接続文字列を Runbook に追記）
