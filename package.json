@@ -28,6 +28,7 @@
     "test": "vitest run --reporter verbose",
     "test:e2e": "npm run build && playwright test",
     "playwright:e2e": "npm run build && playwright test tests/e2e --workers=1",
+    "import:pg": "ts-node src/scripts/importToPostgres.ts",
     "web:dev": "npm --workspace @test-codex/web run dev",
     "web:build": "npm --workspace @test-codex/web run build",
     "web:start": "npm --workspace @test-codex/web run start",
