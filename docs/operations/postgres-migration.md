@@ -42,8 +42,8 @@
 - Playwright などテストは Postgres 環境で再実行し、ロックやトランザクションタイムアウトを確認。
 
 ## 現在のリソース
-- stg: Render Postgres (free, v15, region oregon)
+- stg: Render Postgres (free, v15, region oregon) — **available**
   - name: `test-codex-migration-stg-db`
   - id: `dpg-d4mdlojuibrs738gqn00-a`
   - dashboard: https://dashboard.render.com/d/dpg-d4mdlojuibrs738gqn00-a
-  - status: creating（作成直後。稼働後に接続文字列を Runbook に追記）
+  - connection strings: Renderダッシュボードに表示（`DATABASE_URL` を stg 環境に設定して使用）
