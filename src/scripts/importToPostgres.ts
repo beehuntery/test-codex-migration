@@ -149,7 +149,7 @@ async function importData(): Promise<void> {
     const tagIds = new Map<string, string>();
     const tagRecords = tags.map((name) => ({ id: randomUUID(), name, createdAt: now, updatedAt: null }));
     tagRecords.forEach((t) => tagIds.set(t.name, t.id));
-    await tx.tag.createMany({ data: tagRecords, skipDuplicates: true });
+    await tx.tag.createMany({ data: tagRecords });
 
     // create tasks with tag connections
     for (const task of tasks) {
