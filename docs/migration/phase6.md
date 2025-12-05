@@ -28,17 +28,17 @@
 - [ ] Express サービス停止（ロールバック経路を残したまま）
 
 **データ永続化（Postgres）**
-- [ ] Render Postgres をプロビジョニング（stg/prd）
-- [ ] Prisma datasource 切替・マイグレーション検証（dev→stg→prd）
-- [ ] SQLite→Postgres データ移行スクリプト作成 & リハーサル
+- [x] Render Postgres をプロビジョニング（stg）／[ ] prd
+- [x] Prisma datasource 切替・マイグレーション検証（dev→stg）／[ ] prd
+- [x] SQLite→Postgres データ移行スクリプト作成 & リハーサル（stgで実施済）
 - [ ] 本番切替とロールバック手順（再デプロイ/前スナップショット復元）を検証
-- [ ] Runbook 整備（`docs/operations/postgres-migration.md`）
+- [x] Runbook 整備（`docs/operations/postgres-migration.md`）
 
 **監視・運用**
 - [x] 監視ルール（Uptime、HTTP 5xx/latency、DB接続エラー）を定義・通知先設定・当番表作成（文書化）
 - [x] ロールバック自動化スクリプト（前タグ Deploy Hook 再実行）を素案作成（scripts/rollback.sh）
 - [x] Runbook 更新（監視、ロールバック、API統合後の手順）→ `docs/operations/monitoring-runbook.md`
-- [ ] 定期監視は実施せず手動確認運用で合意（必要なら将来拡張）
+- [x] 定期監視は実施せず手動確認運用で合意（必要なら将来拡張）
 
 監視・運用の詳細は `docs/operations/monitoring-runbook.md` に分離。ここでは完了チェックのみ管理する。
 

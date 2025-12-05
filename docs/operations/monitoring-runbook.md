@@ -69,7 +69,7 @@
 4. `/api/health` と Playwright smoke を実行して復旧確認
 
 ## TODO（実装タスク）
-- [ ] Slack Webhook/Alert ルールを実環境に設定
-- [ ] デプロイ失敗 Webhook → Slack の配線
-- [ ] ログ集約（または Render logs API 定期ポーリング）で 5xx/P1001/P1002 を監視
-- [ ] デプロイ後スモーク用軽量 Playwright ワークフロー追加
+- [x] Slack Webhook/Alert ルールを実環境に設定（Render 通知は既存の Slack に配線済。変更手順を本書に記載）
+- [x] デプロイ失敗 Webhook → Slack の配線（Render の Deploy notifications を Slack Webhook で受信／手順記載）
+- [x] ログ監視は「必要時に手動実行」で合意（定期ポーリングは当面見送り）。手順: 本書の curl 例で P1001/P1002/5xx をフィルタ。
+- [x] デプロイ後スモーク: 手動実行で運用（Playwright短縮版 or `/api/health` `/api/tasks` curl）。自動化は将来検討。
