@@ -30,8 +30,9 @@ stg/prd で API を Express から Next.js Route Handlers に切り替え、最�
    - 必要なら本番 Playwright を実行（方針に従う）。
 
 3. **Express 停止（任意タイミング）**
-   - Render prd/stg の Express サービスを Stop もしくは Start Command を no-op に変更。
-   - ロールバック用に Deploy Hook / Start Command をメモしておく。
+   - Render prd/stg の Express サービスを **Suspend**（Dashboard: Service → ⋯ → Suspend）する。無料枠節約と誤アクセス防止のため。
+   - Suspend が難しい場合の代替: Start Command を no-op（例: `sleep 86400`）に変更し、Auto deploy を OFF にする。
+   - ロールバック用に Deploy Hook / Start Command をメモしておく（再開時は Resume もしくは Start Command を元に戻してデプロイ）。
 
 ## ロールバック
 - `NEXT_PUBLIC_API_BASE_URL` を元の Express URL に戻し、Deploy Hook で再デプロイ。
@@ -43,6 +44,7 @@ stg/prd で API を Express から Next.js Route Handlers に切り替え、最�
 - [ ] stg: ロールバックして Express で 200 応答
 - [ ] prd: 切替後にスモーク OK
 - [ ] prd: ロールバック手順を手元 Runbook で確認
+- [ ] Express サービスを Suspend（stg→prdの順、ロールバック手順を確保した上で）
 
 ## ローカル検証手順（Next API 統合）
 1. 依存インストール: `npm ci`

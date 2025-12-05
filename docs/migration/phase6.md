@@ -25,7 +25,9 @@
 - [x] `/api/tasks`, `/api/tags`, `/api/tasks/reorder` を段階移行（stg リハーサル済）
 - [x] `/api/tasks/:taskId` (GET/PATCH/DELETE) を Next に実装
 - [x] CORS/ENV: stg/prd で `NEXT_PUBLIC_API_BASE_URL` を Next ドメインに設定（同一オリジン化）。Playwright 用は repo variable `PLAYWRIGHT_API_BASE_URL` で上書き可。
-- [ ] Express サービス停止（ロールバック経路を残したまま）
+- [ ] Express サービス停止（ロールバック経路を残したまま）  
+    - stg: Suspend/Start Command no-op で停止（Next API 動作確認後）  
+    - prd: 切替とスモーク完了後に停止、ロールバック手順を明記
 
 **データ永続化（Postgres）**
 - [x] Render Postgres をプロビジョニング（stg）／[ ] prd
