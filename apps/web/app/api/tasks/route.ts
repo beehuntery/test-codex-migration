@@ -50,33 +50,39 @@ export async function POST(req: Request) {
 
   const input = parsed.data;
 
-  const created = await prisma.$transaction(async (tx) => {
-    const aggregate = await tx.task.aggregate({ _max: { order: true } });
-    const order = (aggregate._max.order ?? -1) + 1;
+  try {
+    const created = await prisma.$transaction(async (tx) => {
+      const aggregate = await tx.task.aggregate({ _max: { order: true } });
+      const order = (aggregate._max.order ?? -1) + 1;
 
-    return tx.task.create({
-      data: {
-        title: input.title.trim(),
-        description: (input.description ?? '').trim(),
-        status: input.status ?? 'todo',
-        dueDate: input.dueDate ? new Date(input.dueDate) : null,
-        order,
-        tags: {
-          connectOrCreate: (input.tags ?? []).map((name) => ({
-            where: { name },
-            create: { name }
-          }))
-        }
-      },
-      include: { tags: { select: { name: true } } }
+      return tx.task.create({
+        data: {
+          title: input.title.trim(),
+          description: (input.description ?? '').trim(),
+          status: input.status ?? 'todo',
+          dueDate: input.dueDate ? new Date(input.dueDate) : null,
+          order,
+          tags: {
+            connectOrCreate: (input.tags ?? []).map((name) => ({
+              where: { name },
+              create: { name }
+            }))
+          }
+        },
+        include: { tags: { select: { name: true } } }
+      });
     });
-  });
 
-  const mapped = mapTask(created);
-  const parsedTask = TaskSchema.safeParse(mapped);
-  if (!parsedTask.success) {
-    return NextResponse.json({ error: 'Failed to parse created task' }, { status: 500 });
+    const mapped = mapTask(created);
+    const parsedTask = TaskSchema.safeParse(mapped);
+    if (!parsedTask.success) {
+      return NextResponse.json({ error: 'Failed to parse created task' }, { status: 500 });
+    }
+
+    return NextResponse.json(parsedTask.data, { status: 201 });
+  } catch (error) {
+    // ログに詳細を出力して 5xx を返す
+    console.error('[api/tasks POST] failed', error);
+    return NextResponse.json({ error: 'Failed to create task' }, { status: 503 });
   }
-
-  return NextResponse.json(parsedTask.data, { status: 201 });
 }
