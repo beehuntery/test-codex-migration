@@ -8,6 +8,11 @@
 - Render デプロイジョブ
 - DB: Prisma/SQLite → 将来 Postgres
 
+## DB共用（暫定）ルール
+- 現在、prod/stg は同一 Postgres（stg DB）を共用している（Free 制約による暫定措置）。
+- **stg での更新系操作は禁止**（参照のみ）。検証が必要な場合はローカル/Preview で実施。
+- 本番専用 DB を用意することは今後の改善項目として backlog に保持。
+
 ## シグナルと閾値（提案）
 - HTTP 5xx rate: 5分窓で ≥1% or >10件 → Warn / ≥5% or >30件 → Critical
 - Latency p95: 60s窓で >2s → Warn / >4s → Critical
