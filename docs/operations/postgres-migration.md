@@ -25,12 +25,12 @@
 ## タスク分解（進捗付き）
 - [x] Render Postgres (stg) プロビジョニング  
   - name: `test-codex-migration-stg-db` (free, v15, Oregon)
-- [ ] Render Postgres (prd) プロビジョニング
+- [ ] Render Postgres (prd) プロビジョニング（現在 stg DB を暫定共用中。専用DBを後日作成）
 - [x] Prisma datasource を Postgres に切替（main 反映済）
 - [x] 初期マイグレーションを作成（Postgres向け）: `20251203_postgres_init`
 - [x] データ移行スクリプト（SQLite→Postgres）: `npm run import:pg` (`src/scripts/importToPostgres.ts`)
 - [x] stg: migrate deploy & データ移行 & スモーク
-- [ ] prd: メンテ時間確保 → データ移行 → 切替 → スモーク
+- [ ] prd: メンテ時間確保 → **専用DB作成** → migrate deploy → （必要なら）データ移行 → スモーク
 - [ ] ロールバック手順明文化（旧SQLiteに戻す手順／前タグDeployHookで戻す手順）
 
 ## リスクと対策
@@ -38,20 +38,20 @@
 - ダウンタイム: 本番切替は短時間メンテウィンドウを確保
 - ロールバック: 切替前のSQLiteを温存し、環境変数を戻すだけで復旧できるようにする
 
-## 直近で実施した stg 手順（ログ用）
+## 直近で実施した stg/prd 手順（ログ用）
 1. 失敗状態のマイグレーションを `migrate resolve --applied 20251203_postgres_init` で適用済みにマーク  
 2. `npx prisma db push --schema prisma/schema.prisma` でスキーマ同期  
-3. Render 再デプロイ → 成功を確認  
-4. 必要に応じ `npm run import:pg` で JSON データ投入
+3. Render stg / prd (Next) を再デプロイ → stg 成功、本番は stg DB を参照する形で動作確認  
+4. 必要に応じ `npm run import:pg` で JSON データ投入（本番では未実施）
 
-## prd 移行の提案フロー（ドラフト）
-1) prd 用 Postgres を Render でプロビジョニング（Standard+推奨）  
-2) `.env.production` / Render Environment に `DATABASE_URL` を Postgres で設定  
+## prd 移行の提案フロー（改訂：専用DB前提）
+1) prd 用 Postgres を Render でプロビジョニング（Starter+推奨。Free枠共用は暫定のみ）  
+2) `.env.production` / Render Environment に `DATABASE_URL` を **prd専用DB** で設定  
 3) メンテ時間内に以下を実行  
    - `npx prisma migrate deploy --schema prisma/schema.prisma`  
    - （必要なら）`npm run import:pg` でデータ投入  
 4) デプロイ → `/api/health` `/api/tasks` スモーク → 短縮版 Playwright  
-5) ロールバック: DeployHook で前タグを再デプロイ（`scripts/rollback.sh <service_id> <hook> <tag>`）
+5) ロールバック: DeployHook で前タグを再デプロイ（`scripts/rollback.sh <service_id> <hook> <tag>`） または `DATABASE_URL` を旧DBに戻す
 
 ## 補足
 - Prisma のマイグレーションは SQLite と Postgres で SQL が異なるため、Postgres用マイグレーションを新規生成する。
