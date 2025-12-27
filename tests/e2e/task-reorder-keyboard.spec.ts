@@ -18,8 +18,8 @@ test.describe('Task reorder via keyboard', () => {
     const { id: firstId } = await createTaskViaUI(page, { title: firstTitle, tags: 'keyboard-test' });
     const { card: secondCard, id: secondId } = await createTaskViaUI(page, { title: secondTitle, tags: 'keyboard-test' });
 
-    await secondCard.focus();
-    await page.keyboard.press('Alt+ArrowUp');
+    await secondCard.click();
+    await secondCard.press('Alt+ArrowUp');
 
     await expect.poll(async () => {
       const orderAfterMove = await page.locator('[data-task-id]').evaluateAll((nodes) =>
@@ -33,7 +33,7 @@ test.describe('Task reorder via keyboard', () => {
     expect(consoleErrors).toEqual([]);
 
     // restore order for subsequent tests
-    await secondCard.focus();
-    await page.keyboard.press('Alt+ArrowDown');
+    await secondCard.click();
+    await secondCard.press('Alt+ArrowDown');
   });
 });

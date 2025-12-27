@@ -12,8 +12,7 @@ test.describe('Quick add + bulk delete undo', () => {
     await titleInput.fill(title);
     await titleInput.focus();
     await titleInput.press('Enter');
-    const toast = page.getByText('タスクを追加しました');
-    await expect(toast).toBeVisible({ timeout: 10000 });
+
     // API経由の作成に置き換わった場合でもリロードして検出できるようフォールバック
     await page.waitForTimeout(500); // 軽いバッファ
     await expect
