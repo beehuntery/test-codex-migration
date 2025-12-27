@@ -1,5 +1,9 @@
 import { useSyncExternalStore } from 'react';
-import { action } from '@storybook/addon-actions';
+const action =
+  (name: string) =>
+  (...args: unknown[]) => {
+    console.info(`[storybook action] ${name}`, ...args);
+  };
 
 let currentPathname = '/';
 let currentParams = new URLSearchParams();
