@@ -425,42 +425,42 @@ export class PrismaDataStore implements DataStore {
           async (tx: Prisma.TransactionClient) => {
             const tasks: Array<{ id: string; order: number | null }> = await tx.task.findMany({
               select: { id: true, order: true }
-          });
-          const orderMap = new Map(order.map((id, idx) => [id, idx] as const));
-          let changed = false;
-
-          for (const task of tasks) {
-            const newOrder = orderMap.get(task.id);
-            if (newOrder !== undefined && task.order !== newOrder) {
-              await tx.task.update({ where: { id: task.id }, data: { order: newOrder } });
-              changed = true;
-            }
-          }
-
-          let nextOrder = order.length;
-          const remainder = tasks
-            .filter((task) => !orderMap.has(task.id))
-            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-          for (const task of remainder) {
-            if (task.order !== nextOrder) {
-              await tx.task.update({ where: { id: task.id }, data: { order: nextOrder } });
-              changed = true;
-            }
-            nextOrder += 1;
-          }
-
-          if (!changed) {
-            const existing: PrismaTaskWithTags[] = await tx.task.findMany({
-              orderBy: { order: 'asc' },
-              include: { tags: { select: { name: true } } }
             });
-            return existing.map(mapTask);
-          }
+
+            const orderMap = new Map(order.map((id, idx) => [id, idx] as const));
+            let changed = false;
+
+            // Update only the order column via raw SQL to avoid @updatedAt auto-touch.
+            for (const task of tasks) {
+              const newOrder = orderMap.get(task.id);
+              if (newOrder !== undefined && task.order !== newOrder) {
+                await tx.$executeRaw`UPDATE "Task" SET "order" = ${newOrder} WHERE "id" = ${task.id}`;
+                changed = true;
+              }
+            }
+
+            // Append remaining tasks after the provided list
+            let nextOrder = order.length;
+            const remainder = tasks
+              .filter((task) => !orderMap.has(task.id))
+              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+            for (const task of remainder) {
+              if (task.order !== nextOrder) {
+                await tx.$executeRaw`UPDATE "Task" SET "order" = ${nextOrder} WHERE "id" = ${task.id}`;
+                changed = true;
+              }
+              nextOrder += 1;
+            }
 
             const updated: PrismaTaskWithTags[] = await tx.task.findMany({
               orderBy: { order: 'asc' },
               include: { tags: { select: { name: true } } }
             });
+
+            if (!changed) {
+              return updated.map(mapTask);
+            }
+
             return updated.map(mapTask);
           },
           { timeout: this.options.transactionTimeoutMs }

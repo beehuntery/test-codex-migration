@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useCallback, useEffect, useState, useTransition } from 'react';
 import { TaskStatusSchema, type TaskStatus } from '@shared/api';
 import { setTaskStatusAction } from '../actions';
 import { STATUS_LABELS } from './status-badge';
@@ -21,18 +21,18 @@ export function TaskStatusForm({
   const [error, setError] = useState<string | null>(null);
   const { notify } = useTaskNotifications();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const updateStatus = useCallback(
+    (next: TaskStatus) => {
     startTransition(async () => {
       setError(null);
       try {
-        await setTaskStatusAction(taskId, selectedStatus);
+        await setTaskStatusAction(taskId, next);
         notify({
           type: 'success',
           title: 'ステータスを更新しました',
-          description: STATUS_LABELS[selectedStatus] ?? selectedStatus
+          description: STATUS_LABELS[next] ?? next
         });
-        if (selectedStatus === 'done') {
+        if (next === 'done') {
           emitTaskCompleted(taskId);
         }
       } catch (err) {
@@ -46,23 +46,37 @@ export function TaskStatusForm({
         });
       }
     });
-  };
+    },
+    [currentStatus, notify, startTransition, taskId]
+  );
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const custom = event as CustomEvent<{ taskId: string }>;
+      if (custom.detail?.taskId !== taskId) return;
+      const currentIndex = STATUS_OPTIONS.indexOf(selectedStatus);
+      const next = STATUS_OPTIONS[(currentIndex + 1) % STATUS_OPTIONS.length] ?? selectedStatus;
+      setSelectedStatus(next);
+      updateStatus(next);
+    };
+    document.addEventListener('task-cycle-status', handler as EventListener);
+    return () => document.removeEventListener('task-cycle-status', handler as EventListener);
+  }, [selectedStatus, taskId, updateStatus]);
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-wrap items-center gap-2 rounded-xl border border-[rgba(107,102,95,0.15)] bg-white/90 px-3 py-2"
-    >
-      <label className="text-xs font-semibold text-[color:var(--color-text-muted)]" htmlFor={`status-${taskId}`}>
-        ステータス更新
-      </label>
+    <div className="flex items-center gap-2 min-h-[32px]">
       <select
         id={`status-${taskId}`}
         name="status"
         value={selectedStatus}
-        onChange={(event) => setSelectedStatus(event.target.value as TaskStatus)}
+        onChange={(event) => {
+          const next = event.target.value as TaskStatus;
+          setSelectedStatus(next);
+          updateStatus(next);
+        }}
         disabled={isPending}
         className="rounded-lg border border-[rgba(107,102,95,0.25)] bg-white px-3 py-1 text-sm text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-accent)]/40"
+        aria-label="ステータス"
       >
         {STATUS_OPTIONS.map((status) => (
           <option key={status} value={status}>
@@ -70,10 +84,10 @@ export function TaskStatusForm({
           </option>
         ))}
       </select>
-      <button type="submit" className="btn-secondary text-xs" disabled={isPending}>
-        {isPending ? '更新中…' : '更新'}
-      </button>
+      <span className="w-14 text-right text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-text-muted)]">
+        {isPending ? '…更新中' : ''}
+      </span>
       {error ? <p className="text-xs text-[color:var(--color-error)]">{error}</p> : null}
-    </form>
+    </div>
   );
 }

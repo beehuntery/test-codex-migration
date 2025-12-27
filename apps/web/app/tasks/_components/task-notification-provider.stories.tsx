@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TaskNotificationProvider, useTaskNotifications } from './task-notification-provider';
 import { emitTaskCompleted } from '../_lib/task-events';
 

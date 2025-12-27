@@ -1,29 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-const NEXT_PORT = process.env.NEXT_PORT || '3001';
-const BASE_URL = `http://localhost:${NEXT_PORT}`;
-
-async function createTaskViaUI(
-  page: import('@playwright/test').Page,
-  { title, tags }: { title: string; tags?: string }
-) {
-  const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'タスクを追加' }) }).first();
-  await form.getByLabel('タイトル').fill(title);
-  await form.getByLabel('説明').fill('Keyboard reorder test task');
-  const dueInput = form.getByLabel('期限');
-  await dueInput.fill('');
-  await form.getByPlaceholder('カンマ区切りで入力').fill(tags ?? 'keyboard-test');
-  await form.getByRole('button', { name: 'タスクを追加' }).click();
-  const taskList = page.getByTestId('task-list');
-  const card = taskList
-    .getByRole('listitem')
-    .filter({ has: page.getByText(title, { exact: true }) })
-    .first();
-  await expect(card).toBeVisible();
-  await expect(card).toHaveAttribute('data-task-id', /.+/);
-  const id = await card.getAttribute('data-task-id');
-  return { card, id };
-}
+import { createTaskViaUI, gotoTasks } from './utils';
 
 test.describe('Task reorder via keyboard', () => {
   test('Alt + Arrow keys move tasks within the list', async ({ page }) => {
@@ -37,11 +13,10 @@ test.describe('Task reorder via keyboard', () => {
       }
     });
 
-    await page.goto(`${BASE_URL}/tasks`);
-    await page.waitForLoadState('networkidle');
+    await gotoTasks(page);
 
-    const { id: firstId } = await createTaskViaUI(page, { title: firstTitle });
-    const { card: secondCard, id: secondId } = await createTaskViaUI(page, { title: secondTitle });
+    const { id: firstId } = await createTaskViaUI(page, { title: firstTitle, tags: 'keyboard-test' });
+    const { card: secondCard, id: secondId } = await createTaskViaUI(page, { title: secondTitle, tags: 'keyboard-test' });
 
     await secondCard.focus();
     await page.keyboard.press('Alt+ArrowUp');

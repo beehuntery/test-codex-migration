@@ -1,29 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-const NEXT_PORT = process.env.NEXT_PORT || '3001';
-const BASE_URL = `http://localhost:${NEXT_PORT}`;
-
-async function createTaskViaUI(
-  page: import('@playwright/test').Page,
-  { title }: { title: string }
-) {
-  const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'タスクを追加' }) }).first();
-  await form.getByLabel('タイトル').fill(title);
-  await form.getByLabel('説明').fill('Reorder persistence test');
-  await form.getByLabel('期限').fill('');
-  await form.getByPlaceholder('カンマ区切りで入力').fill('persist');
-  await form.getByRole('button', { name: 'タスクを追加' }).click();
-
-  const taskList = page.getByTestId('task-list');
-  const card = taskList
-    .getByRole('listitem')
-    .filter({ has: page.getByText(title, { exact: true }) })
-    .first();
-  await expect(card).toBeVisible();
-  await expect(card).toHaveAttribute('data-task-id', /.+/);
-  const id = await card.getAttribute('data-task-id');
-  return { card, id }; 
-}
+import { createTaskViaUI, gotoTasks } from './utils';
 
 test.describe('Reorder persistence', () => {
   test('keyboard reorder persists after reload', async ({ page }) => {
@@ -35,11 +11,10 @@ test.describe('Reorder persistence', () => {
     const firstTitle = `Persist Task A ${Date.now()}`;
     const secondTitle = `Persist Task B ${Date.now()}`;
 
-    await page.goto(`${BASE_URL}/tasks`);
-    await page.waitForLoadState('networkidle');
+    await gotoTasks(page);
 
-    const { id: firstId } = await createTaskViaUI(page, { title: firstTitle });
-    const { card: secondCard, id: secondId } = await createTaskViaUI(page, { title: secondTitle });
+    const { card: firstCard, id: firstId } = await createTaskViaUI(page, { title: firstTitle, tags: 'persist' });
+    const { card: secondCard, id: secondId } = await createTaskViaUI(page, { title: secondTitle, tags: 'persist' });
 
     // move second above first via keyboard
     await secondCard.focus();

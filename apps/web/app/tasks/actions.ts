@@ -117,10 +117,14 @@ export async function createTaskAction(formData: FormData) {
   const description = (formData.get('description') ?? '').toString().trim();
   const dueDateRaw = (formData.get('dueDate') ?? '').toString().trim();
   const tagsRaw = (formData.get('tags') ?? '').toString().trim();
+  const statusRaw = (formData.get('status') ?? '').toString().trim();
 
   if (!title) {
     return { error: 'タイトルは必須です。' };
   }
+
+  const parsedStatus = TaskStatusSchema.safeParse(statusRaw || 'todo');
+  const status: TaskStatus = parsedStatus.success ? parsedStatus.data : 'todo';
 
   const tags = tagsRaw
     .split(',')
@@ -131,13 +135,40 @@ export async function createTaskAction(formData: FormData) {
     await createTaskRequest({
       title,
       description,
-      status: 'todo',
+      status,
       dueDate: dueDateRaw ? dueDateRaw : null,
       tags
     });
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : 'タスクの作成に失敗しました。'
+    };
+  }
+
+  revalidatePath('/tasks');
+  return { success: true };
+}
+
+export async function updateTaskFieldsAction(formData: FormData) {
+  const taskId = (formData.get('taskId') ?? '').toString().trim();
+  if (!taskId) return { error: 'タスクIDが無効です。' };
+
+  const title = (formData.get('title') ?? '').toString();
+  const description = (formData.get('description') ?? '').toString();
+  const dueDateRaw = (formData.get('dueDate') ?? '').toString().trim();
+  const statusRaw = (formData.get('status') ?? '').toString();
+
+  const parsedStatus = TaskStatusSchema.safeParse(statusRaw || 'todo');
+  const status: TaskStatus = parsedStatus.success ? parsedStatus.data : 'todo';
+
+  try {
+    if (title.trim()) await updateTaskTitleRequest(taskId, title.trim());
+    await updateTaskDescriptionRequest(taskId, description);
+    await updateTaskDueDateRequest(taskId, dueDateRaw ? dueDateRaw : null);
+    await updateTaskStatusRequest(taskId, status);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : '自動保存に失敗しました。'
     };
   }
 

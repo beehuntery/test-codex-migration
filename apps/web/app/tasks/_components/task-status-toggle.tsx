@@ -6,7 +6,7 @@ import { setTaskStatusAction } from '../actions';
 import { useTaskNotifications } from './task-notification-provider';
 import { emitTaskCompleted } from '../_lib/task-events';
 
-const STATUS_FLOW: TaskStatus[] = ['todo', 'in_progress', 'done'];
+const STATUS_FLOW: TaskStatus[] = ['todo', 'in_progress', 'waiting', 'pending', 'done'];
 
 function getNextStatus(current: TaskStatus): TaskStatus {
   const index = STATUS_FLOW.indexOf(current);
@@ -24,6 +24,8 @@ export function TaskStatusToggle({ taskId, status }: { taskId: string; status: T
   const labelMap: Record<TaskStatus, string> = {
     todo: '未着手',
     in_progress: '進行中',
+    waiting: '待ち',
+    pending: '保留',
     done: '完了'
   };
 

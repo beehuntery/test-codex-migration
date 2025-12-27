@@ -25,6 +25,7 @@ export function TaskDueDateEditor({ taskId, dueDate }: { taskId: string; dueDate
   const [optimisticDueDate, setOptimisticDueDate] = useOptimistic(stableDueDate, (_, next: string | null) => next);
   const [inputValue, setInputValue] = useState(dueDate ?? '');
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const { notify } = useTaskNotifications();
 
   const syncOptimistic = (nextValue: string | null) => {
@@ -61,17 +62,46 @@ export function TaskDueDateEditor({ taskId, dueDate }: { taskId: string; dueDate
     })();
   };
 
+  const formattedLabel = (() => {
+    if (!optimisticDueDate) return '—';
+    try {
+      const d = new Date(optimisticDueDate);
+      const mm = `${d.getMonth() + 1}`.padStart(2, '0');
+      const dd = `${d.getDate()}`.padStart(2, '0');
+      return `${mm}/${dd}`;
+    } catch {
+      return '—';
+    }
+  })();
+
   return (
-    <div className="flex flex-col gap-2">
-      <input
-        type="date"
-        value={inputValue}
-        onChange={(event) => setInputValue(event.target.value)}
-        onBlur={() => commitDueDate(inputValue)}
-        disabled={isPending}
-        className="w-full rounded-lg border border-[rgba(107,102,95,0.25)] bg-white px-3 py-2 text-sm text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-accent)]/40"
-      />
-      <span className="text-xs text-[color:var(--color-text-muted)]">{formatDisplay(optimisticDueDate)}</span>
+    <div className="flex items-center gap-2">
+      {isEditing ? (
+        <input
+          type="date"
+          value={inputValue}
+          onChange={(event) => setInputValue(event.target.value)}
+          onBlur={() => {
+            commitDueDate(inputValue);
+            setIsEditing(false);
+          }}
+          autoFocus
+          disabled={isPending}
+          className="w-full rounded-lg border border-[rgba(107,102,95,0.25)] bg-white px-2 py-1 text-sm text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-accent)]/40"
+          aria-label="期限を編集"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsEditing(true)}
+          className={`w-full rounded-lg px-2 py-1 text-sm text-left transition hover:bg-[color:var(--color-surface-muted)] ${
+            !optimisticDueDate ? 'text-[color:var(--color-disabled)]' : ''
+          }`}
+          title={formatDisplay(optimisticDueDate)}
+        >
+          {formattedLabel}
+        </button>
+      )}
       {error ? <p className="text-xs text-[color:var(--color-error)]">{error}</p> : null}
     </div>
   );

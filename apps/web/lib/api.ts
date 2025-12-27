@@ -12,26 +12,54 @@ import {
   TagListSchema
 } from '@shared/api';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+// Prefer explicit API base; otherwise fall back depending on environment.
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  process.env.API_BASE_URL ||
+  '';
 const LOG_API_REQUESTS = process.env.LOG_API_REQUESTS === '1';
 
+const resolveServerBaseUrl = () => {
+  const vercelUrl = process.env.VERCEL_URL;
+  if (vercelUrl) return `https://${vercelUrl}`;
+  const port = process.env.PORT ?? process.env.NEXT_PORT ?? '3000';
+  return `http://127.0.0.1:${port}`;
+};
+
 export async function fetchFromApi<T>(path: string, init?: RequestInit): Promise<T> {
-  const url = new URL(path, API_BASE_URL);
+  const isBrowser = typeof window !== 'undefined';
+  const baseUrl = API_BASE_URL || (isBrowser ? '' : resolveServerBaseUrl());
+  const useAbsolute = Boolean(baseUrl);
+  const url = useAbsolute ? new URL(path, baseUrl) : null;
   const method = init?.method ?? 'GET';
   const startedAt = LOG_API_REQUESTS ? Date.now() : 0;
 
-  const res = await fetch(url.toString(), {
-    cache: 'no-store',
-    headers: {
-      'Content-Type': 'application/json',
-      ...init?.headers
-    },
-    ...init
-  });
+  const doFetch = (target: string) =>
+    fetch(target, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+        ...init?.headers
+      },
+      ...init
+    });
+
+  let res: Response;
+  try {
+    res = await doFetch(useAbsolute ? url!.toString() : path);
+  } catch (error) {
+    // In development/test, fall back to same-origin when the absolute base URL is unreachable.
+    if (useAbsolute && process.env.NODE_ENV !== 'production') {
+      res = await doFetch(path);
+    } else {
+      throw error;
+    }
+  }
 
   if (LOG_API_REQUESTS) {
     const elapsed = Date.now() - startedAt;
-    console.log(`[Next API] ${method} ${url.toString()} -> ${res.status} (${elapsed}ms)`);
+    const requestUrl = useAbsolute ? url!.toString() : path;
+    console.log(`[Next API] ${method} ${requestUrl} -> ${res.status} (${elapsed}ms)`);
   }
 
   if (!res.ok) {

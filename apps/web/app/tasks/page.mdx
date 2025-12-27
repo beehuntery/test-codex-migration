@@ -1,30 +1,30 @@
-import { Meta, Canvas, Story, Controls } from '@storybook/blocks';
-import * as TaskCardStories from './_components/task-card.stories';
+import { Meta, Canvas, Story, Controls } from '@storybook/addon-docs/blocks';
+import * as TaskDetailPaneStories from './_components/task-detail-pane.stories';
 import * as TaskDeleteButtonStories from './_components/task-delete-button.stories';
 
-<Meta of={TaskCardStories} title="Tasks/Documentation" />
+<Meta of={TaskDetailPaneStories} title="Tasks/Documentation" />
 
 # Tasks UI 概要
 
 このページは Next.js フェーズ3で構築中のタスク管理 UI コンポーネントを Storybook 上で解説するための MDX ドキュメントです。
 
-## TaskCard コンポーネント
+## TaskDetailPane コンポーネント
 
-タスクのタイトル、説明、期限、タグ、ステータスを表示するカードです。Next.js ではサーバーコンポーネントから呼び出され、ステータス更新フォーム（Server Action）を組み合わせることで操作が可能になります。
+タスク一覧で行を選択した際に表示される右側の詳細ペインです。タイトル・ステータス・期限・タグ・説明を一括で編集し、自動保存（Server Action）で反映されます。
 
 <Canvas>
-  <Story of={TaskCardStories.Default} name="Default" />
+  <Story of={TaskDetailPaneStories.Default} name="Default" />
 </Canvas>
 
 ## コントロール
 
-<Controls of={TaskCardStories.Default} />
+<Controls of={TaskDetailPaneStories.Default} />
 
 ## 確認ポイント
 
 - Tailwind トークンによるスタイリングとデザイントークンの適用状況
-- タグがない場合のプレースホルダーテキスト
-- Server Action を利用できない環境でもレンダリングが崩れないか
+- タグ編集UIの表示崩れがないか
+- 自動保存中のUIブレが発生しないか
 
 ## TaskDeleteButton コンポーネント
 

@@ -9,8 +9,8 @@ Next.js Route Handlers への完全切替と Postgres 移行後、本番運用�
 
 ## 前提確認
 - [x] 対象コミット/デプロイ: main 最新 (`test-codex-migration-next-prd`)
-- [x] 判定日時 (UTC/JST): 2025-12-07 / (入力)
-- [x] 判定者: (入力)
+- [x] 判定日時 (UTC/JST): 2025-12-07
+- [x] 判定者: yousukeayada
 - [x] 連絡チャネル（Slack/Issue）周知済み
 
 ## 技術条件
@@ -33,8 +33,7 @@ Next.js Route Handlers への完全切替と Postgres 移行後、本番運用�
 - [ ] 本番専用 Postgres は未作成（Free 制約のため）。共用継続の承認を記録
 
 ## 判定結果
-- [ ] **Go** / [ ] **No-Go**
+- [x] **Go** / [ ] **No-Go**
 - 備考:
   - 本番 DB は stg と共用（暫定）。専用 DB 作成は今後の改善項目。
   - stg でのデータ操作は prod へ影響するため、stg テスト運用を制限するルールが必要。
-

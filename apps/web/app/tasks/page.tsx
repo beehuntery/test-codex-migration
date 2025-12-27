@@ -2,13 +2,11 @@ import Link from 'next/link';
 
 import { getTasks, getTags } from '../../lib/api';
 import { TaskStatusSchema } from '@shared/api';
-import { TaskCreateForm } from './_components/task-create-form';
-import { TaskTagFilterControls } from './_components/task-tag-filter-controls';
-import { TaskReorderList } from './_components/task-reorder-list';
-import { TaskStatusFilterControls } from './_components/task-status-filter-controls';
-import { TaskAdvancedFilterControls } from './_components/task-advanced-filter-controls';
+import { TaskQuickAdd } from './_components/task-quick-add';
 import { STATUS_LABELS } from './_components/status-badge';
 import { TaskNotificationProvider } from './_components/task-notification-provider';
+import { TaskCommandBar, type TaskSortState } from './_components/task-command-bar';
+import { TaskTableSection } from './_components/task-table-section';
 import {
   matchesDateRange,
   matchesSearch,
@@ -34,6 +32,7 @@ type TasksPageSearchParams = {
   createdTo?: string | string[];
   updatedFrom?: string | string[];
   updatedTo?: string | string[];
+  sort?: string | string[];
 };
 
 type TasksPageProps = {
@@ -67,6 +66,25 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const updatedTo = parseDateInput(resolvedSearchParams?.updatedTo);
   const { from: normalizedUpdatedFrom, to: normalizedUpdatedTo } = normalizeDateRange(updatedFrom, updatedTo);
 
+  const sortState: TaskSortState = (() => {
+    const raw = Array.isArray(resolvedSearchParams?.sort)
+      ? resolvedSearchParams?.sort[0]
+      : resolvedSearchParams?.sort ?? '';
+    const [keyRaw, dirRaw] = (raw || '').split(':');
+    const key: TaskSortState['key'] =
+      keyRaw === 'dueDate'
+        ? 'dueDate'
+        : keyRaw === 'title'
+        ? 'title'
+        : keyRaw === 'updatedAt'
+        ? 'updatedAt'
+        : keyRaw === 'status'
+        ? 'status'
+        : 'order';
+    const direction: TaskSortState['direction'] = dirRaw === 'asc' || key === 'order' ? 'asc' : 'desc';
+    return { key, direction };
+  })();
+
   let filteredTasks = tasks;
 
   if (searchQuery) {
@@ -98,8 +116,61 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
     );
   }
 
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    const dir = sortState.direction === 'desc' ? -1 : 1;
+
+    // 1) 手動順が指定されている場合は order のみで並べる
+    if (sortState.key === 'order') {
+      const ao = a.order ?? 0;
+      const bo = b.order ?? 0;
+      return ao === bo ? 0 : ao > bo ? dir : -dir;
+    }
+
+    // 2) 選択されたキーで並べ、同値時だけ order で安定化
+    const orderFallback = () => {
+      const ao = a.order ?? 0;
+      const bo = b.order ?? 0;
+      return ao === bo ? 0 : ao > bo ? 1 : -1;
+    };
+
+    if (sortState.key === 'status') {
+      const order = ['todo', 'in_progress', 'waiting', 'pending', 'done'] as const;
+      const idx = (s: string | undefined) => {
+        const i = order.indexOf((s ?? '') as (typeof order)[number]);
+        return i === -1 ? order.length : i;
+      };
+      const av = idx(a.status);
+      const bv = idx(b.status);
+      if (av === bv) return orderFallback();
+      return av > bv ? dir : -dir;
+    }
+
+    if (sortState.key === 'updatedAt') {
+      const av = a.updatedAt ?? '';
+      const bv = b.updatedAt ?? '';
+      if (av === bv) return orderFallback();
+      return av > bv ? dir : -dir;
+    }
+
+    if (sortState.key === 'dueDate') {
+      const av = a.dueDate ?? '';
+      const bv = b.dueDate ?? '';
+      if (av === bv) return orderFallback();
+      return av > bv ? dir : -dir;
+    }
+
+    if (sortState.key === 'title') {
+      const av = a.title.toLowerCase();
+      const bv = b.title.toLowerCase();
+      if (av === bv) return orderFallback();
+      return av > bv ? dir : -dir;
+    }
+
+    return orderFallback();
+  });
+
   const totalCount = tasks.length;
-  const filteredCount = filteredTasks.length;
+  const filteredCount = sortedTasks.length;
   const hasActiveFilters =
     Boolean(searchQuery) ||
     Boolean(normalizedDueFrom) ||
@@ -115,29 +186,19 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
 
   return (
     <TaskNotificationProvider>
-      <section className="mx-auto flex min-h-screen max-w-5xl flex-col gap-10 px-6 py-16">
-        <header className="flex flex-col gap-3">
-          <h1 className="text-3xl font-semibold text-[color:var(--color-text)]">タスク一覧</h1>
-          <p className="max-w-2xl text-base text-[color:var(--color-text-muted)]">
-            タスクの作成・絞り込み・並び替えができます。
-          </p>
-        </header>
+      <TaskCommandBar searchQuery={searchQuery} activeStatuses={activeStatuses} />
+      <section className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-10">
         <div className="card-surface space-y-6 p-8 text-[color:var(--color-text-muted)]">
-          <TaskCreateForm />
-          <TaskTagFilterControls availableTags={availableTags} selectedTags={activeFilterTags} />
-          <TaskStatusFilterControls selectedStatuses={activeStatuses} />
-          <TaskAdvancedFilterControls
-            initialQuery={searchQuery}
-            initialDueFrom={normalizedDueFrom}
-            initialDueTo={normalizedDueTo}
-            initialCreatedFrom={normalizedCreatedFrom}
-            initialCreatedTo={normalizedCreatedTo}
-            initialUpdatedFrom={normalizedUpdatedFrom}
-            initialUpdatedTo={normalizedUpdatedTo}
-          />
+          <TaskQuickAdd availableTags={availableTags} />
           <p className="text-xs text-[color:var(--color-text-muted)]" id="reorder-help">
-            タスクはドラッグまたは <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">Alt</kbd> +
-            <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">↑/↓</kbd> で並び替えできます。
+            並び替え: ドラッグ &amp; ドロップ / <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">Alt</kbd>+
+            <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">↑/↓</kbd> / <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">Ctrl</kbd>+
+            <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">J/K</kbd>（選択またはフォーカス範囲をまとめて移動）。 フォーカス範囲拡大:
+            <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">Shift</kbd>+
+            <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">J/K</kbd>。 リストへ移動:
+            <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">L</kbd>、ステータス巡回:
+            <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">S</kbd>、検索:
+            <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">/</kbd>。
           </p>
 
           <div aria-describedby="reorder-help">
@@ -178,18 +239,17 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
                 ) : null}
               </div>
             ) : (
-              <TaskReorderList tasks={filteredTasks} />
+              <TaskTableSection
+                tasks={sortedTasks}
+                totalCount={totalCount}
+                filteredCount={filteredCount}
+                hasActiveFilters={hasActiveFilters}
+                sortState={sortState}
+                availableTags={availableTags}
+              />
             )}
           </div>
 
-          <div>
-            <p className="mb-3 text-lg font-semibold text-[color:var(--color-text)]">次のステップ</p>
-            <ul className="flex list-disc flex-col gap-2 pl-6">
-              <li>フィルター系コンポーネントを Storybook で可視化し、デザイン差分を検証</li>
-              <li>API フェッチ層の共通化（`src/shared/api.ts` ベースで SSR/ISR を検討）</li>
-              <li>キーボード並び替えのアクセシビリティ強化と Playwright カバレッジ拡張</li>
-            </ul>
-          </div>
         </div>
         <Link href="/" className="btn-secondary w-fit">
           トップへ戻る

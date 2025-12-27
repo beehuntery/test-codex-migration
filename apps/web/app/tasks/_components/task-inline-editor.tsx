@@ -60,11 +60,12 @@ export function TaskInlineEditor({ taskId, title, disabled = false }: TaskInline
         onChange={(event) => setInputValue(event.target.value)}
         onBlur={handleBlur}
         disabled={isPending || disabled}
-        className="w-full rounded-lg border border-[rgba(107,102,95,0.25)] bg-white px-3 py-2 text-lg font-semibold text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-accent)]/40"
+        className="w-full rounded-lg border border-[rgba(107,102,95,0.25)] bg-white px-2.5 py-1 text-sm font-semibold text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-accent)]/40"
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${taskId}-title-error` : undefined}
+        title={optimisticTitle}
+        aria-label="タイトルを編集"
       />
-      <span className="text-xs text-[color:var(--color-text-muted)]">{optimisticTitle}</span>
       {error ? (
         <p id={`${taskId}-title-error`} className="text-xs text-[color:var(--color-error)]">
           {error}

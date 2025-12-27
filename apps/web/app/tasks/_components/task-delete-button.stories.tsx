@@ -1,6 +1,6 @@
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent } from '@storybook/testing-library';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { within, userEvent } from 'storybook/test';
 import { TaskDeleteButton } from './task-delete-button';
 import { TaskNotificationProvider } from './task-notification-provider';
 

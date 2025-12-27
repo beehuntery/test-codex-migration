@@ -1,9 +1,9 @@
 # テスト項目一覧
 
-最終更新日: 2025-11-25
+最終更新日: 2025-12-25
 
 本書では現在リポジトリに存在する自動テストを種別ごとに列挙し、カバレッジの概要と確認ポイントを整理する。
-（注）API は Next.js Route Handlers に統合済み。`legacy-parity` E2E シナリオのみ、Express 停止までバックワード互換を確認する目的で残している。
+（注）API は Next.js Route Handlers に統合済み。レガシー Express UI は廃止済みのため、関連シナリオは削除または skip に移行。
 
 ## ユニットテスト (Vitest)
 
@@ -31,33 +31,23 @@
 
 | ファイル | シナリオ | 主な確認ポイント |
 | --- | --- | --- |
-| `tests/e2e/create-task.spec.ts` | Create task form | タスク作成フォームで入力した内容がリストに即時表示される。 |
-| `tests/e2e/delete-task.spec.ts` | Task delete button | 削除確認ダイアログを経てタスクが UI から除去される。 |
-| `tests/e2e/due-date.spec.ts` | Task due date editor | 期限入力の変更が表示書式 (YYYY/MM/DD) で反映される。 |
-| `tests/e2e/status-toggle.spec.ts` | Task status toggle | ステータストグル操作で `todo → 進行中 → 完了` と遷移する。 |
-| `tests/e2e/tag-editor.spec.ts` | Task tag editor | タグ削除操作が UI とバックエンドで整合し、コンソールエラーが発生しない。 |
-| `tests/e2e/task-filters.spec.ts` | Task advanced filters | 詳細フィルターでキーワード・期限による絞り込み／リセットができる。 |
-| `tests/e2e/filters-combination.spec.ts` | Combined task filters | タグ・ステータス・キーワード・期限フィルターを組み合わせて適用し、URL パラメーターと結果が同期する。 |
-| `tests/e2e/notifications.spec.ts` | Task notifications | タスク追加・状態変更時のトースト表示と完了ハイライトが正しく動作する。 |
-| `tests/e2e/task-reorder.spec.mjs` | Drag & drop reorder persistence | HTML モック環境でのドラッグ＆ドロップ順序が API フェッチとリロード後も維持される。 |
-| `tests/e2e/task-reorder-keyboard.spec.ts` | Keyboard-based reorder | `Alt + Arrow` によるキーボード並び替えが反映され、順序が戻せる。 |
-| `tests/e2e/legacy-parity.spec.ts` | Legacy UI parity | Next.js UI で行った更新が Express ベースのレガシー UI へ反映される。 |
-| `tests/e2e/tag-persistence.spec.ts` | Tag persistence | タグ削除が再読み込み後も反映され、コンソールエラーが出ない。 |
-| `tests/e2e/reorder-persistence.spec.ts` | Reorder persistence | Alt+Arrow で変更した順序がリロード後も保持される。 |
-| `tests/e2e/notification-ux.spec.ts` | Notification UX | ステータス変更でトーストが表示され自動消去される。 |
-| `tests/e2e/simple.spec.mjs` | Harness sanity check | Playwright テスト基盤が最低限動作することの確認。 |
-
-### 追加で整備する予定のシナリオ（QA/UX改善）
-- Tag edit persistence: タグ追加・削除を行い、再読み込み後も反映されることを確認
-- Combined filters + reorder persistence: 複合フィルター適用後に並び替えし、再取得後も順序・フィルター結果が維持されること
-- Notification UX: タスク完了時のトースト表示とアクセシビリティ（フォーカス戻し）を検証
+| `tests/e2e/create-task.spec.ts` | クイック追加 | タイトル必須で作成でき、トースト表示と一覧反映が行われる。 |
+| `tests/e2e/quick-add-bulk-undo.spec.ts` | バルク削除 | 追加→チェック→削除で行が消える。選択バーの表示が正しく更新される。 |
+| `tests/e2e/reorder-persistence.spec.ts` | 並び替え保持（Alt+Arrow） | Alt+↑/↓ で手動順が更新され、リロード後も保持される。 |
+| `tests/e2e/task-reorder-keyboard.spec.ts` | キーボード並び替え | Alt+↑/↓ でタスクの順序が変わる。 |
+| `tests/e2e/task-reorder-dnd.spec.mjs` | D&D 並び替え | ドラッグ＆ドロップで順序が変わり、再取得後も維持される。 |
+| `tests/e2e/tag-ui.spec.ts` | タグUI | ドロップダウン選択・新規作成（Enter）・連続追加が成立する。 |
+| `tests/e2e/keyboard-shortcuts.spec.ts` | キーボード操作 | `/` 検索フォーカス、`L` リストフォーカス、`j/k` 移動、`Shift+j` 範囲拡大、`S` ステータス巡回。 |
+| `tests/e2e/status-extended.spec.ts` | ステータス拡張 | `waiting` / `pending` がドロップダウンで選択できる。 |
+| `tests/e2e/layout.spec.ts` | レイアウト回帰 | ヘッダと1行目が重ならず、行高が過剰に肥大化しない。 |
+| `tests/e2e/inline-edit.spec.ts` | インライン編集 | タイトル編集時に行選択が暴発せず、入力が反映される。 |
+| `tests/e2e/due-date.spec.ts` | 期限編集 | 期限を編集して表示（MM/DD）が更新される。 |
+| `tests/e2e/notifications.spec.ts` | 通知フロー | ステータス更新のトースト表示と完了時ハイライトが機能する。 |
+| `tests/e2e/tag-editor.spec.ts` | タグ削除 | タグ削除操作が反映され、コンソールエラーが出ない。 |
+| `tests/e2e/tag-persistence.spec.ts` | タグ永続化 | タグ削除がAPIとリロード後に保持される。 |
+| `tests/e2e/simple.spec.mjs` | ハーネス健全性 | Playwright 実行環境の健全性確認。 |
 
 
 ### 補足
 - `tests/e2e/global-setup.ts` は E2E 実行前に `/tasks` へウォームアップフェッチを行い、Next.js dev サーバー立ち上がりの揺らぎを吸収する。
-- `tests/e2e/utils.ts` にはタスク生成ヘルパー・コンソールエラートラップなど、複数シナリオで共通利用するユーティリティを集約している。
-
-## 未整備・今後の検討
-- Prisma ストアに対する実データベース統合テスト（現在はモックベースの監視ロジック検証のみ）。
-- フロントエンドのアクセシビリティ回帰（キーボード操作以外のフォーカス管理など）の自動化。
-- モバイル UI に関する E2E シナリオ追加。
+- `tests/e2e/utils.ts` はタスク生成ヘルパーや `gotoTasks()` などを共通化し、外部サーバー利用時の遷移揺らぎを吸収している。

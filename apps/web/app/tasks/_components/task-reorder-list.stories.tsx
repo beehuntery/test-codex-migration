@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { Task } from '@shared/api';
 import { TaskReorderList } from './task-reorder-list';
 import { TaskNotificationProvider } from './task-notification-provider';
@@ -21,7 +21,7 @@ const fixtureTasks: Task[] = [
     id: 'storybook-2',
     title: 'ドラッグ＆ドロップのデモ',
     description: 'タスクをドラッグすると並び替えが即座に反映されます。',
-    status: 'todo',
+    status: 'waiting',
     dueDate: '2025-12-05',
     createdAt: '2025-10-22T11:00:00.000Z',
     updatedAt: null,
@@ -32,7 +32,7 @@ const fixtureTasks: Task[] = [
     id: 'storybook-3',
     title: 'キーボード操作のテスト',
     description: 'Alt + ↑/↓ キーで移動し、並び替えを体験できます。',
-    status: 'todo',
+    status: 'pending',
     dueDate: null,
     createdAt: '2025-10-25T14:00:00.000Z',
     updatedAt: '2025-10-28T18:30:00.000Z',
@@ -92,7 +92,7 @@ function ReorderListPlayground() {
               フォーカスを当てた状態で <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">Alt</kbd> +
               <kbd className="rounded bg-[color:var(--color-surface-muted)] px-1">↑/↓</kbd> でキーボード並び替えができます。
             </li>
-            <li>タスクの「次の状態へ」ボタンやフォームから完了状態にするとハイライトが点灯します。</li>
+            <li>ステータスのプルダウンで完了状態にするとハイライトが点灯します。</li>
             <li>下のショートカットボタンでも完了イベントを手動で送信できます。</li>
           </ul>
           <div className="mt-4 flex flex-wrap gap-3">

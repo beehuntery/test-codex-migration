@@ -1,6 +1,6 @@
 # Release Notes (Draft)
 
-## 最新デプロイ (2025-12-07)
+## 最新デプロイ (2025-12-07, v0.0.8)
 - Next.js Route Handlers へ完全移行（/api/health, /api/tasks, /api/tags, /api/tasks/:id, /api/tasks/reorder）
 - Prisma datasource を Postgres に切替
 - Express サービスを stg/prd とも Suspend（ロールバックで Resume 可）
@@ -19,4 +19,3 @@
 - 本番専用 Postgres（Starter 以上）への移行
 - Playwright 本番短縮版の自動スモーク
 - ログ監視の自動化（現状手動フィルタ）
-

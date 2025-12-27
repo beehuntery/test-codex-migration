@@ -2,6 +2,7 @@
   --color-base: #e5ded3;
   --color-surface: #f8f5f0;
   --color-surface-alt: #ffffff;
+  --color-surface-muted: #f1ece4;
   --color-primary: #6bb892;
   --color-secondary: #efdcc5;
   --color-accent: #82c7c9;
@@ -11,6 +12,14 @@
   --color-success: #4e8f6f;
   --color-warning: #d6a75b;
   --color-error: #c97171;
+  --color-divider: #e7e1d9;
+
+  /* ステータス別ピルカラー */
+  --status-todo: #6b665f;
+  --status-doing: #82c7c9;
+  --status-waiting: #d6a75b;
+  --status-pending: #b8b3ab;
+  --status-done: #4e8f6f;
 
   --shadow-elevation-1: 0 8px 24px rgba(107, 102, 95, 0.12);
   --shadow-elevation-2: 0 16px 32px rgba(62, 58, 54, 0.16);
@@ -19,8 +28,39 @@
   --radius-card: 20px;
   --radius-button-lg: 16px;
   --radius-button: 12px;
+  --radius-badge: 12px;
 
   --font-sans: "SF Pro Text", "SF Pro JP", "Noto Sans JP", system-ui, sans-serif;
+
+  /* タイポスケール (ptベース相当) */
+  --text-h1: 28px;
+  --text-h2: 22px;
+  --text-h3: 18px;
+  --text-body-lg: 16px;
+  --text-body: 15px;
+  --text-body-sm: 14px;
+  --text-caption: 12px;
+
+  --leading-tight: 1.3;
+  --leading-normal: 1.4;
+
+  /* スペーシング (8ptグリッド) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* テーブル・ペイン用寸法 */
+  --table-row-height: 30px;
+  --table-row-gap: 8px;
+  --table-padding-x: 10px;
+  --table-padding-y: 4px;
+  --table-header-height: 32px;
+  --pane-min-width: 280px;
+  --pane-max-width: 40%;
+  --command-bar-height: 72px;
 }
 
 @utility shadow-elevated {
@@ -38,6 +78,7 @@
   font-weight: 600;
   letter-spacing: 0.01em;
   padding: 0.75rem 1.5rem;
+  min-height: 44px;
   transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
@@ -47,5 +88,99 @@
   border-radius: var(--radius-button);
   background-color: transparent;
   padding: 0.7rem 1.4rem;
+  min-height: 44px;
   transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+@utility focus-ring-soft {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+@utility task-table-header {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1.3fr) 120px 120px 260px 72px;
+  align-items: center;
+  column-gap: var(--table-row-gap);
+  min-height: var(--table-header-height);
+  padding: var(--table-padding-y) var(--table-padding-x);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+@utility task-table-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1.3fr) 120px 120px 260px 72px;
+  align-items: center;
+  column-gap: var(--table-row-gap);
+  min-height: var(--table-row-height);
+  padding: var(--table-padding-y) var(--table-padding-x);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+@utility task-table-sticky-area {
+  position: sticky;
+  top: 0;
+  z-index: 14;
+  background: linear-gradient(180deg, var(--color-surface) 0%, rgba(248, 245, 240, 0.95) 60%, rgba(248, 245, 240, 0) 100%);
+  backdrop-filter: blur(4px);
+}
+
+@utility task-pane-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(var(--pane-min-width), var(--pane-max-width));
+  column-gap: var(--space-5);
+}
+
+.responsive-pane-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(var(--pane-min-width), var(--pane-max-width));
+  column-gap: var(--space-5);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .responsive-pane-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  .task-table-header {
+    display: none;
+  }
+}
+
+@utility pane-resize-handle {
+  position: absolute;
+  left: -6px;
+  top: 0;
+  width: 12px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+}
+
+@utility badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-badge);
+  font-size: var(--text-caption);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+}
+
+@utility kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface-muted);
+  font-size: var(--text-caption);
+  line-height: 1.2;
+  letter-spacing: 0.02em;
 }

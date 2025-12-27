@@ -1,27 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-const NEXT_PORT = process.env.NEXT_PORT || '3001';
-const BASE_URL = `http://localhost:${NEXT_PORT}`;
-
-async function createTaskViaUI(
-  page: import('@playwright/test').Page,
-  { title, tags }: { title: string; tags?: string }
-) {
-  const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'タスクを追加' }) }).first();
-  await form.getByLabel('タイトル').fill(title);
-  await form.getByLabel('説明').fill('Tag persistence test');
-  await form.getByLabel('期限').fill('');
-  await form.getByPlaceholder('カンマ区切りで入力').fill(tags ?? '');
-  await form.getByRole('button', { name: 'タスクを追加' }).click();
-
-  const taskList = page.getByTestId('task-list');
-  const card = taskList
-    .getByRole('listitem')
-    .filter({ has: page.getByText(title, { exact: true }) })
-    .first();
-  await expect(card).toBeVisible();
-  return card;
-}
+import { createTaskViaUI, getTaskCardByTitle, gotoTasks } from './utils';
 
 test.describe('Tag persistence', () => {
   test('removing a tag persists after reload', async ({ page }) => {
@@ -32,17 +10,16 @@ test.describe('Tag persistence', () => {
 
     const title = `Tag Persist ${Date.now()}`;
 
-    await page.goto(`${BASE_URL}/tasks`);
-    await page.waitForLoadState('networkidle');
+    await gotoTasks(page);
 
-    const card = await createTaskViaUI(page, { title, tags: 'alpha,beta' });
+    const { card } = await createTaskViaUI(page, { title, tags: 'alpha,beta' });
 
-    // remove beta
-    await card.getByRole('button', { name: 'beta を削除' }).click();
+    const removeBeta = card.getByRole('button', { name: 'beta を削除' }).first();
+    await expect(removeBeta).toBeVisible({ timeout: 10000 });
+    await removeBeta.click();
     await expect(card.getByText('beta')).toHaveCount(0);
     await expect(card.getByText('alpha')).toHaveCount(1);
 
-    // バックエンド反映を確認（poll）
     await expect.poll(async () => {
       const res = await page.request.get('/api/tasks');
       const tasks = (await res.json()) as Array<{ title: string; tags: string[] }>;
@@ -50,14 +27,9 @@ test.describe('Tag persistence', () => {
       return found ? found.tags.includes('beta') : true;
     }).toBe(false);
 
-    // reload and confirm persistence
-    await page.reload();
-    const reloadedCard = page
-      .getByTestId('task-list')
-      .getByRole('listitem')
-      .filter({ has: page.getByText(title, { exact: true }) })
-      .first();
-    await expect(reloadedCard).toBeVisible();
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.getByTestId('task-list')).toBeVisible({ timeout: 10000 });
+    const reloadedCard = await getTaskCardByTitle(page, title, 15000);
     await expect(reloadedCard.getByText('beta')).toHaveCount(0);
     await expect(reloadedCard.getByText('alpha')).toHaveCount(1);
 

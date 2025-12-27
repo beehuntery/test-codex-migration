@@ -4,6 +4,8 @@ import { type TaskStatus } from '@shared/api';
 export const STATUS_LABELS: Record<TaskStatus, string> = {
   todo: '未着手',
   in_progress: '進行中',
+  waiting: '待ち',
+  pending: '保留',
   done: '完了'
 };
 
@@ -24,6 +26,16 @@ const STATUS_META: Record<
     label: STATUS_LABELS.in_progress,
     bg: 'bg-[color:var(--color-accent)]/70',
     text: 'text-[color:var(--color-text)]'
+  },
+  waiting: {
+    label: STATUS_LABELS.waiting,
+    bg: 'bg-[color:var(--color-warning)]/25',
+    text: 'text-[color:var(--color-warning)]'
+  },
+  pending: {
+    label: STATUS_LABELS.pending,
+    bg: 'bg-[color:var(--color-disabled)]/25',
+    text: 'text-[color:var(--color-text-muted)]'
   },
   done: {
     label: STATUS_LABELS.done,

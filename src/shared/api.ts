@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
-export const TaskStatusSchema = z.enum(['todo', 'in_progress', 'done']);
+export const TaskStatusSchema = z.enum(['todo', 'in_progress', 'waiting', 'pending', 'done']);
 
 export const TaskSchema = z.object({
   id: z.string().min(1),

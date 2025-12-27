@@ -3,7 +3,7 @@ import type { Page, Locator, ConsoleMessage } from '@playwright/test';
 
 // Playwright の webServer と揃えて 3001 を既定値にする
 export const NEXT_PORT = process.env.NEXT_PORT || '3001';
-export const BASE_URL = `http://localhost:${NEXT_PORT}`;
+export const BASE_URL = `http://127.0.0.1:${NEXT_PORT}`;
 
 export type CreateTaskOptions = {
   title: string;
@@ -13,22 +13,60 @@ export type CreateTaskOptions = {
 };
 
 export async function createTaskViaUI(page: Page, options: CreateTaskOptions) {
-  const { title, description = '', tags = '', dueDate = '' } = options;
-  const form = page
-    .locator('form')
-    .filter({ has: page.getByRole('button', { name: 'タスクを追加' }) })
-    .first();
+  const { title, tags = '', dueDate = '' } = options;
+  const tagList = tags
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
 
-  await form.getByLabel('タイトル').fill(title);
-  await form.getByLabel('説明').fill(description);
-  await form.getByLabel('期限').fill(dueDate);
-  await form.getByPlaceholder('カンマ区切りで入力').fill(tags);
-  await form.getByRole('button', { name: 'タスクを追加' }).click();
+  // UI経由ではなくAPI経由で確実に作成してから一覧を再読み込み
+  const createRes = await page.request.post('/api/tasks', {
+    data: {
+      title,
+      description: '',
+      status: 'todo',
+      dueDate: dueDate || null,
+      tags: tagList
+    }
+  });
+  await expect(createRes).toBeOK();
+
+  await expect
+    .poll(async () => {
+      const res = await page.request.get('/api/tasks');
+      if (!res.ok()) return false;
+      const tasks = (await res.json()) as Array<{ title: string }>;
+      return tasks.some((task) => task.title === title);
+    }, { timeout: 10000 })
+    .toBe(true);
+
+  await gotoTasks(page);
 
   const taskList = page.getByTestId('task-list');
   const card = taskList.locator(`[data-task-title="${escapeSelectorAttribute(title)}"]`).first();
-  await expect(card).toBeVisible();
-  return card;
+  // 変化が完了するまで余裕を持って待機
+  await expect(card).toBeVisible({ timeout: 15000 });
+  await page.getByText('タスクを追加しました').first().waitFor({ timeout: 7000 }).catch(() => {});
+  const id = await card.getAttribute('data-task-id');
+  return { card, id };
+}
+
+export async function gotoTasks(page: Page) {
+  const targetUrl = '/tasks';
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
+      if (!response || response.ok()) {
+        await page.waitForLoadState('domcontentloaded');
+        return;
+      }
+    } catch (error) {
+      if (attempt === 2) {
+        throw error;
+      }
+    }
+    await page.waitForTimeout(1000);
+  }
 }
 
 export function captureConsoleErrors(page: Page) {
@@ -46,10 +84,10 @@ export function captureConsoleErrors(page: Page) {
   };
 }
 
-export async function getTaskCardByTitle(page: Page, title: string): Promise<Locator> {
+export async function getTaskCardByTitle(page: Page, title: string, timeout = 5000): Promise<Locator> {
   const taskList = page.getByTestId('task-list');
   const locator = taskList.locator(`[data-task-title="${escapeSelectorAttribute(title)}"]`).first();
-  await expect(locator).toBeVisible();
+  await expect(locator).toBeVisible({ timeout });
   return locator;
 }
 

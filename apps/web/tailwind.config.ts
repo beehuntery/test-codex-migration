@@ -8,6 +8,7 @@ const config: Config = {
         base: 'var(--color-base)',
         surface: 'var(--color-surface)',
         'surface-alt': 'var(--color-surface-alt)',
+        'surface-muted': 'var(--color-surface-muted)',
         primary: 'var(--color-primary)',
         secondary: 'var(--color-secondary)',
         accent: 'var(--color-accent)',
@@ -16,7 +17,8 @@ const config: Config = {
         disabled: 'var(--color-disabled)',
         success: 'var(--color-success)',
         warning: 'var(--color-warning)',
-        error: 'var(--color-error)'
+        error: 'var(--color-error)',
+        divider: 'var(--color-divider)'
       },
       boxShadow: {
         card: 'var(--shadow-elevation-1)',

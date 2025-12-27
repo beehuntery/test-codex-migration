@@ -1,4 +1,4 @@
-import type { Preview } from '@storybook/react';
+import type { Preview } from '@storybook/react-vite';
 import '../app/globals.css';
 
 declare const global: typeof globalThis & { process?: { env: Record<string, string | undefined> } };
@@ -17,11 +17,16 @@ const preview: Preview = {
       }
     },
     backgrounds: {
-      default: 'surface',
-      values: [
-        { name: 'surface', value: 'var(--color-base)' },
-        { name: 'white', value: '#ffffff' }
-      ]
+      options: {
+        surface: { name: 'surface', value: 'var(--color-base)' },
+        white: { name: 'white', value: '#ffffff' }
+      }
+    }
+  },
+
+  initialGlobals: {
+    backgrounds: {
+      value: 'surface'
     }
   }
 };
