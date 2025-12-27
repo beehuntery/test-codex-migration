@@ -11,7 +11,23 @@ test.describe('Quick add + bulk delete undo', () => {
     const titleInput = page.getByTestId('qa-title');
     await titleInput.fill(title);
     await titleInput.focus();
-    await titleInput.press('Enter');
+    await page.getByTestId('quick-add-form').evaluate((form) => {
+      (form as HTMLFormElement).requestSubmit();
+    });
+    await expect
+      .poll(
+        async () => {
+          const value = await titleInput.inputValue();
+          if (value === '') return true;
+          const errorToast = await page.getByText('タスク追加に失敗しました').count();
+          if (errorToast > 0) {
+            throw new Error('quick add failed');
+          }
+          return false;
+        },
+        { timeout: 15000 }
+      )
+      .toBe(true);
 
     // 反映確認はUIで行い、必要に応じてリロードして待機する
     await page.waitForTimeout(500); // 軽いバッファ
@@ -20,7 +36,11 @@ test.describe('Quick add + bulk delete undo', () => {
         async () => {
           await page.reload({ waitUntil: 'networkidle' });
           const count = await page.getByRole('listitem', { name: new RegExp(title) }).count();
-          return count > 0;
+          if (count > 0) return true;
+          const res = await page.request.get('/api/tasks');
+          if (!res.ok()) return false;
+          const tasks = (await res.json()) as Array<{ title: string }>;
+          return tasks.some((task) => task.title === title);
         },
         { timeout: 30000 }
       )

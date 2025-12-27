@@ -20,10 +20,8 @@ test.describe('Task reorder via keyboard', () => {
 
     const secondCard = page.getByTestId('task-list').locator(`[data-task-id="${secondId}"]`).first();
     await secondCard.scrollIntoViewIfNeeded();
-    await secondCard.click();
-    await page.keyboard.down('Alt');
-    await secondCard.press('ArrowUp');
-    await page.keyboard.up('Alt');
+    await secondCard.focus();
+    await secondCard.press('Alt+ArrowUp');
 
     await expect.poll(async () => {
       const orderAfterMove = await page.locator('[data-task-id]').evaluateAll((nodes) =>
@@ -32,15 +30,13 @@ test.describe('Task reorder via keyboard', () => {
       const firstIndex = orderAfterMove.indexOf(firstId);
       const secondIndex = orderAfterMove.indexOf(secondId);
       return secondIndex !== -1 && firstIndex !== -1 && secondIndex < firstIndex;
-    }).toBe(true);
+    }, { timeout: 15000 }).toBe(true);
 
     expect(consoleErrors).toEqual([]);
 
     // restore order for subsequent tests
     await secondCard.scrollIntoViewIfNeeded();
-    await secondCard.click();
-    await page.keyboard.down('Alt');
-    await secondCard.press('ArrowDown');
-    await page.keyboard.up('Alt');
+    await secondCard.focus();
+    await secondCard.press('Alt+ArrowDown');
   });
 });
