@@ -13,17 +13,18 @@ test.describe('Quick add + bulk delete undo', () => {
     await titleInput.focus();
     await titleInput.press('Enter');
 
-    // API経由の作成に置き換わった場合でもリロードして検出できるようフォールバック
+    // 反映確認はUIで行い、必要に応じてリロードして待機する
     await page.waitForTimeout(500); // 軽いバッファ
     await expect
-      .poll(async () => {
-        const res = await page.request.get('/api/tasks');
-        if (!res.ok()) return false;
-        const tasks = (await res.json()) as Array<{ title: string }>;
-        return tasks.some((task) => task.title === title);
-      }, { timeout: 15000 })
+      .poll(
+        async () => {
+          await page.reload({ waitUntil: 'networkidle' });
+          const count = await page.getByRole('listitem', { name: new RegExp(title) }).count();
+          return count > 0;
+        },
+        { timeout: 30000 }
+      )
       .toBe(true);
-    await page.reload({ waitUntil: 'networkidle' });
 
     // 追加後、行が現れるまで待つ（listitem のラベルにタイトルが含まれるもの）
     const row = page.getByRole('listitem', { name: new RegExp(title) });
