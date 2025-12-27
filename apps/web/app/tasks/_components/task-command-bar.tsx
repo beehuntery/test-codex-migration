@@ -76,8 +76,6 @@ export function TaskCommandBar({ searchQuery, activeStatuses }: TaskCommandBarPr
     });
   };
 
-  const commandHint = navigator.userAgent.includes('Mac') ? '⌘K' : 'Ctrl+K';
-
   return (
     <div
       className="sticky top-0 z-40 border-b border-[color:var(--color-divider)] bg-[color:var(--color-surface)]/90 backdrop-blur"
