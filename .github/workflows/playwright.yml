@@ -44,7 +44,7 @@ jobs:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       PLAYWRIGHT_BROWSERS_PATH: .playwright-browsers
       NEXT_PORT: '3010'
-      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:${{ env.NEXT_PORT }}
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:3010
     steps:
       - uses: actions/checkout@v4
       - name: Detect frontend changes
