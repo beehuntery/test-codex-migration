@@ -10,45 +10,22 @@ test.describe('Quick add + bulk delete undo', () => {
     // Quick add (確実に1件だけヒットさせるためタイトルはユニーク文字列)
     const titleInput = page.getByTestId('qa-title');
     await titleInput.fill(title);
-    await titleInput.focus();
-    await page.getByTestId('quick-add-form').evaluate((form) => {
-      (form as HTMLFormElement).requestSubmit();
+    await expect(titleInput).toHaveValue(title);
+    const createResponse = page.waitForResponse((response) => {
+      return response.url().includes('/api/tasks') && response.request().method() === 'POST';
     });
-    await expect
-      .poll(
-        async () => {
-          const value = await titleInput.inputValue();
-          if (value === '') return true;
-          const errorToast = await page.getByText('タスク追加に失敗しました').count();
-          if (errorToast > 0) {
-            throw new Error('quick add failed');
-          }
-          return false;
-        },
-        { timeout: 15000 }
-      )
-      .toBe(true);
+    await page.getByRole('button', { name: 'タスクを追加' }).click();
+    const response = await createResponse;
+    expect(response.ok()).toBeTruthy();
 
-    // 反映確認はUIで行い、必要に応じてリロードして待機する
-    await page.waitForTimeout(500); // 軽いバッファ
-    await expect
-      .poll(
-        async () => {
-          await page.reload({ waitUntil: 'networkidle' });
-          const count = await page.getByRole('listitem', { name: new RegExp(title) }).count();
-          if (count > 0) return true;
-          const res = await page.request.get('/api/tasks');
-          if (!res.ok()) return false;
-          const tasks = (await res.json()) as Array<{ title: string }>;
-          return tasks.some((task) => task.title === title);
-        },
-        { timeout: 30000 }
-      )
-      .toBe(true);
+    await expect(titleInput).toHaveValue('');
+    await page.reload({ waitUntil: 'networkidle' });
 
-    // 追加後、行が現れるまで待つ（listitem のラベルにタイトルが含まれるもの）
-    const row = page.getByRole('listitem', { name: new RegExp(title) });
-    await expect(row).toBeVisible({ timeout: 15000 });
+    const row = page
+      .getByTestId('task-list')
+      .locator(`[data-task-title="${title}"]`)
+      .first();
+    await expect(row).toBeVisible({ timeout: 20000 });
 
     // Select row via checkbox
     await row.getByRole('checkbox').check();

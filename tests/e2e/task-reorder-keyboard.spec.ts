@@ -18,10 +18,14 @@ test.describe('Task reorder via keyboard', () => {
     const { id: firstId } = await createTaskViaUI(page, { title: firstTitle, tags: 'keyboard-test' });
     const { id: secondId } = await createTaskViaUI(page, { title: secondTitle, tags: 'keyboard-test' });
 
-    const secondCard = page.getByTestId('task-list').locator(`[data-task-id="${secondId}"]`).first();
-    await secondCard.scrollIntoViewIfNeeded();
-    await secondCard.focus();
-    await secondCard.press('Alt+ArrowUp');
+    const list = page.getByTestId('task-list');
+    const secondCard = list.locator(`[data-task-id="${secondId}"]`).first();
+    await list.focus();
+    await page.keyboard.press('j');
+    await expect(secondCard).toHaveAttribute('data-focused', 'true');
+    await page.keyboard.down('Alt');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.up('Alt');
 
     await expect.poll(async () => {
       const orderAfterMove = await page.locator('[data-task-id]').evaluateAll((nodes) =>
@@ -35,8 +39,10 @@ test.describe('Task reorder via keyboard', () => {
     expect(consoleErrors).toEqual([]);
 
     // restore order for subsequent tests
-    await secondCard.scrollIntoViewIfNeeded();
-    await secondCard.focus();
-    await secondCard.press('Alt+ArrowDown');
+    await list.focus();
+    await page.keyboard.press('j');
+    await page.keyboard.down('Alt');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.up('Alt');
   });
 });
