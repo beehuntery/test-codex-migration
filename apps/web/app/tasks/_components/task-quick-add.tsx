@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState, useTransition } from 'react';
 import { TaskStatusSchema } from '@shared/api';
 import { useRouter } from 'next/navigation';
-import { createTaskAction } from '../actions';
 import { useTaskNotifications } from './task-notification-provider';
 import { TaskTagEditor } from './task-tag-editor';
 
@@ -47,15 +46,25 @@ export function TaskQuickAdd({ availableTags }: TaskQuickAddProps) {
     }
 
     startTransition(async () => {
-      const formData = new FormData();
-      formData.set('title', trimmedTitle);
-      formData.set('tags', tags.join(','));
-      formData.set('dueDate', dueDate);
-      formData.set('status', status);
+      const payload = {
+        title: trimmedTitle,
+        description: '',
+        status,
+        dueDate: dueDate ? dueDate : null,
+        tags
+      };
 
-      const result = await createTaskAction(formData);
-      if (result?.error) {
-        notify({ type: 'error', title: 'タスク追加に失敗しました', description: result.error });
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        const message = typeof data?.error === 'string' ? data.error : 'タスクの作成に失敗しました。';
+        notify({ type: 'error', title: 'タスク追加に失敗しました', description: message });
         return;
       }
 

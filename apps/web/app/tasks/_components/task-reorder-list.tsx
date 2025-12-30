@@ -413,6 +413,25 @@ export function TaskReorderList({
 
   const handleListKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.defaultPrevented) return;
+    if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      if (!focusedTaskId) {
+        return;
+      }
+      event.preventDefault();
+      onKeyboardReorder?.();
+      const delta = event.key === 'ArrowUp' ? -1 : 1;
+      const currentIndex = orderedTasks.findIndex((task) => task.id === focusedTaskId);
+      const nextIndex = currentIndex + delta;
+      if (currentIndex === -1 || nextIndex < 0 || nextIndex >= orderedTasks.length) {
+        return;
+      }
+      const nextOrder = [...orderedTasks];
+      const [movedTask] = nextOrder.splice(currentIndex, 1);
+      nextOrder.splice(nextIndex, 0, movedTask);
+      applyOrder(nextOrder, true);
+      setFocusAfterOrder(focusedTaskId);
+      return;
+    }
     if (event.altKey || event.metaKey) return;
 
     const key = event.key.toLowerCase();
