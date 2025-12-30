@@ -11,10 +11,11 @@ test.describe('Quick add + bulk delete undo', () => {
     const titleInput = page.getByTestId('qa-title');
     await titleInput.fill(title);
     await expect(titleInput).toHaveValue(title);
+    const form = page.getByTestId('quick-add-form');
     const createResponse = page.waitForResponse((response) => {
       return response.url().includes('/api/tasks') && response.request().method() === 'POST';
     });
-    await page.getByRole('button', { name: 'タスクを追加' }).click();
+    await form.getByRole('button', { name: 'タスクを追加' }).click();
     const response = await createResponse;
     expect(response.ok()).toBeTruthy();
 

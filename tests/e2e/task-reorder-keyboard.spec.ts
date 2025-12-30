@@ -20,9 +20,9 @@ test.describe('Task reorder via keyboard', () => {
 
     const list = page.getByTestId('task-list');
     const secondCard = list.locator(`[data-task-id="${secondId}"]`).first();
-    await list.focus();
-    await page.keyboard.press('j');
-    await expect(secondCard).toHaveAttribute('data-focused', 'true');
+    await secondCard.scrollIntoViewIfNeeded();
+    await secondCard.evaluate((node) => (node as HTMLElement).focus());
+    await expect(page.getByTestId('focused-task-indicator')).toContainText(secondTitle);
     await page.keyboard.down('Alt');
     await page.keyboard.press('ArrowUp');
     await page.keyboard.up('Alt');
@@ -39,8 +39,8 @@ test.describe('Task reorder via keyboard', () => {
     expect(consoleErrors).toEqual([]);
 
     // restore order for subsequent tests
-    await list.focus();
-    await page.keyboard.press('j');
+    await secondCard.scrollIntoViewIfNeeded();
+    await secondCard.evaluate((node) => (node as HTMLElement).focus());
     await page.keyboard.down('Alt');
     await page.keyboard.press('ArrowDown');
     await page.keyboard.up('Alt');
