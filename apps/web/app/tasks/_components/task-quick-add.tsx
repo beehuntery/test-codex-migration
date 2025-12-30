@@ -39,7 +39,8 @@ export function TaskQuickAdd({ availableTags }: TaskQuickAddProps) {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const trimmedTitle = title.trim();
+    const rawTitle = titleRef.current?.value ?? title;
+    const trimmedTitle = rawTitle.trim();
     if (!trimmedTitle) {
       notify({ type: 'error', title: 'タイトルを入力してください', description: 'クイック追加にはタイトルが必要です。' });
       return;
@@ -69,6 +70,9 @@ export function TaskQuickAdd({ availableTags }: TaskQuickAddProps) {
       }
 
       setTitle('');
+      if (titleRef.current) {
+        titleRef.current.value = '';
+      }
       setTags([]);
       setDueDate('');
       setStatus('todo');
