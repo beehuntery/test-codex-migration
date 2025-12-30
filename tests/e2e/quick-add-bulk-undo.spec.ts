@@ -12,15 +12,36 @@ test.describe('Quick add + bulk delete undo', () => {
     await titleInput.fill(title);
     await expect(titleInput).toHaveValue(title);
     const form = page.getByTestId('quick-add-form');
-    const createResponse = page.waitForResponse((response) => {
-      return response.url().includes('/api/tasks') && response.request().method() === 'POST';
-    });
     await form.getByRole('button', { name: 'タスクを追加' }).click();
-    const response = await createResponse;
-    expect(response.ok()).toBeTruthy();
+    await expect
+      .poll(
+        async () => {
+          const value = await titleInput.inputValue();
+          if (value === '') return true;
+          const errorToast = await page.getByText('タスク追加に失敗しました').count();
+          const missingToast = await page.getByText('タイトルを入力してください').count();
+          if (errorToast > 0 || missingToast > 0) {
+            throw new Error('quick add failed');
+          }
+          return false;
+        },
+        { timeout: 15000 }
+      )
+      .toBe(true);
 
-    await expect(titleInput).toHaveValue('');
-    await page.reload({ waitUntil: 'networkidle' });
+    await expect
+      .poll(
+        async () => {
+          await page.reload({ waitUntil: 'networkidle' });
+          const count = await page
+            .getByTestId('task-list')
+            .locator(`[data-task-title="${title}"]`)
+            .count();
+          return count > 0;
+        },
+        { timeout: 30000 }
+      )
+      .toBe(true);
 
     const row = page
       .getByTestId('task-list')
