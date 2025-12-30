@@ -134,7 +134,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.changes.outputs.next_build == 'true'
         env:
           NEXT_TELEMETRY_DISABLED: '1'
-        run: npm --workspace @test-codex/web run build
+        run: npm --workspace @test-codex/web run build:sqlite
       - name: Notify Slack (success)
         if: success() && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v2.1.1
