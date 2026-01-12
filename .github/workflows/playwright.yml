@@ -46,7 +46,7 @@ jobs:
       NEXT_PORT: '3010'
       NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:3010
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Detect frontend changes
         id: changes
         uses: dorny/paths-filter@v3
